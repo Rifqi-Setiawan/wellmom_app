@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "email": "sari.dewi@example.com",
+  "phone": "+6281234567890",
+  "full_name": "Sari Dewi",
+  "role": "ibu_hamil",
+  "profile_photo_url": "https://example.com/photos/sari.jpg",
+  "is_active": true,
+  "is_verified": true,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-20T14:45:00Z"
+}
