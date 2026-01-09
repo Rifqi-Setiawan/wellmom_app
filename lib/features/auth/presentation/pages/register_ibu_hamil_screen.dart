@@ -27,10 +27,17 @@ class _RegisterIbuHamilScreenState
   final _alamatController = TextEditingController();
   final _jalanController = TextEditingController();
   final _kodePosController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _emergencyContactNameController = TextEditingController();
+  final _emergencyContactPhoneController = TextEditingController();
+  final _emergencyContactRelationController = TextEditingController();
   
   Provinsi? _selectedProvinsi;
   KotaKabupaten? _selectedKota;
   Kecamatan? _selectedKecamatan;
+  String? _selectedBloodType;
 
   @override
   void dispose() {
@@ -40,6 +47,9 @@ class _RegisterIbuHamilScreenState
     _alamatController.dispose();
     _jalanController.dispose();
     _kodePosController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -60,25 +70,41 @@ class _RegisterIbuHamilScreenState
     _alamatController.text = state.alamat;
     _jalanController.text = state.jalan;
     _kodePosController.text = state.kodePos;
+    _emailController.text = state.email;
+    _phoneController.text = state.phone;
+    _passwordController.text = state.password;
+    _emergencyContactNameController.text = state.emergencyContactName;
+    _emergencyContactPhoneController.text = state.emergencyContactPhone;
+    _emergencyContactRelationController.text = state.emergencyContactRelation ?? '';
     
     // Sync dropdown selections
-    if (state.provinsiId.isNotEmpty) {
-      _selectedProvinsi = state.provinces.firstWhere(
-        (p) => p.id == state.provinsiId,
-        orElse: () => state.provinces.first,
-      );
+    _selectedBloodType = state.bloodType;
+    if (state.provinsiId.isNotEmpty && state.provinces.isNotEmpty) {
+      try {
+        _selectedProvinsi = state.provinces.firstWhere(
+          (p) => p.id == state.provinsiId,
+        );
+      } catch (e) {
+        // Not found, keep null
+      }
     }
-    if (state.kotaId.isNotEmpty) {
-      _selectedKota = state.regencies.firstWhere(
-        (k) => k.id == state.kotaId,
-        orElse: () => state.regencies.first,
-      );
+    if (state.kotaId.isNotEmpty && state.regencies.isNotEmpty) {
+      try {
+        _selectedKota = state.regencies.firstWhere(
+          (k) => k.id == state.kotaId,
+        );
+      } catch (e) {
+        // Not found, keep null
+      }
     }
-    if (state.kecamatanId.isNotEmpty) {
-      _selectedKecamatan = state.districts.firstWhere(
-        (d) => d.id == state.kecamatanId,
-        orElse: () => state.districts.first,
-      );
+    if (state.kecamatanId.isNotEmpty && state.districts.isNotEmpty) {
+      try {
+        _selectedKecamatan = state.districts.firstWhere(
+          (d) => d.id == state.kecamatanId,
+        );
+      } catch (e) {
+        // Not found, keep null
+      }
     }
   }
 
@@ -119,6 +145,22 @@ class _RegisterIbuHamilScreenState
           .updateJalan(_jalanController.text.trim());
       ref.read(registerViewModelProvider.notifier)
           .updateKodePos(_kodePosController.text.trim());
+      ref.read(registerViewModelProvider.notifier)
+          .updateEmail(_emailController.text.trim());
+      ref.read(registerViewModelProvider.notifier)
+          .updatePhone(_phoneController.text.trim());
+      ref.read(registerViewModelProvider.notifier)
+          .updatePassword(_passwordController.text);
+      ref.read(registerViewModelProvider.notifier)
+          .updateBloodType(_selectedBloodType);
+      ref.read(registerViewModelProvider.notifier)
+          .updateEmergencyContactName(_emergencyContactNameController.text.trim());
+      ref.read(registerViewModelProvider.notifier)
+          .updateEmergencyContactPhone(_emergencyContactPhoneController.text.trim());
+      ref.read(registerViewModelProvider.notifier)
+          .updateEmergencyContactRelation(_emergencyContactRelationController.text.trim().isEmpty 
+              ? null 
+              : _emergencyContactRelationController.text.trim());
       
       // Validate required dropdowns
       if (_selectedProvinsi == null || _selectedKota == null || _selectedKecamatan == null) {
@@ -260,6 +302,158 @@ class _RegisterIbuHamilScreenState
                     return AppStrings.tanggalLahirHarusDiisi;
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              // Email
+              CustomTextField(
+                label: 'Email',
+                hintText: 'Masukkan email Anda',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier).updateEmail(value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Email harus diisi';
+                  }
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    return 'Format email tidak valid';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              // Phone
+              CustomTextField(
+                label: 'Nomor Telepon',
+                hintText: '+6281234567890',
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier).updatePhone(value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nomor telepon harus diisi';
+                  }
+                  if (!value.startsWith('+62')) {
+                    return 'Format nomor telepon harus dimulai dengan +62';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              // Password
+              CustomTextField(
+                label: AppStrings.kataSandi,
+                hintText: '••••••••',
+                controller: _passwordController,
+                obscureText: true,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier).updatePassword(value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password harus diisi';
+                  }
+                  if (value.length < 8) {
+                    return 'Password minimal 8 karakter';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                AppStrings.minimalKarakter,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textLight,
+                    ),
+              ),
+              const SizedBox(height: 24),
+              // Blood Type Dropdown
+              CustomDropdown<String>(
+                label: 'Golongan Darah',
+                hintText: 'Pilih Golongan Darah',
+                value: _selectedBloodType,
+                items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+                getLabel: (type) => type,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBloodType = value;
+                  });
+                  if (value != null) {
+                    ref.read(registerViewModelProvider.notifier).updateBloodType(value);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              // Emergency Contact Section Header
+              Row(
+                children: [
+                  Icon(
+                    Icons.emergency,
+                    size: 20,
+                    color: AppColors.primaryBlue,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Kontak Darurat',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Emergency Contact Name
+              CustomTextField(
+                label: 'Nama Kontak Darurat',
+                hintText: 'Contoh: Budi (Suami)',
+                controller: _emergencyContactNameController,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier)
+                      .updateEmergencyContactName(value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama kontak darurat harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              // Emergency Contact Phone
+              CustomTextField(
+                label: 'Nomor Telepon Kontak Darurat',
+                hintText: '+6281234567890',
+                controller: _emergencyContactPhoneController,
+                keyboardType: TextInputType.phone,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier)
+                      .updateEmergencyContactPhone(value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nomor telepon kontak darurat harus diisi';
+                  }
+                  if (!value.startsWith('+62')) {
+                    return 'Format nomor telepon harus dimulai dengan +62';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              // Emergency Contact Relation
+              CustomTextField(
+                label: 'Hubungan dengan Kontak Darurat',
+                hintText: 'Contoh: Suami, Ibu, Kakak',
+                controller: _emergencyContactRelationController,
+                onChanged: (value) {
+                  ref.read(registerViewModelProvider.notifier)
+                      .updateEmergencyContactRelation(value.isEmpty ? null : value);
                 },
               ),
               const SizedBox(height: 24),
@@ -480,23 +674,6 @@ class _RegisterIbuHamilScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // JALAN / NO. RUMAH
-                    CustomTextField(
-                      label: 'JALAN / NO. RUMAH',
-                      hintText: 'Contoh: Jl. Melati No. 123',
-                      controller: _jalanController,
-                      onChanged: (value) {
-                        ref.read(registerViewModelProvider.notifier)
-                            .updateJalan(value);
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Jalan harus diisi';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
                     // PROVINSI (Dropdown)
                     CustomDropdown<Provinsi>(
                       label: 'PROVINSI',
@@ -585,6 +762,23 @@ class _RegisterIbuHamilScreenState
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    // JALAN / NO. RUMAH (moved here - below KOTA/KAB and KECAMATAN, above KODE POS)
+                    CustomTextField(
+                      label: 'JALAN / NO. RUMAH',
+                      hintText: 'Contoh: Jl. Melati No. 123',
+                      controller: _jalanController,
+                      onChanged: (value) {
+                        ref.read(registerViewModelProvider.notifier)
+                            .updateJalan(value);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Jalan harus diisi';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     // KODE POS

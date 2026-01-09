@@ -1,4 +1,5 @@
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
+import 'package:wellmom_app/features/auth/domain/entities/ibu_hamil_entity.dart';
 
 /// Extension to add validation methods to IbuHamilModel
 extension IbuHamilModelExtensions on IbuHamilModel {
@@ -11,5 +12,15 @@ extension IbuHamilModelExtensions on IbuHamilModel {
   bool isValidRiskLevel() {
     if (riskLevel == null) return true;
     return ['low', 'normal', 'high'].contains(riskLevel);
+  }
+  
+  /// Convert IbuHamilModel to IbuHamilEntity
+  IbuHamilEntity toEntity() {
+    return IbuHamilEntity(
+      id: id,
+      userId: userId,
+      namaLengkap: namaLengkap,
+      nik: nik,
+    );
   }
 }

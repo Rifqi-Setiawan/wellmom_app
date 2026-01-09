@@ -1,4 +1,6 @@
 import 'package:wellmom_app/core/errors/failures.dart';
+import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
+import 'package:wellmom_app/features/auth/domain/entities/ibu_hamil_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/login_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/user_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/register_form_entity.dart';
@@ -13,6 +15,12 @@ abstract class AuthRepository {
 
   /// Login with Google
   Future<Either<Failure, UserEntity>> loginWithGoogle();
+  
+  /// Register ibu hamil with complete data
+  Future<Either<Failure, IbuHamilEntity>> registerIbuHamil(RegisterIbuHamilRequestModel request);
+  
+  /// Assign ibu hamil to puskesmas
+  Future<Either<Failure, void>> assignIbuHamilToPuskesmas(int puskesmasId, int ibuHamilId);
 }
 
 /// Either type for error handling (simple implementation)

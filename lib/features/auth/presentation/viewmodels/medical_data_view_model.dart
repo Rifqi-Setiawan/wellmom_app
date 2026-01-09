@@ -30,6 +30,9 @@ class MedicalDataState {
   final bool isCardBExpanded;
   final bool isCardCExpanded;
 
+  // WhatsApp Consent
+  final bool whatsappConsent;
+
   const MedicalDataState({
     this.hpht,
     this.hpl,
@@ -51,6 +54,7 @@ class MedicalDataState {
     this.isCardAExpanded = false,
     this.isCardBExpanded = false,
     this.isCardCExpanded = false,
+    this.whatsappConsent = false,
   });
 
   MedicalDataState copyWith({
@@ -74,6 +78,7 @@ class MedicalDataState {
     bool? isCardAExpanded,
     bool? isCardBExpanded,
     bool? isCardCExpanded,
+    bool? whatsappConsent,
   }) {
     return MedicalDataState(
       hpht: hpht ?? this.hpht,
@@ -96,6 +101,7 @@ class MedicalDataState {
       isCardAExpanded: isCardAExpanded ?? this.isCardAExpanded,
       isCardBExpanded: isCardBExpanded ?? this.isCardBExpanded,
       isCardCExpanded: isCardCExpanded ?? this.isCardCExpanded,
+      whatsappConsent: whatsappConsent ?? this.whatsappConsent,
     );
   }
 }
@@ -207,5 +213,10 @@ class MedicalDataViewModel extends StateNotifier<MedicalDataState> {
 
   void toggleCardC() {
     state = state.copyWith(isCardCExpanded: !state.isCardCExpanded);
+  }
+
+  // WhatsApp Consent
+  void updateWhatsappConsent(bool value) {
+    state = state.copyWith(whatsappConsent: value);
   }
 }

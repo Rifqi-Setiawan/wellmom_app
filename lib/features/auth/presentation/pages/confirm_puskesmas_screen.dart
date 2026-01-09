@@ -1,15 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
+import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
+import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
 
-class ConfirmPuskesmasScreen extends ConsumerWidget {
+class ConfirmPuskesmasScreen extends ConsumerStatefulWidget {
   const ConfirmPuskesmasScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConfirmPuskesmasScreen> createState() =>
+      _ConfirmPuskesmasScreenState();
+}
+
+class _ConfirmPuskesmasScreenState
+    extends ConsumerState<ConfirmPuskesmasScreen> {
+  Future<void> _handleCompleteRegistration() async {
+    final puskesmasState = ref.read(puskesmasViewModelProvider);
+    final selectedPuskesmas = puskesmasState.selectedPuskesmas;
+
+    if (selectedPuskesmas == null) {
+      ErrorSnackbar.show(context, 'Puskesmas belum dipilih');
+      return;
+    }
+
+    // Get data from all ViewModels
+    final registerState = ref.read(registerViewModelProvider);
+    final medicalDataState = ref.read(medicalDataViewModelProvider);
+
+    // Convert states to maps for the ViewModel
+    final registerStateMap = {
+      'namaLengkap': registerState.namaLengkap,
+      'nik': registerState.nik,
+      'tanggalLahir': registerState.tanggalLahir,
+      'alamat': registerState.alamat,
+      'jalan': registerState.jalan,
+      'kelurahan': registerState.kelurahan,
+      'kecamatan': registerState.kecamatan,
+      'kota': registerState.kota,
+      'provinsi': registerState.provinsi,
+      'kodePos': registerState.kodePos,
+      'latitude': registerState.latitude ?? registerState.currentPosition?.latitude,
+      'longitude': registerState.longitude ?? registerState.currentPosition?.longitude,
+      'email': registerState.email,
+      'phone': registerState.phone,
+      'password': registerState.password,
+      'bloodType': registerState.bloodType,
+      'emergencyContactName': registerState.emergencyContactName,
+      'emergencyContactPhone': registerState.emergencyContactPhone,
+      'emergencyContactRelation': registerState.emergencyContactRelation,
+    };
+
+    final medicalDataStateMap = {
+      'hpht': medicalDataState.hpht,
+      'hpl': medicalDataState.hpl,
+      'usiaKehamilan': medicalDataState.usiaKehamilan,
+      'kehamilanKe': medicalDataState.kehamilanKe,
+      'jumlahAnak': medicalDataState.jumlahAnak,
+      'riwayatKeguguran': medicalDataState.riwayatKeguguran,
+      'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
+      'darahTinggi': medicalDataState.darahTinggi,
+      'diabetes': medicalDataState.diabetes,
+      'anemia': medicalDataState.anemia,
+      'penyakitJantung': medicalDataState.penyakitJantung,
+      'asma': medicalDataState.asma,
+      'penyakitGinjal': medicalDataState.penyakitGinjal,
+      'tbcMalaria': medicalDataState.tbcMalaria,
+      'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
+      'pernahCaesar': medicalDataState.pernahCaesar,
+      'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
+      'whatsappConsent': medicalDataState.whatsappConsent,
+    };
+
+    // Execute complete registration
+    final success = await ref
+        .read(confirmRegistrationViewModelProvider.notifier)
+        .completeRegistration(
+          puskesmasId: selectedPuskesmas.puskesmas.id,
+          registerState: registerStateMap,
+          medicalDataState: medicalDataStateMap,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      ErrorSnackbar.showSuccess(
+        context,
+        'Registrasi berhasil! Selamat datang di WellMom.',
+      );
+      // Navigate to home screen
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRouter.home,
+        (route) => false,
+      );
+    } else {
+      final confirmState = ref.read(confirmRegistrationViewModelProvider);
+      if (confirmState.error != null) {
+        ErrorSnackbar.show(context, confirmState.error!);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final puskesmasState = ref.watch(puskesmasViewModelProvider);
+    final confirmState = ref.watch(confirmRegistrationViewModelProvider);
     final selectedPuskesmas = puskesmasState.selectedPuskesmas;
 
     if (selectedPuskesmas == null) {
@@ -297,10 +393,10 @@ class ConfirmPuskesmasScreen extends ConsumerWidget {
               children: [
                 CustomButton(
                   text: 'Selesai Registrasi →',
-                  onPressed: () {
-                    // TODO: Handle complete registration
-                    // This will be implemented in the next step
-                  },
+                  onPressed: confirmState.isSubmitting
+                      ? null
+                      : _handleCompleteRegistration,
+                  isLoading: confirmState.isSubmitting,
                 ),
                 const SizedBox(height: 12),
                 TextButton(

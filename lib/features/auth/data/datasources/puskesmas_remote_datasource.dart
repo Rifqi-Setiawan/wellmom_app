@@ -8,6 +8,12 @@ abstract class PuskesmasRemoteDataSource {
     double latitude,
     double longitude,
   );
+  
+  /// Assign ibu hamil to puskesmas
+  Future<void> assignIbuHamilToPuskesmas(
+    int puskesmasId,
+    int ibuHamilId,
+  );
 }
 
 /// Implementation of PuskesmasRemoteDataSource
@@ -105,6 +111,47 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
           throw ServerFailure(
               responseData?['detail'] ?? responseData?['message'] ??
                   'Gagal mendapatkan daftar puskesmas');
+        }
+      } else {
+        throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');
+      }
+    } catch (e) {
+      if (e is Failure) {
+        rethrow;
+      }
+      throw UnknownFailure('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> assignIbuHamilToPuskesmas(
+    int puskesmasId,
+    int ibuHamilId,
+  ) async {
+    try {
+      await dio.post(
+        '/puskesmas/$puskesmasId/ibu-hamil/$ibuHamilId/assign',
+      );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response?.statusCode;
+        final responseData = e.response?.data;
+
+        if (statusCode == 400) {
+          final detail = responseData?['detail'] ?? 'Data tidak valid';
+          throw ServerFailure(detail);
+        } else if (statusCode == 403) {
+          final detail = responseData?['detail'] ??
+              'Anda tidak memiliki izin untuk melakukan assign ini';
+          throw ServerFailure(detail);
+        } else if (statusCode == 404) {
+          final detail = responseData?['detail'] ??
+              'Puskesmas atau ibu hamil tidak ditemukan';
+          throw ServerFailure(detail);
+        } else {
+          throw ServerFailure(
+              responseData?['detail'] ?? responseData?['message'] ??
+                  'Gagal assign ibu hamil ke puskesmas');
         }
       } else {
         throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');

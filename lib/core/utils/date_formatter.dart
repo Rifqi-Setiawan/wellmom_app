@@ -19,4 +19,9 @@ class DateFormatter {
       return null;
     }
   }
+
+  /// Format DateTime to YYYY-MM-DD string for API
+  static String formatDateForApi(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
 }

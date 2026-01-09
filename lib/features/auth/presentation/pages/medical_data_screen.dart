@@ -694,12 +694,53 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ),
             ),
             const SizedBox(height: 32),
+            // WhatsApp Consent Checkbox
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: state.whatsappConsent,
+                  onChanged: (value) {
+                    ref
+                        .read(medicalDataViewModelProvider.notifier)
+                        .updateWhatsappConsent(value ?? false);
+                  },
+                  activeColor: AppColors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref
+                          .read(medicalDataViewModelProvider.notifier)
+                          .updateWhatsappConsent(!state.whatsappConsent);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        'Saya bersedia menerima notifikasi dan informasi kesehatan kehamilan melalui WhatsApp dari aplikasi WellMom. Saya dapat mencabut persetujuan ini kapan saja.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 13,
+                              color: AppColors.textDark,
+                              height: 1.4,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             // Next button
             CustomButton(
               text: 'Next',
-              onPressed: () {
-                Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
-              },
+              onPressed: state.whatsappConsent
+                  ? () {
+                      Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
+                    }
+                  : null,
             ),
           ],
         ),

@@ -33,6 +33,17 @@ class RegisterState {
   final bool isSubmitting;
   final String? error;
   
+  // User credentials (for registration)
+  final String email;
+  final String phone;
+  final String password;
+  
+  // Emergency contact and blood type
+  final String? bloodType;
+  final String emergencyContactName;
+  final String emergencyContactPhone;
+  final String? emergencyContactRelation;
+  
   // Dropdown states
   final List<Provinsi> provinces;
   final List<KotaKabupaten> regencies;
@@ -63,6 +74,13 @@ class RegisterState {
     this.locationError,
     this.isSubmitting = false,
     this.error,
+    this.email = '',
+    this.phone = '',
+    this.password = '',
+    this.bloodType,
+    this.emergencyContactName = '',
+    this.emergencyContactPhone = '',
+    this.emergencyContactRelation,
     this.provinces = const [],
     this.regencies = const [],
     this.districts = const [],
@@ -93,6 +111,13 @@ class RegisterState {
     String? locationError,
     bool? isSubmitting,
     String? error,
+    String? email,
+    String? phone,
+    String? password,
+    String? bloodType,
+    String? emergencyContactName,
+    String? emergencyContactPhone,
+    String? emergencyContactRelation,
     List<Provinsi>? provinces,
     List<KotaKabupaten>? regencies,
     List<Kecamatan>? districts,
@@ -125,6 +150,13 @@ class RegisterState {
       locationError: clearLocationError ? null : (locationError ?? this.locationError),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       error: clearError ? null : (error ?? this.error),
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      password: password ?? this.password,
+      bloodType: bloodType ?? this.bloodType,
+      emergencyContactName: emergencyContactName ?? this.emergencyContactName,
+      emergencyContactPhone: emergencyContactPhone ?? this.emergencyContactPhone,
+      emergencyContactRelation: emergencyContactRelation ?? this.emergencyContactRelation,
       provinces: provinces ?? this.provinces,
       regencies: regencies ?? this.regencies,
       districts: districts ?? this.districts,
@@ -264,6 +296,41 @@ class RegisterViewModel extends StateNotifier<RegisterState> {
   /// Update kode pos
   void updateKodePos(String value) {
     state = state.copyWith(kodePos: value, clearError: true);
+  }
+
+  /// Update email
+  void updateEmail(String value) {
+    state = state.copyWith(email: value.trim(), clearError: true);
+  }
+
+  /// Update phone
+  void updatePhone(String value) {
+    state = state.copyWith(phone: value.trim(), clearError: true);
+  }
+
+  /// Update password
+  void updatePassword(String value) {
+    state = state.copyWith(password: value, clearError: true);
+  }
+
+  /// Update blood type
+  void updateBloodType(String? value) {
+    state = state.copyWith(bloodType: value, clearError: true);
+  }
+
+  /// Update emergency contact name
+  void updateEmergencyContactName(String value) {
+    state = state.copyWith(emergencyContactName: value.trim(), clearError: true);
+  }
+
+  /// Update emergency contact phone
+  void updateEmergencyContactPhone(String value) {
+    state = state.copyWith(emergencyContactPhone: value.trim(), clearError: true);
+  }
+
+  /// Update emergency contact relation
+  void updateEmergencyContactRelation(String? value) {
+    state = state.copyWith(emergencyContactRelation: value?.trim(), clearError: true);
   }
 
   /// Load provinces from API

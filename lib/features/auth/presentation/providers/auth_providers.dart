@@ -6,6 +6,7 @@ import 'package:wellmom_app/features/auth/data/datasources/auth_remote_datasourc
 import 'package:wellmom_app/features/auth/data/datasources/puskesmas_remote_datasource.dart';
 import 'package:wellmom_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:wellmom_app/features/auth/presentation/viewmodels/confirm_registration_view_model.dart';
 import 'package:wellmom_app/features/auth/presentation/viewmodels/login_view_model.dart';
 import 'package:wellmom_app/features/auth/presentation/viewmodels/medical_data_view_model.dart';
 import 'package:wellmom_app/features/auth/presentation/viewmodels/puskesmas_view_model.dart';
@@ -32,7 +33,8 @@ final authRemoteDataSourceProvider =
 /// Auth repository provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
-  return AuthRepositoryImpl(remoteDataSource);
+  final puskesmasRemoteDataSource = ref.watch(puskesmasRemoteDataSourceProvider);
+  return AuthRepositoryImpl(remoteDataSource, puskesmasRemoteDataSource);
 });
 
 /// Register view model provider
@@ -73,4 +75,11 @@ final puskesmasViewModelProvider =
     StateNotifierProvider<PuskesmasViewModel, PuskesmasState>((ref) {
   final remoteDataSource = ref.watch(puskesmasRemoteDataSourceProvider);
   return PuskesmasViewModel(puskesmasRemoteDataSource: remoteDataSource);
+});
+
+/// Confirm registration view model provider
+final confirmRegistrationViewModelProvider =
+    StateNotifierProvider<ConfirmRegistrationViewModel, ConfirmRegistrationState>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return ConfirmRegistrationViewModel(authRepository: authRepository);
 });

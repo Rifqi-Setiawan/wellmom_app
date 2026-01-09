@@ -1,7 +1,11 @@
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:wellmom_app/features/auth/data/datasources/puskesmas_remote_datasource.dart';
+import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model_extensions.dart';
 import 'package:wellmom_app/features/auth/data/models/login_response_model_extensions.dart';
+import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
 import 'package:wellmom_app/features/auth/data/models/user_model_extensions.dart';
+import 'package:wellmom_app/features/auth/domain/entities/ibu_hamil_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/login_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/register_form_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/user_entity.dart';
@@ -10,8 +14,9 @@ import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.da
 /// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
+  final PuskesmasRemoteDataSource puskesmasRemoteDataSource;
 
-  AuthRepositoryImpl(this.remoteDataSource);
+  AuthRepositoryImpl(this.remoteDataSource, this.puskesmasRemoteDataSource);
 
   @override
   Future<Either<Failure, UserEntity>> register(RegisterFormEntity form) async {
@@ -60,6 +65,33 @@ class AuthRepositoryImpl implements AuthRepository {
       // TODO: Implement Google Sign-In token retrieval
       // For now, this is a placeholder
       throw const ServerFailure('Google login not implemented yet');
+    } on Failure catch (e) {
+      return Either.left(e);
+    } catch (e) {
+      return Either.left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, IbuHamilEntity>> registerIbuHamil(
+      RegisterIbuHamilRequestModel request) async {
+    try {
+      final ibuHamilModel = await remoteDataSource.registerIbuHamil(request);
+      return Either.right(ibuHamilModel.toEntity());
+    } on Failure catch (e) {
+      return Either.left(e);
+    } catch (e) {
+      return Either.left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> assignIbuHamilToPuskesmas(
+      int puskesmasId, int ibuHamilId) async {
+    try {
+      await puskesmasRemoteDataSource.assignIbuHamilToPuskesmas(
+          puskesmasId, ibuHamilId);
+      return Either.right(null);
     } on Failure catch (e) {
       return Either.left(e);
     } catch (e) {

@@ -42,6 +42,19 @@ class CustomDropdown<T> extends StatelessWidget {
         DropdownButtonFormField<T>(
           value: value,
           isExpanded: true,
+          selectedItemBuilder: (BuildContext context) {
+            return items.map<Widget>((T item) {
+              return Text(
+                getLabel(item),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textDark,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              );
+            }).toList();
+          },
           items: items.map((T item) {
             return DropdownMenuItem<T>(
               value: item,
