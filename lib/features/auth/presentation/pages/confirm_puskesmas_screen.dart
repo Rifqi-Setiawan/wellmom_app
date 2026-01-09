@@ -70,6 +70,7 @@ class _ConfirmPuskesmasScreenState
       'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
       'pernahCaesar': medicalDataState.pernahCaesar,
       'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
+      'dataSharingConsent': medicalDataState.dataSharingConsent,
       'whatsappConsent': medicalDataState.whatsappConsent,
     };
 

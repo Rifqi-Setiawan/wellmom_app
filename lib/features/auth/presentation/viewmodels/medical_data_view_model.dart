@@ -30,7 +30,8 @@ class MedicalDataState {
   final bool isCardBExpanded;
   final bool isCardCExpanded;
 
-  // WhatsApp Consent
+  // Consent
+  final bool dataSharingConsent;
   final bool whatsappConsent;
 
   const MedicalDataState({
@@ -54,6 +55,7 @@ class MedicalDataState {
     this.isCardAExpanded = false,
     this.isCardBExpanded = false,
     this.isCardCExpanded = false,
+    this.dataSharingConsent = false,
     this.whatsappConsent = false,
   });
 
@@ -78,6 +80,7 @@ class MedicalDataState {
     bool? isCardAExpanded,
     bool? isCardBExpanded,
     bool? isCardCExpanded,
+    bool? dataSharingConsent,
     bool? whatsappConsent,
   }) {
     return MedicalDataState(
@@ -101,6 +104,7 @@ class MedicalDataState {
       isCardAExpanded: isCardAExpanded ?? this.isCardAExpanded,
       isCardBExpanded: isCardBExpanded ?? this.isCardBExpanded,
       isCardCExpanded: isCardCExpanded ?? this.isCardCExpanded,
+      dataSharingConsent: dataSharingConsent ?? this.dataSharingConsent,
       whatsappConsent: whatsappConsent ?? this.whatsappConsent,
     );
   }
@@ -215,7 +219,11 @@ class MedicalDataViewModel extends StateNotifier<MedicalDataState> {
     state = state.copyWith(isCardCExpanded: !state.isCardCExpanded);
   }
 
-  // WhatsApp Consent
+  // Consent
+  void updateDataSharingConsent(bool value) {
+    state = state.copyWith(dataSharingConsent: value);
+  }
+
   void updateWhatsappConsent(bool value) {
     state = state.copyWith(whatsappConsent: value);
   }

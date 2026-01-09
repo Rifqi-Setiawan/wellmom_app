@@ -694,6 +694,45 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ),
             ),
             const SizedBox(height: 32),
+            // Data Sharing Consent Checkbox
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: state.dataSharingConsent,
+                  onChanged: (value) {
+                    ref
+                        .read(medicalDataViewModelProvider.notifier)
+                        .updateDataSharingConsent(value ?? false);
+                  },
+                  activeColor: AppColors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref
+                          .read(medicalDataViewModelProvider.notifier)
+                          .updateDataSharingConsent(!state.dataSharingConsent);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        'Saya menyetujui data kesehatan kehamilan saya dibagikan kepada tenaga kesehatan dan fasilitas layanan kesehatan terkait untuk keperluan pemantauan dan pelayanan kehamilan.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 13,
+                              color: AppColors.textDark,
+                              height: 1.4,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // WhatsApp Consent Checkbox
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

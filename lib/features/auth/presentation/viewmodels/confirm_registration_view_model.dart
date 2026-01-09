@@ -237,7 +237,7 @@ class ConfirmRegistrationViewModel
         age: calculateAge(registerState['tanggalLahir'] as DateTime?),
         bloodType: registerState['bloodType'] as String?,
         currentMedications: null, // Not collected in current form
-        dataSharingConsent: false, // Default
+        dataSharingConsent: medicalDataState['dataSharingConsent'] as bool? ?? false,
         dateOfBirth: formatDate(registerState['tanggalLahir'] as DateTime?)!,
         emergencyContactName: registerState['emergencyContactName']?.toString().trim() ?? '',
         emergencyContactPhone: registerState['emergencyContactPhone']?.toString().trim() ?? '',
