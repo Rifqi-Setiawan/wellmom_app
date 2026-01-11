@@ -48,21 +48,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (e.response != null) {
         final statusCode = e.response?.statusCode;
         final responseData = e.response?.data;
+        final detail = responseData?['detail'];
         
-        // Handle specific error codes
+        // Handle specific error cases based on status code and message
         if (statusCode == 401) {
-          final detail = responseData?['detail'] ?? 'Email atau password salah';
-          throw ServerFailure(detail);
+          // Email atau password salah
+          final errorMessage = (detail is String ? detail : null) ?? 'Email atau password salah';
+          throw ServerFailure(errorMessage);
         } else if (statusCode == 403) {
-          final detail = responseData?['detail'] ?? 
-              'Akun tidak aktif. Silakan hubungi administrator.';
-          throw ServerFailure(detail);
+          // Akun tidak aktif atau bukan akun ibu hamil
+          final errorMessage = (detail is String ? detail : null) ?? 'Akun tidak aktif. Silakan hubungi administrator.';
+          throw ServerFailure(errorMessage);
         } else if (statusCode == 404) {
-          final detail = responseData?['detail'] ?? 'Email tidak terdaftar di sistem';
-          throw ServerFailure(detail);
+          // Email tidak terdaftar atau profil ibu hamil tidak ditemukan
+          // Check the detail message to distinguish between the two cases
+          if (detail is String) {
+            if (detail.contains('tidak terdaftar')) {
+              throw ServerFailure('Email tidak terdaftar di sistem');
+            } else if (detail.contains('Profil ibu hamil') || detail.contains('profil ibu hamil')) {
+              throw ServerFailure('Profil ibu hamil tidak ditemukan. Silakan lengkapi registrasi terlebih dahulu.');
+            } else {
+              throw ServerFailure(detail);
+            }
+          } else {
+            throw ServerFailure('Email tidak terdaftar di sistem');
+          }
         } else if (statusCode == 422) {
           // Validation error
-          final detail = responseData?['detail'];
           String errorMessage = 'Data yang dimasukkan tidak valid';
           
           if (detail is List && detail.isNotEmpty) {
@@ -86,11 +98,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           
           throw ValidationFailure(errorMessage);
         } else {
-          throw ServerFailure(
-              responseData?['detail'] ?? responseData?['message'] ?? 'Login gagal');
+          // Other server errors
+          final errorMessage = (detail is String ? detail : null) ?? 
+              (responseData?['message'] as String?) ?? 
+              'Login gagal. Silakan coba lagi.';
+          throw ServerFailure(errorMessage);
         }
       } else {
-        throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');
+        // Network error (no response)
+        throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah. Periksa koneksi internet Anda.');
       }
     } catch (e) {
       if (e is Failure) {

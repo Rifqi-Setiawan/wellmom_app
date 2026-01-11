@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/constants/app_strings.dart';
+import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
@@ -43,13 +44,19 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       if (success) {
         final state = ref.read(loginViewModelProvider);
         if (state.loginResponse != null) {
-          // TODO: Save token and navigate to home
+          // TODO: Save token to secure storage
+          // Show success message
           ErrorSnackbar.showSuccess(
             context,
             'Login berhasil! Selamat datang, ${state.loginResponse!.namaLengkap}',
           );
-          // Navigate to home screen
-          // Navigator.of(context).pushReplacementNamed('/home');
+          
+          // Navigate to home screen and clear all previous routes
+          // This ensures user cannot go back to login screen
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            AppRouter.home,
+            (route) => false, // Remove all previous routes
+          );
         }
       } else {
         final state = ref.read(loginViewModelProvider);
