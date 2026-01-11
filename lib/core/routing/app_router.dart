@@ -4,6 +4,7 @@ import 'package:wellmom_app/features/auth/presentation/pages/login_ibu_hamil_scr
 import 'package:wellmom_app/features/auth/presentation/pages/medical_data_screen.dart';
 import 'package:wellmom_app/features/auth/presentation/pages/register_ibu_hamil_screen.dart';
 import 'package:wellmom_app/features/auth/presentation/pages/select_puskesmas_screen.dart';
+import 'package:wellmom_app/features/chatbot/presentation/pages/chatbot_screen.dart';
 import 'package:wellmom_app/features/history/presentation/pages/history_screen.dart';
 import 'package:wellmom_app/features/home/presentation/pages/home_screen.dart';
 import 'package:wellmom_app/features/konsul/presentation/pages/konsul_screen.dart';
@@ -29,6 +30,7 @@ class AppRouter {
   static const String monitor = '/monitor';
   static const String konsul = '/konsul';
   static const String profile = '/profile';
+  static const String chatbot = '/chatbot';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -90,6 +92,11 @@ class AppRouter {
       case profile:
         return _noAnimationRoute(
           builder: (_) => const ProfileScreen(),
+          settings: settings,
+        );
+      case chatbot:
+        return MaterialPageRoute(
+          builder: (_) => const ChatbotScreen(),
           settings: settings,
         );
       default:

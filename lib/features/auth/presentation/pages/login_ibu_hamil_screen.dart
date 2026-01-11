@@ -7,6 +7,7 @@ import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 class LoginIbuHamilScreen extends ConsumerStatefulWidget {
   const LoginIbuHamilScreen({super.key});
@@ -44,7 +45,10 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       if (success) {
         final state = ref.read(loginViewModelProvider);
         if (state.loginResponse != null) {
-          // TODO: Save token to secure storage
+          // Save token to provider for chatbot and other features
+          ref.read(authTokenProvider.notifier).state = 
+              state.loginResponse!.accessToken;
+          
           // Show success message
           ErrorSnackbar.showSuccess(
             context,

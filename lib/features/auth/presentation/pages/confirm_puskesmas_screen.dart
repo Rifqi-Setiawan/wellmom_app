@@ -5,6 +5,7 @@ import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 class ConfirmPuskesmasScreen extends ConsumerStatefulWidget {
   const ConfirmPuskesmasScreen({super.key});
@@ -86,6 +87,13 @@ class _ConfirmPuskesmasScreenState
     if (!mounted) return;
 
     if (success) {
+      // Save token to provider for chatbot and other features
+      final confirmState = ref.read(confirmRegistrationViewModelProvider);
+      if (confirmState.registrationResponse != null) {
+        ref.read(authTokenProvider.notifier).state = 
+            confirmState.registrationResponse!.accessToken;
+      }
+      
       // Show success message
       ErrorSnackbar.showSuccess(
         context,

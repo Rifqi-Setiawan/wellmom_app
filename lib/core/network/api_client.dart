@@ -9,16 +9,22 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: apiBaseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 20),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 60), // Increased for AI responses
+      sendTimeout: const Duration(seconds: 30),
       headers: {
         'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
     ),
   );
 
-  // Add common interceptors here if needed (logging, auth, etc.)
-  // dio.interceptors.add(LogInterceptor(responseBody: true));
+  // Add logging interceptor for debugging
+  dio.interceptors.add(LogInterceptor(
+    requestBody: true,
+    responseBody: true,
+    error: true,
+  ));
 
   return dio;
 });

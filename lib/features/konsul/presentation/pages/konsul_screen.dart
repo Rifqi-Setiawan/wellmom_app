@@ -81,7 +81,7 @@ class _KonsulScreenState extends State<KonsulScreen> {
                   title: 'WellBot',
                   description: 'Menjawab pertanyaan 24/7',
                   onTap: () {
-                    // Handle WellBot tap
+                    Navigator.of(context).pushNamed(AppRouter.chatbot);
                   },
                 )),
                 const SizedBox(width: 12),
