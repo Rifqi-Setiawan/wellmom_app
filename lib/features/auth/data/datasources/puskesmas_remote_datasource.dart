@@ -10,9 +10,11 @@ abstract class PuskesmasRemoteDataSource {
   );
   
   /// Assign ibu hamil to puskesmas
+  /// [accessToken] is required for authentication from registration response
   Future<void> assignIbuHamilToPuskesmas(
     int puskesmasId,
     int ibuHamilId,
+    String accessToken,
   );
 }
 
@@ -56,12 +58,67 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
       normalized['puskesmas'] = puskesmasJson;
     }
     
-    // Handle distance_km
-    if (normalized['distance_km'] is List) {
-      normalized['distance_km'] = (normalized['distance_km'] as List).first;
+    // Handle distance_km with proper type conversion
+    if (normalized.containsKey('distance_km')) {
+      final distanceValue = normalized['distance_km'];
+      double? finalDistance;
+      
+      // If it's a List, get the first element
+      if (distanceValue is List) {
+        if (distanceValue.isNotEmpty) {
+          final firstElement = distanceValue.first;
+          // Recursively handle if first element is also a List
+          if (firstElement is List && firstElement.isNotEmpty) {
+            finalDistance = _parseDistanceValue(firstElement.first);
+          } else {
+            finalDistance = _parseDistanceValue(firstElement);
+          }
+        } else {
+          finalDistance = 0.0;
+        }
+      } else {
+        finalDistance = _parseDistanceValue(distanceValue);
+      }
+      
+      // Ensure we have a valid double
+      normalized['distance_km'] = finalDistance ?? 0.0;
+      
+      // Log for debugging
+      print('📍 Distance normalized: ${normalized['distance_km']} km (original: $distanceValue, type: ${distanceValue.runtimeType})');
+    } else {
+      // If distance_km is missing, set to 0.0
+      normalized['distance_km'] = 0.0;
+      print('⚠️ distance_km field is missing in response');
     }
     
     return normalized;
+  }
+  
+  /// Helper method to parse distance value to double
+  double? _parseDistanceValue(dynamic value) {
+    if (value == null) {
+      return 0.0;
+    } else if (value is double) {
+      return value;
+    } else if (value is int) {
+      return value.toDouble();
+    } else if (value is String) {
+      final parsed = double.tryParse(value);
+      if (parsed != null) {
+        return parsed;
+      }
+      // Try to extract number from string (e.g., "0.1 km" -> 0.1)
+      final numberMatch = RegExp(r'[\d.]+').firstMatch(value);
+      if (numberMatch != null) {
+        return double.tryParse(numberMatch.group(0) ?? '0') ?? 0.0;
+      }
+      return 0.0;
+    } else if (value is num) {
+      return value.toDouble();
+    } else {
+      print('⚠️ Unknown distance_km type: ${value.runtimeType}, value: $value');
+      return 0.0;
+    }
   }
 
   @override
@@ -70,6 +127,13 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
     double longitude,
   ) async {
     try {
+      // Log request parameters for debugging
+      print('═══════════════════════════════════════════════════════════');
+      print('📤 REQUEST: Get Nearest Puskesmas');
+      print('   Latitude: $latitude');
+      print('   Longitude: $longitude');
+      print('═══════════════════════════════════════════════════════════');
+      
       final response = await dio.get(
         '/puskesmas/nearest',
         queryParameters: {
@@ -77,6 +141,16 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
           'longitude': longitude,
         },
       );
+
+      // Log raw response for debugging
+      print('📥 RESPONSE: Get Nearest Puskesmas');
+      print('   Status: ${response.statusCode}');
+      print('   Data type: ${response.data.runtimeType}');
+      if (response.data is List && (response.data as List).isNotEmpty) {
+        print('   First item distance_km (raw): ${(response.data as List).first['distance_km']}');
+        print('   First item distance_km type: ${(response.data as List).first['distance_km'].runtimeType}');
+      }
+      print('═══════════════════════════════════════════════════════════');
 
       if (response.data is List) {
         try {
@@ -90,10 +164,18 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
                 // Normalize the JSON data to handle type mismatches
                 final normalizedJson = _normalizePuskesmasJson(json);
                 
-                return NearestPuskesmasModel.fromJson(normalizedJson);
+                final puskesmas = NearestPuskesmasModel.fromJson(normalizedJson);
+                
+                // Log parsed result
+                print('✅ Parsed puskesmas: ${puskesmas.puskesmas.name}');
+                print('   Distance: ${puskesmas.distanceKm} km');
+                print('   Address: ${puskesmas.address}');
+                
+                return puskesmas;
               })
               .toList();
         } catch (e) {
+          print('❌ Error parsing puskesmas data: $e');
           throw ServerFailure('Error parsing puskesmas data: ${e.toString()}');
         }
       } else {
@@ -127,10 +209,16 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
   Future<void> assignIbuHamilToPuskesmas(
     int puskesmasId,
     int ibuHamilId,
+    String accessToken,
   ) async {
     try {
       await dio.post(
         '/puskesmas/$puskesmasId/ibu-hamil/$ibuHamilId/assign',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
       );
     } on DioException catch (e) {
       if (e.response != null) {
@@ -139,6 +227,10 @@ class PuskesmasRemoteDataSourceImpl implements PuskesmasRemoteDataSource {
 
         if (statusCode == 400) {
           final detail = responseData?['detail'] ?? 'Data tidak valid';
+          throw ServerFailure(detail);
+        } else if (statusCode == 401) {
+          final detail = responseData?['detail'] ??
+              'Token tidak valid atau sudah kadaluarsa';
           throw ServerFailure(detail);
         } else if (statusCode == 403) {
           final detail = responseData?['detail'] ??

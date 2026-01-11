@@ -1,34 +1,36 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
-import 'package:wellmom_app/features/auth/domain/entities/ibu_hamil_entity.dart';
+import 'package:wellmom_app/features/auth/domain/entities/register_ibu_hamil_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
 
 /// State for complete registration
 class ConfirmRegistrationState {
   final bool isSubmitting;
   final String? error;
-  final IbuHamilEntity? registeredIbuHamil;
+  final RegisterIbuHamilResponseEntity? registrationResponse;
 
   const ConfirmRegistrationState({
     this.isSubmitting = false,
     this.error,
-    this.registeredIbuHamil,
+    this.registrationResponse,
   });
 
   ConfirmRegistrationState copyWith({
     bool? isSubmitting,
     String? error,
-    IbuHamilEntity? registeredIbuHamil,
+    RegisterIbuHamilResponseEntity? registrationResponse,
     bool clearError = false,
-    bool clearRegisteredIbuHamil = false,
+    bool clearRegistrationResponse = false,
   }) {
     return ConfirmRegistrationState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
       error: clearError ? null : (error ?? this.error),
-      registeredIbuHamil: clearRegisteredIbuHamil
+      registrationResponse: clearRegistrationResponse
           ? null
-          : (registeredIbuHamil ?? this.registeredIbuHamil),
+          : (registrationResponse ?? this.registrationResponse),
     );
   }
 }
@@ -103,6 +105,71 @@ class ConfirmRegistrationViewModel
         medicalDataState: medicalDataState,
       );
 
+      // Output request body for debugging
+      try {
+        final requestJson = requestModel.toJson();
+        
+        // Validate all required fields are present and not null
+        final ibuHamilJson = requestJson['ibu_hamil'] as Map<String, dynamic>?;
+        if (ibuHamilJson == null) {
+          throw Exception('ibu_hamil is null in request JSON');
+        }
+        
+        // Check required fields
+        final requiredFields = [
+          'address',
+          'date_of_birth',
+          'emergency_contact_name',
+          'emergency_contact_phone',
+          'kecamatan',
+          'kota_kabupaten',
+          'nama_lengkap',
+          'nik',
+          'provinsi',
+          'location',
+          'riwayat_kesehatan_ibu',
+        ];
+        
+        final missingFields = <String>[];
+        for (final field in requiredFields) {
+          if (!ibuHamilJson.containsKey(field) || ibuHamilJson[field] == null) {
+            missingFields.add(field);
+          } else if (field == 'location' && ibuHamilJson[field] is List) {
+            final loc = ibuHamilJson[field] as List;
+            if (loc.isEmpty) {
+              missingFields.add(field);
+            }
+          } else if (field == 'riwayat_kesehatan_ibu' && ibuHamilJson[field] is Map) {
+            // OK, it's a map
+          } else if (ibuHamilJson[field] is String && (ibuHamilJson[field] as String).isEmpty) {
+            missingFields.add(field);
+          }
+        }
+        
+        if (missingFields.isNotEmpty) {
+          print('⚠️ Missing or empty required fields: ${missingFields.join(", ")}');
+        }
+        
+        final formattedJson = const JsonEncoder.withIndent('  ').convert(requestJson);
+        print('═══════════════════════════════════════════════════════════');
+        print('📤 REQUEST BODY - REGISTRASI IBU HAMIL');
+        print('═══════════════════════════════════════════════════════════');
+        print(formattedJson);
+        print('═══════════════════════════════════════════════════════════');
+        
+        if (missingFields.isNotEmpty) {
+          throw Exception('Missing required fields: ${missingFields.join(", ")}');
+        }
+      } catch (e) {
+        print('⚠️ Error formatting request JSON: $e');
+        print('📤 Request Model: ${requestModel.toString()}');
+        state = state.copyWith(
+          isSubmitting: false,
+          error: 'Error mempersiapkan data: ${e.toString()}',
+        );
+        return false;
+      }
+
       // Validate required fields in request model
       final validationError = _validateRequestModel(requestModel);
       if (validationError != null) {
@@ -114,7 +181,7 @@ class ConfirmRegistrationViewModel
       }
 
       // Step 1: Register ibu hamil
-      IbuHamilEntity? registeredIbuHamil;
+      RegisterIbuHamilResponseEntity? registrationResponse;
       
       final registerResult = await authRepository.registerIbuHamil(requestModel);
       
@@ -126,20 +193,36 @@ class ConfirmRegistrationViewModel
           );
           return false;
         },
-        (entity) {
-          registeredIbuHamil = entity;
+        (response) {
+          registrationResponse = response;
+          // Log success response for debugging
+          print('═══════════════════════════════════════════════════════════');
+          print('✅ REGISTRASI IBU HAMIL BERHASIL');
+          print('═══════════════════════════════════════════════════════════');
+          print('Ibu Hamil ID: ${response.ibuHamil.id}');
+          print('Nama: ${response.ibuHamil.namaLengkap}');
+          print('NIK: ${response.ibuHamil.nik}');
+          print('User ID: ${response.user.id}');
+          print('Access Token: ${response.accessToken.substring(0, 20)}...');
+          print('Message: ${response.message}');
+          print('═══════════════════════════════════════════════════════════');
           return true;
         },
       );
 
-      if (!registerSuccess || registeredIbuHamil == null) {
+      if (!registerSuccess || registrationResponse == null) {
         return false;
       }
 
-      // Step 2: Assign to puskesmas
+      // Step 2: Assign to puskesmas using access token from registration
+      print('📤 Assigning ibu hamil to puskesmas...');
+      print('   Puskesmas ID: $puskesmasId');
+      print('   Ibu Hamil ID: ${registrationResponse!.ibuHamil.id}');
+      
       final assignResult = await authRepository.assignIbuHamilToPuskesmas(
         puskesmasId,
-        registeredIbuHamil!.id,
+        registrationResponse!.ibuHamil.id,
+        registrationResponse!.accessToken,
       );
 
       return assignResult.fold(
@@ -151,9 +234,10 @@ class ConfirmRegistrationViewModel
           return false;
         },
         (_) {
+          print('✅ Assign ke puskesmas berhasil!');
           state = state.copyWith(
             isSubmitting: false,
-            registeredIbuHamil: registeredIbuHamil,
+            registrationResponse: registrationResponse,
           );
           return true;
         },
@@ -231,39 +315,62 @@ class ConfirmRegistrationViewModel
       return age;
     }
 
+    // Validate tanggalLahir is not null (required field)
+    final tanggalLahir = registerState['tanggalLahir'] as DateTime?;
+    if (tanggalLahir == null) {
+      throw Exception('Tanggal lahir harus diisi');
+    }
+    final dateOfBirthString = formatDate(tanggalLahir);
+    if (dateOfBirthString == null || dateOfBirthString.isEmpty) {
+      throw Exception('Format tanggal lahir tidak valid');
+    }
+
+    // Ensure required string fields are not empty
+    final namaLengkap = (registerState['namaLengkap']?.toString().trim() ?? '');
+    final nik = (registerState['nik']?.toString().trim() ?? '');
+    final kecamatan = (registerState['kecamatan']?.toString().trim() ?? '');
+    final kotaKabupaten = (registerState['kota']?.toString().trim() ?? '');
+    final provinsi = (registerState['provinsi']?.toString().trim() ?? '');
+    final emergencyContactName = (registerState['emergencyContactName']?.toString().trim() ?? '');
+    final emergencyContactPhone = (registerState['emergencyContactPhone']?.toString().trim() ?? '');
+
+    // Ensure address is not empty
+    if (address.isEmpty) {
+      throw Exception('Alamat harus diisi');
+    }
+
+    // Ensure location is valid (not [0.0, 0.0] if no location was provided)
+    final finalLocation = location.isNotEmpty ? location : [0.0, 0.0];
+
     final request = RegisterIbuHamilRequestModel(
       ibuHamil: IbuHamilData(
         address: address,
-        age: calculateAge(registerState['tanggalLahir'] as DateTime?),
+        age: calculateAge(tanggalLahir),
         bloodType: registerState['bloodType'] as String?,
-        currentMedications: null, // Not collected in current form
         dataSharingConsent: medicalDataState['dataSharingConsent'] as bool? ?? false,
-        dateOfBirth: formatDate(registerState['tanggalLahir'] as DateTime?)!,
-        emergencyContactName: registerState['emergencyContactName']?.toString().trim() ?? '',
-        emergencyContactPhone: registerState['emergencyContactPhone']?.toString().trim() ?? '',
+        dateOfBirth: dateOfBirthString,
+        emergencyContactName: emergencyContactName,
+        emergencyContactPhone: emergencyContactPhone,
         emergencyContactRelation: registerState['emergencyContactRelation'] as String?,
         estimatedDueDate: formatDate(medicalDataState['hpl'] as DateTime?),
         healthcarePreference: 'puskesmas',
-        heightCm: null, // Not collected in current form
         jarakKehamilanTerakhir: medicalDataState['jarakKehamilanTerakhir'] as String?,
         jumlahAnak: medicalDataState['jumlahAnak'] as int? ?? 0,
-        kecamatan: registerState['kecamatan']?.toString().trim() ?? '',
+        kecamatan: kecamatan,
         kehamilanKe: medicalDataState['kehamilanKe'] as int? ?? 1,
         kelurahan: registerState['kelurahan']?.toString().trim(),
-        kotaKabupaten: registerState['kota']?.toString().trim() ?? '',
+        kotaKabupaten: kotaKabupaten,
         lastMenstrualPeriod: formatDate(medicalDataState['hpht'] as DateTime?),
-        location: location.isNotEmpty ? location : [0.0, 0.0], // Default if no location
-        medicalHistory: null, // Not collected in current form
-        miscarriageNumber: (medicalDataState['riwayatKeguguran'] == true) ? 1 : 0,
-        namaLengkap: registerState['namaLengkap']?.toString().trim() ?? '',
-        nik: registerState['nik']?.toString().trim() ?? '',
+        location: finalLocation,
+        miscarriageNumber: medicalDataState['jumlahKeguguran'] as int? ?? 0,
+        namaLengkap: namaLengkap,
+        nik: nik,
         pernahCaesar: medicalDataState['pernahCaesar'] as bool? ?? false,
         pernahPerdarahanSaatHamil:
             medicalDataState['pernahPerdarahanSaatHamil'] as bool? ?? false,
-        prePregnancyWeightKg: null, // Not collected in current form
         previousPregnancyComplications:
             medicalDataState['komplikasiKehamilanSebelumnya'] as String?,
-        provinsi: registerState['provinsi']?.toString().trim() ?? '',
+        provinsi: provinsi,
         riskLevel: 'normal', // Default, can be calculated later
         riwayatKesehatanIbu: RiwayatKesehatanIbuData(
           darahTinggi: medicalDataState['darahTinggi'] as bool? ?? false,
@@ -274,13 +381,12 @@ class ConfirmRegistrationViewModel
           penyakitGinjal: medicalDataState['penyakitGinjal'] as bool? ?? false,
           tbcMalaria: medicalDataState['tbcMalaria'] as bool? ?? false,
         ),
-        rtRw: null, // Not collected in current form
         usiaKehamilan: medicalDataState['usiaKehamilan'] as int?,
         whatsappConsent: medicalDataState['whatsappConsent'] as bool? ?? false,
       ),
       user: UserData(
         email: registerState['email']?.toString().trim() ?? '',
-        fullName: registerState['namaLengkap']?.toString().trim() ?? '',
+        fullName: namaLengkap,
         password: registerState['password']?.toString() ?? '',
         phone: registerState['phone']?.toString().trim() ?? '',
         role: 'ibu_hamil',

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wellmom_app/core/constants/app_colors.dart';
 
 /// Helper widget for showing error snackbars
 class ErrorSnackbar {

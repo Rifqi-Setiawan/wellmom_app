@@ -68,27 +68,27 @@ class AppRouter {
           settings: settings,
         );
       case home:
-        return MaterialPageRoute(
+        return _noAnimationRoute(
           builder: (_) => const HomeScreen(),
           settings: settings,
         );
       case history:
-        return MaterialPageRoute(
+        return _noAnimationRoute(
           builder: (_) => const HistoryScreen(),
           settings: settings,
         );
       case monitor:
-        return MaterialPageRoute(
+        return _noAnimationRoute(
           builder: (_) => const MonitorScreen(),
           settings: settings,
         );
       case konsul:
-        return MaterialPageRoute(
+        return _noAnimationRoute(
           builder: (_) => const KonsulScreen(),
           settings: settings,
         );
       case profile:
-        return MaterialPageRoute(
+        return _noAnimationRoute(
           builder: (_) => const ProfileScreen(),
           settings: settings,
         );
@@ -98,5 +98,18 @@ class AppRouter {
           settings: settings,
         );
     }
+  }
+
+  /// Create a route without animation for instant navigation
+  static PageRoute<T> _noAnimationRoute<T>({
+    required Widget Function(BuildContext) builder,
+    required RouteSettings settings,
+  }) {
+    return PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    );
   }
 }

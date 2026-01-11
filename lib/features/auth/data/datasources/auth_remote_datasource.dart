@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
-import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
 import 'package:wellmom_app/features/auth/data/models/login_response_model.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
+import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_response_model.dart';
 import 'package:wellmom_app/features/auth/data/models/user_model.dart';
 
 /// Abstract remote data source for authentication
@@ -10,7 +10,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> register(Map<String, dynamic> data);
   Future<LoginResponseModel> login(String email, String password);
   Future<UserModel> loginWithGoogle(String token);
-  Future<IbuHamilModel> registerIbuHamil(RegisterIbuHamilRequestModel request);
+  Future<RegisterIbuHamilResponseModel> registerIbuHamil(RegisterIbuHamilRequestModel request);
 }
 
 /// Implementation of AuthRemoteDataSource
@@ -129,21 +129,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<IbuHamilModel> registerIbuHamil(RegisterIbuHamilRequestModel request) async {
+  Future<RegisterIbuHamilResponseModel> registerIbuHamil(RegisterIbuHamilRequestModel request) async {
     try {
       final response = await dio.post(
         '/ibu-hamil/register',
         data: request.toJson(),
       );
       
-      // Response should contain ibu_hamil data
+      // Response should contain ibu_hamil, user, access_token, token_type, message
       if (response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
-        if (data.containsKey('ibu_hamil')) {
-          return IbuHamilModel.fromJson(data['ibu_hamil'] as Map<String, dynamic>);
-        } else {
-          return IbuHamilModel.fromJson(data);
-        }
+        return RegisterIbuHamilResponseModel.fromJson(data);
       }
       throw ServerFailure('Invalid response format');
     } on DioException catch (e) {

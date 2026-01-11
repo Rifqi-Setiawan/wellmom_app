@@ -1,4 +1,5 @@
 /// Models for Indonesia administrative regions (Provinsi, Kota/Kab, Kecamatan)
+library;
 
 class Provinsi {
   final String id;

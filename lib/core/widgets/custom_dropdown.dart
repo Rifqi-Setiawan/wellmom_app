@@ -40,7 +40,7 @@ class CustomDropdown<T> extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<T>(
-          value: value,
+          initialValue: value,
           isExpanded: true,
           selectedItemBuilder: (BuildContext context) {
             return items.map<Widget>((T item) {

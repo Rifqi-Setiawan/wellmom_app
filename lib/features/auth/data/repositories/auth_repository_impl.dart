@@ -1,13 +1,13 @@
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:wellmom_app/features/auth/data/datasources/puskesmas_remote_datasource.dart';
-import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model_extensions.dart';
 import 'package:wellmom_app/features/auth/data/models/login_response_model_extensions.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
+import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_response_model_extensions.dart';
 import 'package:wellmom_app/features/auth/data/models/user_model_extensions.dart';
-import 'package:wellmom_app/features/auth/domain/entities/ibu_hamil_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/login_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/register_form_entity.dart';
+import 'package:wellmom_app/features/auth/domain/entities/register_ibu_hamil_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/entities/user_entity.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
 
@@ -73,11 +73,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, IbuHamilEntity>> registerIbuHamil(
+  Future<Either<Failure, RegisterIbuHamilResponseEntity>> registerIbuHamil(
       RegisterIbuHamilRequestModel request) async {
     try {
-      final ibuHamilModel = await remoteDataSource.registerIbuHamil(request);
-      return Either.right(ibuHamilModel.toEntity());
+      final responseModel = await remoteDataSource.registerIbuHamil(request);
+      return Either.right(responseModel.toEntity());
     } on Failure catch (e) {
       return Either.left(e);
     } catch (e) {
@@ -87,10 +87,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> assignIbuHamilToPuskesmas(
-      int puskesmasId, int ibuHamilId) async {
+      int puskesmasId, int ibuHamilId, String accessToken) async {
     try {
       await puskesmasRemoteDataSource.assignIbuHamilToPuskesmas(
-          puskesmasId, ibuHamilId);
+          puskesmasId, ibuHamilId, accessToken);
       return Either.right(null);
     } on Failure catch (e) {
       return Either.left(e);

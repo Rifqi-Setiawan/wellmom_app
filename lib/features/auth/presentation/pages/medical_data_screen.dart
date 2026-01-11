@@ -21,6 +21,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
   final _usiaKehamilanController = TextEditingController();
   final _kehamilanKeController = TextEditingController();
   final _jumlahAnakController = TextEditingController();
+  final _jumlahKeguguranController = TextEditingController();
   final _jarakKehamilanController = TextEditingController();
   final _komplikasiController = TextEditingController();
 
@@ -31,6 +32,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
     _usiaKehamilanController.dispose();
     _kehamilanKeController.dispose();
     _jumlahAnakController.dispose();
+    _jumlahKeguguranController.dispose();
     _jarakKehamilanController.dispose();
     _komplikasiController.dispose();
     super.dispose();
@@ -61,6 +63,11 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
     // Auto-fill usia kehamilan if HPHT is set
     if (state.usiaKehamilan != null) {
       _usiaKehamilanController.text = state.usiaKehamilan.toString();
+    }
+    
+    // Sync jumlah keguguran
+    if (state.jumlahKeguguran != null && _jumlahKeguguranController.text.isEmpty) {
+      _jumlahKeguguranController.text = state.jumlahKeguguran.toString();
     }
   }
 
@@ -515,22 +522,16 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                     },
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Riwayat keguguran',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildToggleButton(
-                    label: 'Riwayat keguguran',
-                    value: state.riwayatKeguguran,
+                  CustomTextField(
+                    label: 'Jumlah keguguran',
+                    hintText: 'e.g. 0',
+                    controller: _jumlahKeguguranController,
+                    keyboardType: TextInputType.number,
                     onChanged: (value) {
+                      final intValue = int.tryParse(value);
                       ref
                           .read(medicalDataViewModelProvider.notifier)
-                          .updateRiwayatKeguguran(value);
+                          .updateJumlahKeguguran(intValue);
                     },
                   ),
                   const SizedBox(height: 16),

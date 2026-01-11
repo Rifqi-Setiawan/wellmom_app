@@ -8,7 +8,7 @@ class MedicalDataState {
   final int? usiaKehamilan; // minggu
   final int? kehamilanKe;
   final int? jumlahAnak;
-  final bool? riwayatKeguguran; // null = not selected, true = Ya, false = Tidak
+  final int? jumlahKeguguran; // Jumlah keguguran (0, 1, 2, dst.)
   final String? jarakKehamilanTerakhir;
 
   // Card B: Riwayat Kesehatan Ibu
@@ -40,7 +40,7 @@ class MedicalDataState {
     this.usiaKehamilan,
     this.kehamilanKe,
     this.jumlahAnak,
-    this.riwayatKeguguran,
+    this.jumlahKeguguran,
     this.jarakKehamilanTerakhir,
     this.darahTinggi = false,
     this.diabetes = false,
@@ -65,7 +65,7 @@ class MedicalDataState {
     int? usiaKehamilan,
     int? kehamilanKe,
     int? jumlahAnak,
-    bool? riwayatKeguguran,
+    int? jumlahKeguguran,
     String? jarakKehamilanTerakhir,
     bool? darahTinggi,
     bool? diabetes,
@@ -89,7 +89,7 @@ class MedicalDataState {
       usiaKehamilan: usiaKehamilan ?? this.usiaKehamilan,
       kehamilanKe: kehamilanKe ?? this.kehamilanKe,
       jumlahAnak: jumlahAnak ?? this.jumlahAnak,
-      riwayatKeguguran: riwayatKeguguran ?? this.riwayatKeguguran,
+      jumlahKeguguran: jumlahKeguguran ?? this.jumlahKeguguran,
       jarakKehamilanTerakhir: jarakKehamilanTerakhir ?? this.jarakKehamilanTerakhir,
       darahTinggi: darahTinggi ?? this.darahTinggi,
       diabetes: diabetes ?? this.diabetes,
@@ -156,8 +156,8 @@ class MedicalDataViewModel extends StateNotifier<MedicalDataState> {
     state = state.copyWith(jumlahAnak: value);
   }
 
-  void updateRiwayatKeguguran(bool? value) {
-    state = state.copyWith(riwayatKeguguran: value);
+  void updateJumlahKeguguran(int? value) {
+    state = state.copyWith(jumlahKeguguran: value);
   }
 
   void updateJarakKehamilanTerakhir(String? value) {

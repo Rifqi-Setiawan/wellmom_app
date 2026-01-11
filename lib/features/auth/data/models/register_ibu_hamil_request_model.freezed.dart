@@ -23,6 +23,7 @@ RegisterIbuHamilRequestModel _$RegisterIbuHamilRequestModelFromJson(
 
 /// @nodoc
 mixin _$RegisterIbuHamilRequestModel {
+  @JsonKey(name: 'ibu_hamil')
   IbuHamilData get ibuHamil => throw _privateConstructorUsedError;
   UserData get user => throw _privateConstructorUsedError;
 
@@ -47,7 +48,7 @@ abstract class $RegisterIbuHamilRequestModelCopyWith<$Res> {
         RegisterIbuHamilRequestModel
       >;
   @useResult
-  $Res call({IbuHamilData ibuHamil, UserData user});
+  $Res call({@JsonKey(name: 'ibu_hamil') IbuHamilData ibuHamil, UserData user});
 
   $IbuHamilDataCopyWith<$Res> get ibuHamil;
   $UserDataCopyWith<$Res> get user;
@@ -116,7 +117,7 @@ abstract class _$$RegisterIbuHamilRequestModelImplCopyWith<$Res>
   ) = __$$RegisterIbuHamilRequestModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({IbuHamilData ibuHamil, UserData user});
+  $Res call({@JsonKey(name: 'ibu_hamil') IbuHamilData ibuHamil, UserData user});
 
   @override
   $IbuHamilDataCopyWith<$Res> get ibuHamil;
@@ -162,7 +163,7 @@ class __$$RegisterIbuHamilRequestModelImplCopyWithImpl<$Res>
 class _$RegisterIbuHamilRequestModelImpl
     implements _RegisterIbuHamilRequestModel {
   const _$RegisterIbuHamilRequestModelImpl({
-    required this.ibuHamil,
+    @JsonKey(name: 'ibu_hamil') required this.ibuHamil,
     required this.user,
   });
 
@@ -171,6 +172,7 @@ class _$RegisterIbuHamilRequestModelImpl
   ) => _$$RegisterIbuHamilRequestModelImplFromJson(json);
 
   @override
+  @JsonKey(name: 'ibu_hamil')
   final IbuHamilData ibuHamil;
   @override
   final UserData user;
@@ -216,7 +218,7 @@ class _$RegisterIbuHamilRequestModelImpl
 abstract class _RegisterIbuHamilRequestModel
     implements RegisterIbuHamilRequestModel {
   const factory _RegisterIbuHamilRequestModel({
-    required final IbuHamilData ibuHamil,
+    @JsonKey(name: 'ibu_hamil') required final IbuHamilData ibuHamil,
     required final UserData user,
   }) = _$RegisterIbuHamilRequestModelImpl;
 
@@ -224,6 +226,7 @@ abstract class _RegisterIbuHamilRequestModel
       _$RegisterIbuHamilRequestModelImpl.fromJson;
 
   @override
+  @JsonKey(name: 'ibu_hamil')
   IbuHamilData get ibuHamil;
   @override
   UserData get user;
@@ -248,8 +251,6 @@ mixin _$IbuHamilData {
   int? get age => throw _privateConstructorUsedError;
   @JsonKey(name: 'blood_type')
   String? get bloodType => throw _privateConstructorUsedError;
-  @JsonKey(name: 'current_medications')
-  String? get currentMedications => throw _privateConstructorUsedError;
   @JsonKey(name: 'data_sharing_consent')
   bool get dataSharingConsent => throw _privateConstructorUsedError;
   @JsonKey(name: 'date_of_birth')
@@ -264,8 +265,6 @@ mixin _$IbuHamilData {
   String? get estimatedDueDate => throw _privateConstructorUsedError;
   @JsonKey(name: 'healthcare_preference')
   String? get healthcarePreference => throw _privateConstructorUsedError;
-  @JsonKey(name: 'height_cm')
-  double? get heightCm => throw _privateConstructorUsedError;
   @JsonKey(name: 'jarak_kehamilan_terakhir')
   String? get jarakKehamilanTerakhir => throw _privateConstructorUsedError;
   @JsonKey(name: 'jumlah_anak')
@@ -280,8 +279,6 @@ mixin _$IbuHamilData {
   String? get lastMenstrualPeriod => throw _privateConstructorUsedError;
   List<double> get location =>
       throw _privateConstructorUsedError; // [longitude, latitude]
-  @JsonKey(name: 'medical_history')
-  String? get medicalHistory => throw _privateConstructorUsedError;
   @JsonKey(name: 'miscarriage_number')
   int get miscarriageNumber => throw _privateConstructorUsedError;
   @JsonKey(name: 'nama_lengkap')
@@ -291,8 +288,6 @@ mixin _$IbuHamilData {
   bool get pernahCaesar => throw _privateConstructorUsedError;
   @JsonKey(name: 'pernah_perdarahan_saat_hamil')
   bool get pernahPerdarahanSaatHamil => throw _privateConstructorUsedError;
-  @JsonKey(name: 'pre_pregnancy_weight_kg')
-  double? get prePregnancyWeightKg => throw _privateConstructorUsedError;
   @JsonKey(name: 'previous_pregnancy_complications')
   String? get previousPregnancyComplications =>
       throw _privateConstructorUsedError;
@@ -302,8 +297,6 @@ mixin _$IbuHamilData {
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   RiwayatKesehatanIbuData get riwayatKesehatanIbu =>
       throw _privateConstructorUsedError;
-  @JsonKey(name: 'rt_rw')
-  String? get rtRw => throw _privateConstructorUsedError;
   @JsonKey(name: 'usia_kehamilan')
   int? get usiaKehamilan => throw _privateConstructorUsedError;
   @JsonKey(name: 'whatsapp_consent')
@@ -330,7 +323,6 @@ abstract class $IbuHamilDataCopyWith<$Res> {
     String address,
     int? age,
     @JsonKey(name: 'blood_type') String? bloodType,
-    @JsonKey(name: 'current_medications') String? currentMedications,
     @JsonKey(name: 'data_sharing_consent') bool dataSharingConsent,
     @JsonKey(name: 'date_of_birth') String dateOfBirth,
     @JsonKey(name: 'emergency_contact_name') String emergencyContactName,
@@ -339,7 +331,6 @@ abstract class $IbuHamilDataCopyWith<$Res> {
     String? emergencyContactRelation,
     @JsonKey(name: 'estimated_due_date') String? estimatedDueDate,
     @JsonKey(name: 'healthcare_preference') String? healthcarePreference,
-    @JsonKey(name: 'height_cm') double? heightCm,
     @JsonKey(name: 'jarak_kehamilan_terakhir') String? jarakKehamilanTerakhir,
     @JsonKey(name: 'jumlah_anak') int? jumlahAnak,
     String kecamatan,
@@ -348,21 +339,18 @@ abstract class $IbuHamilDataCopyWith<$Res> {
     @JsonKey(name: 'kota_kabupaten') String kotaKabupaten,
     @JsonKey(name: 'last_menstrual_period') String? lastMenstrualPeriod,
     List<double> location,
-    @JsonKey(name: 'medical_history') String? medicalHistory,
     @JsonKey(name: 'miscarriage_number') int miscarriageNumber,
     @JsonKey(name: 'nama_lengkap') String namaLengkap,
     String nik,
     @JsonKey(name: 'pernah_caesar') bool pernahCaesar,
     @JsonKey(name: 'pernah_perdarahan_saat_hamil')
     bool pernahPerdarahanSaatHamil,
-    @JsonKey(name: 'pre_pregnancy_weight_kg') double? prePregnancyWeightKg,
     @JsonKey(name: 'previous_pregnancy_complications')
     String? previousPregnancyComplications,
     String provinsi,
     @JsonKey(name: 'risk_level') String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     RiwayatKesehatanIbuData riwayatKesehatanIbu,
-    @JsonKey(name: 'rt_rw') String? rtRw,
     @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') bool whatsappConsent,
   });
@@ -388,7 +376,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
     Object? address = null,
     Object? age = freezed,
     Object? bloodType = freezed,
-    Object? currentMedications = freezed,
     Object? dataSharingConsent = null,
     Object? dateOfBirth = null,
     Object? emergencyContactName = null,
@@ -396,7 +383,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
     Object? emergencyContactRelation = freezed,
     Object? estimatedDueDate = freezed,
     Object? healthcarePreference = freezed,
-    Object? heightCm = freezed,
     Object? jarakKehamilanTerakhir = freezed,
     Object? jumlahAnak = freezed,
     Object? kecamatan = null,
@@ -405,18 +391,15 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
     Object? kotaKabupaten = null,
     Object? lastMenstrualPeriod = freezed,
     Object? location = null,
-    Object? medicalHistory = freezed,
     Object? miscarriageNumber = null,
     Object? namaLengkap = null,
     Object? nik = null,
     Object? pernahCaesar = null,
     Object? pernahPerdarahanSaatHamil = null,
-    Object? prePregnancyWeightKg = freezed,
     Object? previousPregnancyComplications = freezed,
     Object? provinsi = null,
     Object? riskLevel = freezed,
     Object? riwayatKesehatanIbu = null,
-    Object? rtRw = freezed,
     Object? usiaKehamilan = freezed,
     Object? whatsappConsent = null,
   }) {
@@ -433,10 +416,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
             bloodType: freezed == bloodType
                 ? _value.bloodType
                 : bloodType // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            currentMedications: freezed == currentMedications
-                ? _value.currentMedications
-                : currentMedications // ignore: cast_nullable_to_non_nullable
                       as String?,
             dataSharingConsent: null == dataSharingConsent
                 ? _value.dataSharingConsent
@@ -466,10 +445,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
                 ? _value.healthcarePreference
                 : healthcarePreference // ignore: cast_nullable_to_non_nullable
                       as String?,
-            heightCm: freezed == heightCm
-                ? _value.heightCm
-                : heightCm // ignore: cast_nullable_to_non_nullable
-                      as double?,
             jarakKehamilanTerakhir: freezed == jarakKehamilanTerakhir
                 ? _value.jarakKehamilanTerakhir
                 : jarakKehamilanTerakhir // ignore: cast_nullable_to_non_nullable
@@ -502,10 +477,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
                 ? _value.location
                 : location // ignore: cast_nullable_to_non_nullable
                       as List<double>,
-            medicalHistory: freezed == medicalHistory
-                ? _value.medicalHistory
-                : medicalHistory // ignore: cast_nullable_to_non_nullable
-                      as String?,
             miscarriageNumber: null == miscarriageNumber
                 ? _value.miscarriageNumber
                 : miscarriageNumber // ignore: cast_nullable_to_non_nullable
@@ -526,10 +497,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
                 ? _value.pernahPerdarahanSaatHamil
                 : pernahPerdarahanSaatHamil // ignore: cast_nullable_to_non_nullable
                       as bool,
-            prePregnancyWeightKg: freezed == prePregnancyWeightKg
-                ? _value.prePregnancyWeightKg
-                : prePregnancyWeightKg // ignore: cast_nullable_to_non_nullable
-                      as double?,
             previousPregnancyComplications:
                 freezed == previousPregnancyComplications
                 ? _value.previousPregnancyComplications
@@ -547,10 +514,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
                 ? _value.riwayatKesehatanIbu
                 : riwayatKesehatanIbu // ignore: cast_nullable_to_non_nullable
                       as RiwayatKesehatanIbuData,
-            rtRw: freezed == rtRw
-                ? _value.rtRw
-                : rtRw // ignore: cast_nullable_to_non_nullable
-                      as String?,
             usiaKehamilan: freezed == usiaKehamilan
                 ? _value.usiaKehamilan
                 : usiaKehamilan // ignore: cast_nullable_to_non_nullable
@@ -590,7 +553,6 @@ abstract class _$$IbuHamilDataImplCopyWith<$Res>
     String address,
     int? age,
     @JsonKey(name: 'blood_type') String? bloodType,
-    @JsonKey(name: 'current_medications') String? currentMedications,
     @JsonKey(name: 'data_sharing_consent') bool dataSharingConsent,
     @JsonKey(name: 'date_of_birth') String dateOfBirth,
     @JsonKey(name: 'emergency_contact_name') String emergencyContactName,
@@ -599,7 +561,6 @@ abstract class _$$IbuHamilDataImplCopyWith<$Res>
     String? emergencyContactRelation,
     @JsonKey(name: 'estimated_due_date') String? estimatedDueDate,
     @JsonKey(name: 'healthcare_preference') String? healthcarePreference,
-    @JsonKey(name: 'height_cm') double? heightCm,
     @JsonKey(name: 'jarak_kehamilan_terakhir') String? jarakKehamilanTerakhir,
     @JsonKey(name: 'jumlah_anak') int? jumlahAnak,
     String kecamatan,
@@ -608,21 +569,18 @@ abstract class _$$IbuHamilDataImplCopyWith<$Res>
     @JsonKey(name: 'kota_kabupaten') String kotaKabupaten,
     @JsonKey(name: 'last_menstrual_period') String? lastMenstrualPeriod,
     List<double> location,
-    @JsonKey(name: 'medical_history') String? medicalHistory,
     @JsonKey(name: 'miscarriage_number') int miscarriageNumber,
     @JsonKey(name: 'nama_lengkap') String namaLengkap,
     String nik,
     @JsonKey(name: 'pernah_caesar') bool pernahCaesar,
     @JsonKey(name: 'pernah_perdarahan_saat_hamil')
     bool pernahPerdarahanSaatHamil,
-    @JsonKey(name: 'pre_pregnancy_weight_kg') double? prePregnancyWeightKg,
     @JsonKey(name: 'previous_pregnancy_complications')
     String? previousPregnancyComplications,
     String provinsi,
     @JsonKey(name: 'risk_level') String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     RiwayatKesehatanIbuData riwayatKesehatanIbu,
-    @JsonKey(name: 'rt_rw') String? rtRw,
     @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') bool whatsappConsent,
   });
@@ -648,7 +606,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
     Object? address = null,
     Object? age = freezed,
     Object? bloodType = freezed,
-    Object? currentMedications = freezed,
     Object? dataSharingConsent = null,
     Object? dateOfBirth = null,
     Object? emergencyContactName = null,
@@ -656,7 +613,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
     Object? emergencyContactRelation = freezed,
     Object? estimatedDueDate = freezed,
     Object? healthcarePreference = freezed,
-    Object? heightCm = freezed,
     Object? jarakKehamilanTerakhir = freezed,
     Object? jumlahAnak = freezed,
     Object? kecamatan = null,
@@ -665,18 +621,15 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
     Object? kotaKabupaten = null,
     Object? lastMenstrualPeriod = freezed,
     Object? location = null,
-    Object? medicalHistory = freezed,
     Object? miscarriageNumber = null,
     Object? namaLengkap = null,
     Object? nik = null,
     Object? pernahCaesar = null,
     Object? pernahPerdarahanSaatHamil = null,
-    Object? prePregnancyWeightKg = freezed,
     Object? previousPregnancyComplications = freezed,
     Object? provinsi = null,
     Object? riskLevel = freezed,
     Object? riwayatKesehatanIbu = null,
-    Object? rtRw = freezed,
     Object? usiaKehamilan = freezed,
     Object? whatsappConsent = null,
   }) {
@@ -693,10 +646,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
         bloodType: freezed == bloodType
             ? _value.bloodType
             : bloodType // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        currentMedications: freezed == currentMedications
-            ? _value.currentMedications
-            : currentMedications // ignore: cast_nullable_to_non_nullable
                   as String?,
         dataSharingConsent: null == dataSharingConsent
             ? _value.dataSharingConsent
@@ -726,10 +675,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
             ? _value.healthcarePreference
             : healthcarePreference // ignore: cast_nullable_to_non_nullable
                   as String?,
-        heightCm: freezed == heightCm
-            ? _value.heightCm
-            : heightCm // ignore: cast_nullable_to_non_nullable
-                  as double?,
         jarakKehamilanTerakhir: freezed == jarakKehamilanTerakhir
             ? _value.jarakKehamilanTerakhir
             : jarakKehamilanTerakhir // ignore: cast_nullable_to_non_nullable
@@ -762,10 +707,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
             ? _value._location
             : location // ignore: cast_nullable_to_non_nullable
                   as List<double>,
-        medicalHistory: freezed == medicalHistory
-            ? _value.medicalHistory
-            : medicalHistory // ignore: cast_nullable_to_non_nullable
-                  as String?,
         miscarriageNumber: null == miscarriageNumber
             ? _value.miscarriageNumber
             : miscarriageNumber // ignore: cast_nullable_to_non_nullable
@@ -786,10 +727,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
             ? _value.pernahPerdarahanSaatHamil
             : pernahPerdarahanSaatHamil // ignore: cast_nullable_to_non_nullable
                   as bool,
-        prePregnancyWeightKg: freezed == prePregnancyWeightKg
-            ? _value.prePregnancyWeightKg
-            : prePregnancyWeightKg // ignore: cast_nullable_to_non_nullable
-                  as double?,
         previousPregnancyComplications:
             freezed == previousPregnancyComplications
             ? _value.previousPregnancyComplications
@@ -807,10 +744,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
             ? _value.riwayatKesehatanIbu
             : riwayatKesehatanIbu // ignore: cast_nullable_to_non_nullable
                   as RiwayatKesehatanIbuData,
-        rtRw: freezed == rtRw
-            ? _value.rtRw
-            : rtRw // ignore: cast_nullable_to_non_nullable
-                  as String?,
         usiaKehamilan: freezed == usiaKehamilan
             ? _value.usiaKehamilan
             : usiaKehamilan // ignore: cast_nullable_to_non_nullable
@@ -831,7 +764,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     required this.address,
     this.age,
     @JsonKey(name: 'blood_type') this.bloodType,
-    @JsonKey(name: 'current_medications') this.currentMedications,
     @JsonKey(name: 'data_sharing_consent') this.dataSharingConsent = false,
     @JsonKey(name: 'date_of_birth') required this.dateOfBirth,
     @JsonKey(name: 'emergency_contact_name') required this.emergencyContactName,
@@ -840,7 +772,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     @JsonKey(name: 'emergency_contact_relation') this.emergencyContactRelation,
     @JsonKey(name: 'estimated_due_date') this.estimatedDueDate,
     @JsonKey(name: 'healthcare_preference') this.healthcarePreference,
-    @JsonKey(name: 'height_cm') this.heightCm,
     @JsonKey(name: 'jarak_kehamilan_terakhir') this.jarakKehamilanTerakhir,
     @JsonKey(name: 'jumlah_anak') this.jumlahAnak,
     required this.kecamatan,
@@ -849,20 +780,17 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     @JsonKey(name: 'kota_kabupaten') required this.kotaKabupaten,
     @JsonKey(name: 'last_menstrual_period') this.lastMenstrualPeriod,
     required final List<double> location,
-    @JsonKey(name: 'medical_history') this.medicalHistory,
     @JsonKey(name: 'miscarriage_number') this.miscarriageNumber = 0,
     @JsonKey(name: 'nama_lengkap') required this.namaLengkap,
     required this.nik,
     @JsonKey(name: 'pernah_caesar') this.pernahCaesar = false,
     @JsonKey(name: 'pernah_perdarahan_saat_hamil')
     this.pernahPerdarahanSaatHamil = false,
-    @JsonKey(name: 'pre_pregnancy_weight_kg') this.prePregnancyWeightKg,
     @JsonKey(name: 'previous_pregnancy_complications')
     this.previousPregnancyComplications,
     required this.provinsi,
     @JsonKey(name: 'risk_level') this.riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu') required this.riwayatKesehatanIbu,
-    @JsonKey(name: 'rt_rw') this.rtRw,
     @JsonKey(name: 'usia_kehamilan') this.usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') this.whatsappConsent = false,
   }) : _location = location;
@@ -877,9 +805,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
   @override
   @JsonKey(name: 'blood_type')
   final String? bloodType;
-  @override
-  @JsonKey(name: 'current_medications')
-  final String? currentMedications;
   @override
   @JsonKey(name: 'data_sharing_consent')
   final bool dataSharingConsent;
@@ -901,9 +826,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
   @override
   @JsonKey(name: 'healthcare_preference')
   final String? healthcarePreference;
-  @override
-  @JsonKey(name: 'height_cm')
-  final double? heightCm;
   @override
   @JsonKey(name: 'jarak_kehamilan_terakhir')
   final String? jarakKehamilanTerakhir;
@@ -933,9 +855,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
 
   // [longitude, latitude]
   @override
-  @JsonKey(name: 'medical_history')
-  final String? medicalHistory;
-  @override
   @JsonKey(name: 'miscarriage_number')
   final int miscarriageNumber;
   @override
@@ -950,9 +869,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
   @JsonKey(name: 'pernah_perdarahan_saat_hamil')
   final bool pernahPerdarahanSaatHamil;
   @override
-  @JsonKey(name: 'pre_pregnancy_weight_kg')
-  final double? prePregnancyWeightKg;
-  @override
   @JsonKey(name: 'previous_pregnancy_complications')
   final String? previousPregnancyComplications;
   @override
@@ -964,9 +880,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   final RiwayatKesehatanIbuData riwayatKesehatanIbu;
   @override
-  @JsonKey(name: 'rt_rw')
-  final String? rtRw;
-  @override
   @JsonKey(name: 'usia_kehamilan')
   final int? usiaKehamilan;
   @override
@@ -975,7 +888,7 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
 
   @override
   String toString() {
-    return 'IbuHamilData(address: $address, age: $age, bloodType: $bloodType, currentMedications: $currentMedications, dataSharingConsent: $dataSharingConsent, dateOfBirth: $dateOfBirth, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, emergencyContactRelation: $emergencyContactRelation, estimatedDueDate: $estimatedDueDate, healthcarePreference: $healthcarePreference, heightCm: $heightCm, jarakKehamilanTerakhir: $jarakKehamilanTerakhir, jumlahAnak: $jumlahAnak, kecamatan: $kecamatan, kehamilanKe: $kehamilanKe, kelurahan: $kelurahan, kotaKabupaten: $kotaKabupaten, lastMenstrualPeriod: $lastMenstrualPeriod, location: $location, medicalHistory: $medicalHistory, miscarriageNumber: $miscarriageNumber, namaLengkap: $namaLengkap, nik: $nik, pernahCaesar: $pernahCaesar, pernahPerdarahanSaatHamil: $pernahPerdarahanSaatHamil, prePregnancyWeightKg: $prePregnancyWeightKg, previousPregnancyComplications: $previousPregnancyComplications, provinsi: $provinsi, riskLevel: $riskLevel, riwayatKesehatanIbu: $riwayatKesehatanIbu, rtRw: $rtRw, usiaKehamilan: $usiaKehamilan, whatsappConsent: $whatsappConsent)';
+    return 'IbuHamilData(address: $address, age: $age, bloodType: $bloodType, dataSharingConsent: $dataSharingConsent, dateOfBirth: $dateOfBirth, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, emergencyContactRelation: $emergencyContactRelation, estimatedDueDate: $estimatedDueDate, healthcarePreference: $healthcarePreference, jarakKehamilanTerakhir: $jarakKehamilanTerakhir, jumlahAnak: $jumlahAnak, kecamatan: $kecamatan, kehamilanKe: $kehamilanKe, kelurahan: $kelurahan, kotaKabupaten: $kotaKabupaten, lastMenstrualPeriod: $lastMenstrualPeriod, location: $location, miscarriageNumber: $miscarriageNumber, namaLengkap: $namaLengkap, nik: $nik, pernahCaesar: $pernahCaesar, pernahPerdarahanSaatHamil: $pernahPerdarahanSaatHamil, previousPregnancyComplications: $previousPregnancyComplications, provinsi: $provinsi, riskLevel: $riskLevel, riwayatKesehatanIbu: $riwayatKesehatanIbu, usiaKehamilan: $usiaKehamilan, whatsappConsent: $whatsappConsent)';
   }
 
   @override
@@ -987,8 +900,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
             (identical(other.age, age) || other.age == age) &&
             (identical(other.bloodType, bloodType) ||
                 other.bloodType == bloodType) &&
-            (identical(other.currentMedications, currentMedications) ||
-                other.currentMedications == currentMedications) &&
             (identical(other.dataSharingConsent, dataSharingConsent) ||
                 other.dataSharingConsent == dataSharingConsent) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
@@ -1006,8 +917,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
                 other.estimatedDueDate == estimatedDueDate) &&
             (identical(other.healthcarePreference, healthcarePreference) ||
                 other.healthcarePreference == healthcarePreference) &&
-            (identical(other.heightCm, heightCm) ||
-                other.heightCm == heightCm) &&
             (identical(other.jarakKehamilanTerakhir, jarakKehamilanTerakhir) ||
                 other.jarakKehamilanTerakhir == jarakKehamilanTerakhir) &&
             (identical(other.jumlahAnak, jumlahAnak) ||
@@ -1023,8 +932,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
             (identical(other.lastMenstrualPeriod, lastMenstrualPeriod) ||
                 other.lastMenstrualPeriod == lastMenstrualPeriod) &&
             const DeepCollectionEquality().equals(other._location, _location) &&
-            (identical(other.medicalHistory, medicalHistory) ||
-                other.medicalHistory == medicalHistory) &&
             (identical(other.miscarriageNumber, miscarriageNumber) ||
                 other.miscarriageNumber == miscarriageNumber) &&
             (identical(other.namaLengkap, namaLengkap) ||
@@ -1037,8 +944,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
                   pernahPerdarahanSaatHamil,
                 ) ||
                 other.pernahPerdarahanSaatHamil == pernahPerdarahanSaatHamil) &&
-            (identical(other.prePregnancyWeightKg, prePregnancyWeightKg) ||
-                other.prePregnancyWeightKg == prePregnancyWeightKg) &&
             (identical(
                   other.previousPregnancyComplications,
                   previousPregnancyComplications,
@@ -1051,7 +956,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
                 other.riskLevel == riskLevel) &&
             (identical(other.riwayatKesehatanIbu, riwayatKesehatanIbu) ||
                 other.riwayatKesehatanIbu == riwayatKesehatanIbu) &&
-            (identical(other.rtRw, rtRw) || other.rtRw == rtRw) &&
             (identical(other.usiaKehamilan, usiaKehamilan) ||
                 other.usiaKehamilan == usiaKehamilan) &&
             (identical(other.whatsappConsent, whatsappConsent) ||
@@ -1065,7 +969,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     address,
     age,
     bloodType,
-    currentMedications,
     dataSharingConsent,
     dateOfBirth,
     emergencyContactName,
@@ -1073,7 +976,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     emergencyContactRelation,
     estimatedDueDate,
     healthcarePreference,
-    heightCm,
     jarakKehamilanTerakhir,
     jumlahAnak,
     kecamatan,
@@ -1082,18 +984,15 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     kotaKabupaten,
     lastMenstrualPeriod,
     const DeepCollectionEquality().hash(_location),
-    medicalHistory,
     miscarriageNumber,
     namaLengkap,
     nik,
     pernahCaesar,
     pernahPerdarahanSaatHamil,
-    prePregnancyWeightKg,
     previousPregnancyComplications,
     provinsi,
     riskLevel,
     riwayatKesehatanIbu,
-    rtRw,
     usiaKehamilan,
     whatsappConsent,
   ]);
@@ -1117,7 +1016,6 @@ abstract class _IbuHamilData implements IbuHamilData {
     required final String address,
     final int? age,
     @JsonKey(name: 'blood_type') final String? bloodType,
-    @JsonKey(name: 'current_medications') final String? currentMedications,
     @JsonKey(name: 'data_sharing_consent') final bool dataSharingConsent,
     @JsonKey(name: 'date_of_birth') required final String dateOfBirth,
     @JsonKey(name: 'emergency_contact_name')
@@ -1128,7 +1026,6 @@ abstract class _IbuHamilData implements IbuHamilData {
     final String? emergencyContactRelation,
     @JsonKey(name: 'estimated_due_date') final String? estimatedDueDate,
     @JsonKey(name: 'healthcare_preference') final String? healthcarePreference,
-    @JsonKey(name: 'height_cm') final double? heightCm,
     @JsonKey(name: 'jarak_kehamilan_terakhir')
     final String? jarakKehamilanTerakhir,
     @JsonKey(name: 'jumlah_anak') final int? jumlahAnak,
@@ -1138,22 +1035,18 @@ abstract class _IbuHamilData implements IbuHamilData {
     @JsonKey(name: 'kota_kabupaten') required final String kotaKabupaten,
     @JsonKey(name: 'last_menstrual_period') final String? lastMenstrualPeriod,
     required final List<double> location,
-    @JsonKey(name: 'medical_history') final String? medicalHistory,
     @JsonKey(name: 'miscarriage_number') final int miscarriageNumber,
     @JsonKey(name: 'nama_lengkap') required final String namaLengkap,
     required final String nik,
     @JsonKey(name: 'pernah_caesar') final bool pernahCaesar,
     @JsonKey(name: 'pernah_perdarahan_saat_hamil')
     final bool pernahPerdarahanSaatHamil,
-    @JsonKey(name: 'pre_pregnancy_weight_kg')
-    final double? prePregnancyWeightKg,
     @JsonKey(name: 'previous_pregnancy_complications')
     final String? previousPregnancyComplications,
     required final String provinsi,
     @JsonKey(name: 'risk_level') final String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     required final RiwayatKesehatanIbuData riwayatKesehatanIbu,
-    @JsonKey(name: 'rt_rw') final String? rtRw,
     @JsonKey(name: 'usia_kehamilan') final int? usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') final bool whatsappConsent,
   }) = _$IbuHamilDataImpl;
@@ -1168,9 +1061,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   @override
   @JsonKey(name: 'blood_type')
   String? get bloodType;
-  @override
-  @JsonKey(name: 'current_medications')
-  String? get currentMedications;
   @override
   @JsonKey(name: 'data_sharing_consent')
   bool get dataSharingConsent;
@@ -1193,9 +1083,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   @JsonKey(name: 'healthcare_preference')
   String? get healthcarePreference;
   @override
-  @JsonKey(name: 'height_cm')
-  double? get heightCm;
-  @override
   @JsonKey(name: 'jarak_kehamilan_terakhir')
   String? get jarakKehamilanTerakhir;
   @override
@@ -1217,9 +1104,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   @override
   List<double> get location; // [longitude, latitude]
   @override
-  @JsonKey(name: 'medical_history')
-  String? get medicalHistory;
-  @override
   @JsonKey(name: 'miscarriage_number')
   int get miscarriageNumber;
   @override
@@ -1234,9 +1118,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   @JsonKey(name: 'pernah_perdarahan_saat_hamil')
   bool get pernahPerdarahanSaatHamil;
   @override
-  @JsonKey(name: 'pre_pregnancy_weight_kg')
-  double? get prePregnancyWeightKg;
-  @override
   @JsonKey(name: 'previous_pregnancy_complications')
   String? get previousPregnancyComplications;
   @override
@@ -1247,9 +1128,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   @override
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   RiwayatKesehatanIbuData get riwayatKesehatanIbu;
-  @override
-  @JsonKey(name: 'rt_rw')
-  String? get rtRw;
   @override
   @JsonKey(name: 'usia_kehamilan')
   int? get usiaKehamilan;

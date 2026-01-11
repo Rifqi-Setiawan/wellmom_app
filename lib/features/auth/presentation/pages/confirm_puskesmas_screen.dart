@@ -58,7 +58,7 @@ class _ConfirmPuskesmasScreenState
       'usiaKehamilan': medicalDataState.usiaKehamilan,
       'kehamilanKe': medicalDataState.kehamilanKe,
       'jumlahAnak': medicalDataState.jumlahAnak,
-      'riwayatKeguguran': medicalDataState.riwayatKeguguran,
+      'jumlahKeguguran': medicalDataState.jumlahKeguguran,
       'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
       'darahTinggi': medicalDataState.darahTinggi,
       'diabetes': medicalDataState.diabetes,
@@ -86,16 +86,20 @@ class _ConfirmPuskesmasScreenState
     if (!mounted) return;
 
     if (success) {
+      // Show success message
       ErrorSnackbar.showSuccess(
         context,
         'Registrasi berhasil! Selamat datang di WellMom.',
       );
-      // Navigate to home screen
+      
+      // Navigate to home screen and clear all previous routes
+      // This ensures user cannot go back to registration screens
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRouter.home,
-        (route) => false,
+        (route) => false, // Remove all previous routes
       );
     } else {
+      // Show error message if registration or assign failed
       final confirmState = ref.read(confirmRegistrationViewModelProvider);
       if (confirmState.error != null) {
         ErrorSnackbar.show(context, confirmState.error!);
