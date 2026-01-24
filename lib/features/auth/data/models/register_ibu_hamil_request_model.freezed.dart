@@ -159,7 +159,8 @@ class __$$RegisterIbuHamilRequestModelImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(explicitToJson: true)
 class _$RegisterIbuHamilRequestModelImpl
     implements _RegisterIbuHamilRequestModel {
   const _$RegisterIbuHamilRequestModelImpl({
@@ -744,7 +745,8 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(explicitToJson: true)
 class _$IbuHamilDataImpl implements _IbuHamilData {
   const _$IbuHamilDataImpl({
     required this.address,

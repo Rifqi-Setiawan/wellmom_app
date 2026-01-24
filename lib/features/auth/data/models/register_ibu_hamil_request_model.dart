@@ -6,6 +6,7 @@ part 'register_ibu_hamil_request_model.g.dart';
 /// Request model for complete ibu hamil registration
 @freezed
 class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
+  @JsonSerializable(explicitToJson: true)
   const factory RegisterIbuHamilRequestModel({
     @JsonKey(name: 'ibu_hamil') required IbuHamilData ibuHamil,
     required UserData user,
@@ -17,6 +18,7 @@ class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
 
 @freezed
 class IbuHamilData with _$IbuHamilData {
+  @JsonSerializable(explicitToJson: true)
   const factory IbuHamilData({
     required String address,
     int? age,

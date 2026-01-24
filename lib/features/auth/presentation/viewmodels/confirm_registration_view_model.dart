@@ -111,10 +111,10 @@ class ConfirmRegistrationViewModel
         final requestJson = requestModel.toJson();
         
         // Validate all required fields are present and not null
-        final ibuHamilJson = requestJson['ibu_hamil'] as Map<String, dynamic>?;
-        if (ibuHamilJson == null) {
-          throw Exception('ibu_hamil is null in request JSON');
-        }
+        final ibuHamilRaw = requestJson['ibu_hamil'];
+        final Map<String, dynamic> ibuHamilJson = ibuHamilRaw is Map<String, dynamic>
+            ? ibuHamilRaw
+            : requestModel.ibuHamil.toJson();
         
         // Check required fields
         final requiredFields = [
@@ -140,8 +140,13 @@ class ConfirmRegistrationViewModel
             if (loc.isEmpty) {
               missingFields.add(field);
             }
-          } else if (field == 'riwayat_kesehatan_ibu' && ibuHamilJson[field] is Map) {
-            // OK, it's a map
+          } else if (field == 'riwayat_kesehatan_ibu') {
+            final rkiRaw = ibuHamilJson[field];
+            final rkiMap = rkiRaw is Map<String, dynamic>
+                ? rkiRaw
+                : requestModel.ibuHamil.riwayatKesehatanIbu.toJson();
+            // replace with ensured map for subsequent checks
+            ibuHamilJson[field] = rkiMap;
           } else if (ibuHamilJson[field] is String && (ibuHamilJson[field] as String).isEmpty) {
             missingFields.add(field);
           }

@@ -15,7 +15,10 @@ _$RegisterIbuHamilRequestModelImpl _$$RegisterIbuHamilRequestModelImplFromJson(
 
 Map<String, dynamic> _$$RegisterIbuHamilRequestModelImplToJson(
   _$RegisterIbuHamilRequestModelImpl instance,
-) => <String, dynamic>{'ibu_hamil': instance.ibuHamil, 'user': instance.user};
+) => <String, dynamic>{
+  'ibu_hamil': instance.ibuHamil.toJson(),
+  'user': instance.user.toJson(),
+};
 
 _$IbuHamilDataImpl _$$IbuHamilDataImplFromJson(Map<String, dynamic> json) =>
     _$IbuHamilDataImpl(
@@ -83,7 +86,7 @@ Map<String, dynamic> _$$IbuHamilDataImplToJson(
   'pernah_perdarahan_saat_hamil': instance.pernahPerdarahanSaatHamil,
   'previous_pregnancy_complications': instance.previousPregnancyComplications,
   'provinsi': instance.provinsi,
-  'riwayat_kesehatan_ibu': instance.riwayatKesehatanIbu,
+  'riwayat_kesehatan_ibu': instance.riwayatKesehatanIbu.toJson(),
   'usia_kehamilan': instance.usiaKehamilan,
   'whatsapp_consent': instance.whatsappConsent,
 };

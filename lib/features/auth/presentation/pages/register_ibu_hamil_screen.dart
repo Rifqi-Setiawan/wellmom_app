@@ -418,42 +418,27 @@ class _RegisterIbuHamilScreenState
                 },
               ),
               const SizedBox(height: 24),
-              // Blood Type Section
-              Row(
-                children: [
-                  Icon(
-                    Icons.water_drop_outlined,
-                    size: 20,
-                    color: Colors.red.shade600,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Golongan Darah',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Blood Type Dropdown with compact styling
-              SizedBox(
-                width: 180,
-                child: CustomDropdown<String>(
-                  hintText: 'Pilih Golongan Darah',
-                  value: _selectedBloodType,
-                  items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-                  getLabel: (type) => type,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedBloodType = value;
-                    });
-                    if (value != null) {
-                      ref.read(registerViewModelProvider.notifier).updateBloodType(value);
-                    }
-                  },
-                ),
+              // Blood Type Dropdown - Professional Styling
+              CustomDropdown<String>(
+                label: 'Golongan Darah',
+                hintText: 'Pilih Golongan Darah',
+                value: _selectedBloodType,
+                items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+                getLabel: (type) => type,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBloodType = value;
+                  });
+                  if (value != null) {
+                    ref.read(registerViewModelProvider.notifier).updateBloodType(value);
+                  }
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Golongan darah harus dipilih';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 24),
               // Emergency Contact Section Header
