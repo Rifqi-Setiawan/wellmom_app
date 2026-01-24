@@ -30,6 +30,7 @@ class _RegisterIbuHamilScreenState
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _emergencyContactNameController = TextEditingController();
   final _emergencyContactPhoneController = TextEditingController();
   final _emergencyContactRelationController = TextEditingController();
@@ -38,6 +39,9 @@ class _RegisterIbuHamilScreenState
   KotaKabupaten? _selectedKota;
   Kecamatan? _selectedKecamatan;
   String? _selectedBloodType;
+  
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -50,6 +54,7 @@ class _RegisterIbuHamilScreenState
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -350,7 +355,19 @@ class _RegisterIbuHamilScreenState
                 label: AppStrings.kataSandi,
                 hintText: '••••••••',
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.textLight,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
                 onChanged: (value) {
                   ref.read(registerViewModelProvider.notifier).updatePassword(value);
                 },
@@ -371,24 +388,74 @@ class _RegisterIbuHamilScreenState
                       color: AppColors.textLight,
                     ),
               ),
-              const SizedBox(height: 24),
-              // Blood Type Dropdown
-              CustomDropdown<String>(
-                label: 'Golongan Darah',
-                hintText: 'Pilih Golongan Darah',
-                value: _selectedBloodType,
-                items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-                getLabel: (type) => type,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedBloodType = value;
-                  });
-                  if (value != null) {
-                    ref.read(registerViewModelProvider.notifier).updateBloodType(value);
+              const SizedBox(height: 16),
+              // Confirm Password
+              CustomTextField(
+                label: 'Konfirmasi Password',
+                hintText: '••••••••',
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.textLight,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  },
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Konfirmasi password harus diisi';
                   }
+                  if (value != _passwordController.text) {
+                    return 'Password tidak cocok';
+                  }
+                  return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              // Blood Type Section
+              Row(
+                children: [
+                  Icon(
+                    Icons.water_drop_outlined,
+                    size: 20,
+                    color: Colors.red.shade600,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Golongan Darah',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Blood Type Dropdown with compact styling
+              SizedBox(
+                width: 180,
+                child: CustomDropdown<String>(
+                  hintText: 'Pilih Golongan Darah',
+                  value: _selectedBloodType,
+                  items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+                  getLabel: (type) => type,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedBloodType = value;
+                    });
+                    if (value != null) {
+                      ref.read(registerViewModelProvider.notifier).updateBloodType(value);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
               // Emergency Contact Section Header
               Row(
                 children: [
@@ -491,8 +558,7 @@ class _RegisterIbuHamilScreenState
                             
                             final updatedState = ref.read(registerViewModelProvider);
                             
-                            // Update text fields
-                            _jalanController.text = updatedState.jalan;
+                            // Update text fields - jalan tidak diisi otomatis
                             _kodePosController.text = updatedState.kodePos;
                             
                             // Update location coordinates
@@ -859,18 +925,6 @@ class _RegisterIbuHamilScreenState
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              // Alamat Lengkap (optional, for additional notes)
-              CustomTextField(
-                label: 'Alamat Lengkap (Opsional)',
-                hintText: 'Alamat tambahan atau catatan',
-                controller: _alamatController,
-                maxLines: 2,
-                onChanged: (value) {
-                  ref.read(registerViewModelProvider.notifier)
-                      .updateAlamat(value);
-                },
               ),
               const SizedBox(height: 32),
               // Next button

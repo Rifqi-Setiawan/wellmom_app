@@ -292,8 +292,6 @@ mixin _$IbuHamilData {
   String? get previousPregnancyComplications =>
       throw _privateConstructorUsedError;
   String get provinsi => throw _privateConstructorUsedError;
-  @JsonKey(name: 'risk_level')
-  String? get riskLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   RiwayatKesehatanIbuData get riwayatKesehatanIbu =>
       throw _privateConstructorUsedError;
@@ -348,7 +346,6 @@ abstract class $IbuHamilDataCopyWith<$Res> {
     @JsonKey(name: 'previous_pregnancy_complications')
     String? previousPregnancyComplications,
     String provinsi,
-    @JsonKey(name: 'risk_level') String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     RiwayatKesehatanIbuData riwayatKesehatanIbu,
     @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
@@ -398,7 +395,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
     Object? pernahPerdarahanSaatHamil = null,
     Object? previousPregnancyComplications = freezed,
     Object? provinsi = null,
-    Object? riskLevel = freezed,
     Object? riwayatKesehatanIbu = null,
     Object? usiaKehamilan = freezed,
     Object? whatsappConsent = null,
@@ -506,10 +502,6 @@ class _$IbuHamilDataCopyWithImpl<$Res, $Val extends IbuHamilData>
                 ? _value.provinsi
                 : provinsi // ignore: cast_nullable_to_non_nullable
                       as String,
-            riskLevel: freezed == riskLevel
-                ? _value.riskLevel
-                : riskLevel // ignore: cast_nullable_to_non_nullable
-                      as String?,
             riwayatKesehatanIbu: null == riwayatKesehatanIbu
                 ? _value.riwayatKesehatanIbu
                 : riwayatKesehatanIbu // ignore: cast_nullable_to_non_nullable
@@ -578,7 +570,6 @@ abstract class _$$IbuHamilDataImplCopyWith<$Res>
     @JsonKey(name: 'previous_pregnancy_complications')
     String? previousPregnancyComplications,
     String provinsi,
-    @JsonKey(name: 'risk_level') String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     RiwayatKesehatanIbuData riwayatKesehatanIbu,
     @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
@@ -628,7 +619,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
     Object? pernahPerdarahanSaatHamil = null,
     Object? previousPregnancyComplications = freezed,
     Object? provinsi = null,
-    Object? riskLevel = freezed,
     Object? riwayatKesehatanIbu = null,
     Object? usiaKehamilan = freezed,
     Object? whatsappConsent = null,
@@ -736,10 +726,6 @@ class __$$IbuHamilDataImplCopyWithImpl<$Res>
             ? _value.provinsi
             : provinsi // ignore: cast_nullable_to_non_nullable
                   as String,
-        riskLevel: freezed == riskLevel
-            ? _value.riskLevel
-            : riskLevel // ignore: cast_nullable_to_non_nullable
-                  as String?,
         riwayatKesehatanIbu: null == riwayatKesehatanIbu
             ? _value.riwayatKesehatanIbu
             : riwayatKesehatanIbu // ignore: cast_nullable_to_non_nullable
@@ -789,7 +775,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     @JsonKey(name: 'previous_pregnancy_complications')
     this.previousPregnancyComplications,
     required this.provinsi,
-    @JsonKey(name: 'risk_level') this.riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu') required this.riwayatKesehatanIbu,
     @JsonKey(name: 'usia_kehamilan') this.usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') this.whatsappConsent = false,
@@ -874,9 +859,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
   @override
   final String provinsi;
   @override
-  @JsonKey(name: 'risk_level')
-  final String? riskLevel;
-  @override
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   final RiwayatKesehatanIbuData riwayatKesehatanIbu;
   @override
@@ -888,7 +870,7 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
 
   @override
   String toString() {
-    return 'IbuHamilData(address: $address, age: $age, bloodType: $bloodType, dataSharingConsent: $dataSharingConsent, dateOfBirth: $dateOfBirth, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, emergencyContactRelation: $emergencyContactRelation, estimatedDueDate: $estimatedDueDate, healthcarePreference: $healthcarePreference, jarakKehamilanTerakhir: $jarakKehamilanTerakhir, jumlahAnak: $jumlahAnak, kecamatan: $kecamatan, kehamilanKe: $kehamilanKe, kelurahan: $kelurahan, kotaKabupaten: $kotaKabupaten, lastMenstrualPeriod: $lastMenstrualPeriod, location: $location, miscarriageNumber: $miscarriageNumber, namaLengkap: $namaLengkap, nik: $nik, pernahCaesar: $pernahCaesar, pernahPerdarahanSaatHamil: $pernahPerdarahanSaatHamil, previousPregnancyComplications: $previousPregnancyComplications, provinsi: $provinsi, riskLevel: $riskLevel, riwayatKesehatanIbu: $riwayatKesehatanIbu, usiaKehamilan: $usiaKehamilan, whatsappConsent: $whatsappConsent)';
+    return 'IbuHamilData(address: $address, age: $age, bloodType: $bloodType, dataSharingConsent: $dataSharingConsent, dateOfBirth: $dateOfBirth, emergencyContactName: $emergencyContactName, emergencyContactPhone: $emergencyContactPhone, emergencyContactRelation: $emergencyContactRelation, estimatedDueDate: $estimatedDueDate, healthcarePreference: $healthcarePreference, jarakKehamilanTerakhir: $jarakKehamilanTerakhir, jumlahAnak: $jumlahAnak, kecamatan: $kecamatan, kehamilanKe: $kehamilanKe, kelurahan: $kelurahan, kotaKabupaten: $kotaKabupaten, lastMenstrualPeriod: $lastMenstrualPeriod, location: $location, miscarriageNumber: $miscarriageNumber, namaLengkap: $namaLengkap, nik: $nik, pernahCaesar: $pernahCaesar, pernahPerdarahanSaatHamil: $pernahPerdarahanSaatHamil, previousPregnancyComplications: $previousPregnancyComplications, provinsi: $provinsi, riwayatKesehatanIbu: $riwayatKesehatanIbu, usiaKehamilan: $usiaKehamilan, whatsappConsent: $whatsappConsent)';
   }
 
   @override
@@ -952,8 +934,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
                     previousPregnancyComplications) &&
             (identical(other.provinsi, provinsi) ||
                 other.provinsi == provinsi) &&
-            (identical(other.riskLevel, riskLevel) ||
-                other.riskLevel == riskLevel) &&
             (identical(other.riwayatKesehatanIbu, riwayatKesehatanIbu) ||
                 other.riwayatKesehatanIbu == riwayatKesehatanIbu) &&
             (identical(other.usiaKehamilan, usiaKehamilan) ||
@@ -991,7 +971,6 @@ class _$IbuHamilDataImpl implements _IbuHamilData {
     pernahPerdarahanSaatHamil,
     previousPregnancyComplications,
     provinsi,
-    riskLevel,
     riwayatKesehatanIbu,
     usiaKehamilan,
     whatsappConsent,
@@ -1044,7 +1023,6 @@ abstract class _IbuHamilData implements IbuHamilData {
     @JsonKey(name: 'previous_pregnancy_complications')
     final String? previousPregnancyComplications,
     required final String provinsi,
-    @JsonKey(name: 'risk_level') final String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu')
     required final RiwayatKesehatanIbuData riwayatKesehatanIbu,
     @JsonKey(name: 'usia_kehamilan') final int? usiaKehamilan,
@@ -1122,9 +1100,6 @@ abstract class _IbuHamilData implements IbuHamilData {
   String? get previousPregnancyComplications;
   @override
   String get provinsi;
-  @override
-  @JsonKey(name: 'risk_level')
-  String? get riskLevel;
   @override
   @JsonKey(name: 'riwayat_kesehatan_ibu')
   RiwayatKesehatanIbuData get riwayatKesehatanIbu;
@@ -1473,7 +1448,8 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserData {
-  String get email => throw _privateConstructorUsedError;
+  String get email =>
+      throw _privateConstructorUsedError; // Required: email must be provided
   @JsonKey(name: 'full_name')
   String get fullName => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
@@ -1634,6 +1610,7 @@ class _$UserDataImpl implements _UserData {
 
   @override
   final String email;
+  // Required: email must be provided
   @override
   @JsonKey(name: 'full_name')
   final String fullName;
@@ -1695,7 +1672,7 @@ abstract class _UserData implements UserData {
       _$UserDataImpl.fromJson;
 
   @override
-  String get email;
+  String get email; // Required: email must be provided
   @override
   @JsonKey(name: 'full_name')
   String get fullName;

@@ -3,6 +3,7 @@ import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/chatbot/data/datasources/chatbot_remote_datasource.dart';
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_conversation_model.dart';
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_quota_model.dart';
+import 'package:wellmom_app/features/chatbot/data/models/chatbot_status_model.dart';
 
 /// Local chat message for UI display
 class ChatMessage {
@@ -46,6 +47,8 @@ class ChatbotState {
   final String? error;
   final ChatbotQuotaModel? quota;
   final List<ChatbotConversationModel> conversations;
+  final ChatbotStatusModel? status;
+  final bool isCheckingStatus;
 
   const ChatbotState({
     this.messages = const [],
@@ -55,6 +58,8 @@ class ChatbotState {
     this.error,
     this.quota,
     this.conversations = const [],
+    this.status,
+    this.isCheckingStatus = false,
   });
 
   ChatbotState copyWith({
@@ -65,6 +70,8 @@ class ChatbotState {
     String? error,
     ChatbotQuotaModel? quota,
     List<ChatbotConversationModel>? conversations,
+    ChatbotStatusModel? status,
+    bool? isCheckingStatus,
     bool clearError = false,
     bool clearConversationId = false,
   }) {
@@ -78,17 +85,26 @@ class ChatbotState {
       error: clearError ? null : (error ?? this.error),
       quota: quota ?? this.quota,
       conversations: conversations ?? this.conversations,
+      status: status ?? this.status,
+      isCheckingStatus: isCheckingStatus ?? this.isCheckingStatus,
     );
   }
 
   /// Check if user can send message
   /// Allow sending if quota is unknown (null) - will get proper error from API
-  /// Only block if quota is explicitly 0
+  /// Only block if quota is explicitly 0 or chatbot is not available
   bool get canSendMessage {
     if (isSending) return false;
+    if (status != null && !status!.isAvailable) return false;
     if (quota == null) return true; // Allow if quota unknown
     return quota!.remaining > 0;
   }
+  
+  /// Check if chatbot is available
+  bool get isChatbotAvailable => status?.isAvailable ?? true;
+  
+  /// Get status error message
+  String? get statusError => status?.error;
 }
 
 /// Welcome message from WellBot
@@ -114,7 +130,7 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
     _initializeChat();
   }
 
-  /// Initialize chat with welcome message
+  /// Initialize chat with welcome message and check status
   void _initializeChat() {
     final welcomeMsg = ChatMessage(
       id: 'welcome',
@@ -124,8 +140,45 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
     );
     state = state.copyWith(messages: [welcomeMsg]);
     
+    // Check chatbot status first
+    checkStatus();
+    
     // Fetch quota
     fetchQuota();
+  }
+
+  /// Check chatbot availability status
+  Future<void> checkStatus() async {
+    // Skip if no token
+    if (token.isEmpty) {
+      print('Chatbot: No token available, skipping status check');
+      return;
+    }
+    
+    state = state.copyWith(isCheckingStatus: true);
+    try {
+      final status = await remoteDataSource.getStatus(token);
+      state = state.copyWith(
+        status: status,
+        isCheckingStatus: false,
+      );
+      
+      // If chatbot is not available, show error message
+      if (!status.isAvailable) {
+        final errorMsg = ChatMessage(
+          id: 'status_error',
+          role: 'assistant',
+          content: '⚠️ ${status.error ?? "WellBot sedang tidak tersedia saat ini. Silakan coba lagi nanti, Bunda."}',
+          createdAt: DateTime.now(),
+        );
+        state = state.copyWith(
+          messages: [...state.messages, errorMsg],
+        );
+      }
+    } catch (e) {
+      print('Chatbot: Error checking status: $e');
+      state = state.copyWith(isCheckingStatus: false);
+    }
   }
 
   /// Fetch user's quota
@@ -141,6 +194,11 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
   /// Send a message to the chatbot
   Future<void> sendMessage(String message) async {
     if (message.trim().isEmpty || state.isSending) return;
+    
+    // Debug: log token status
+    print('Chatbot: Sending message...');
+    print('Chatbot: Token length: ${token.length}');
+    print('Chatbot: Token preview: ${token.isNotEmpty ? "${token.substring(0, token.length > 20 ? 20 : token.length)}..." : "EMPTY"}');
 
     // Clear any previous error
     state = state.copyWith(clearError: true);

@@ -48,7 +48,6 @@ _$IbuHamilDataImpl _$$IbuHamilDataImplFromJson(Map<String, dynamic> json) =>
       previousPregnancyComplications:
           json['previous_pregnancy_complications'] as String?,
       provinsi: json['provinsi'] as String,
-      riskLevel: json['risk_level'] as String?,
       riwayatKesehatanIbu: RiwayatKesehatanIbuData.fromJson(
         json['riwayat_kesehatan_ibu'] as Map<String, dynamic>,
       ),
@@ -84,7 +83,6 @@ Map<String, dynamic> _$$IbuHamilDataImplToJson(
   'pernah_perdarahan_saat_hamil': instance.pernahPerdarahanSaatHamil,
   'previous_pregnancy_complications': instance.previousPregnancyComplications,
   'provinsi': instance.provinsi,
-  'risk_level': instance.riskLevel,
   'riwayat_kesehatan_ibu': instance.riwayatKesehatanIbu,
   'usia_kehamilan': instance.usiaKehamilan,
   'whatsapp_consent': instance.whatsappConsent,

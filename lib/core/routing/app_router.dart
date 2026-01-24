@@ -5,6 +5,9 @@ import 'package:wellmom_app/features/auth/presentation/pages/medical_data_screen
 import 'package:wellmom_app/features/auth/presentation/pages/register_ibu_hamil_screen.dart';
 import 'package:wellmom_app/features/auth/presentation/pages/select_puskesmas_screen.dart';
 import 'package:wellmom_app/features/chatbot/presentation/pages/chatbot_screen.dart';
+import 'package:wellmom_app/features/forum/presentation/pages/forum_post_detail_screen.dart';
+import 'package:wellmom_app/features/forum/presentation/pages/forum_reply_screen.dart';
+import 'package:wellmom_app/features/forum/presentation/pages/forum_screen.dart';
 import 'package:wellmom_app/features/history/presentation/pages/history_screen.dart';
 import 'package:wellmom_app/features/home/presentation/pages/home_screen.dart';
 import 'package:wellmom_app/features/konsul/presentation/pages/konsul_screen.dart';
@@ -31,6 +34,9 @@ class AppRouter {
   static const String konsul = '/konsul';
   static const String profile = '/profile';
   static const String chatbot = '/chatbot';
+  static const String forum = '/forum';
+  static const String forumPostDetail = '/forum-post-detail';
+  static const String forumReply = '/forum-reply';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -97,6 +103,35 @@ class AppRouter {
       case chatbot:
         return MaterialPageRoute(
           builder: (_) => const ChatbotScreen(),
+          settings: settings,
+        );
+      case forum:
+        return MaterialPageRoute(
+          builder: (_) => const ForumScreen(),
+          settings: settings,
+        );
+      case forumPostDetail:
+        final postId = settings.arguments as int?;
+        if (postId == null) {
+          return MaterialPageRoute(
+            builder: (_) => const WelcomeScreen(),
+            settings: settings,
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => ForumPostDetailScreen(postId: postId),
+          settings: settings,
+        );
+      case forumReply:
+        final postId = settings.arguments as int?;
+        if (postId == null) {
+          return MaterialPageRoute(
+            builder: (_) => const WelcomeScreen(),
+            settings: settings,
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => ForumReplyScreen(postId: postId),
           settings: settings,
         );
       default:

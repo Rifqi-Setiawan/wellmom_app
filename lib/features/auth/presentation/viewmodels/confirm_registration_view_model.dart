@@ -63,6 +63,7 @@ class ConfirmRegistrationViewModel
       final kota = registerState['kota']?.toString().trim() ?? '';
       final provinsi = registerState['provinsi']?.toString().trim() ?? '';
       
+      // Email, phone, and password are required
       if (email.isEmpty || phone.isEmpty || password.isEmpty) {
         state = state.copyWith(
           isSubmitting: false,
@@ -371,7 +372,7 @@ class ConfirmRegistrationViewModel
         previousPregnancyComplications:
             medicalDataState['komplikasiKehamilanSebelumnya'] as String?,
         provinsi: provinsi,
-        riskLevel: 'normal', // Default, can be calculated later
+        // risk_level is NOT allowed to be filled during registration (will be ignored by backend)
         riwayatKesehatanIbu: RiwayatKesehatanIbuData(
           darahTinggi: medicalDataState['darahTinggi'] as bool? ?? false,
           diabetes: medicalDataState['diabetes'] as bool? ?? false,
@@ -385,6 +386,7 @@ class ConfirmRegistrationViewModel
         whatsappConsent: medicalDataState['whatsappConsent'] as bool? ?? false,
       ),
       user: UserData(
+        // Email is required
         email: registerState['email']?.toString().trim() ?? '',
         fullName: namaLengkap,
         password: registerState['password']?.toString() ?? '',

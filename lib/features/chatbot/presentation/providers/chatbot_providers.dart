@@ -14,10 +14,20 @@ final chatbotRemoteDataSourceProvider = Provider<ChatbotRemoteDataSource>((ref) 
 final authTokenProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for ChatbotViewModel
+/// Using autoDispose to recreate ViewModel when entering chatbot screen
+/// This ensures fresh token is used
 final chatbotViewModelProvider =
-    StateNotifierProvider<ChatbotViewModel, ChatbotState>((ref) {
+    StateNotifierProvider.autoDispose<ChatbotViewModel, ChatbotState>((ref) {
   final remoteDataSource = ref.watch(chatbotRemoteDataSourceProvider);
   final token = ref.watch(authTokenProvider) ?? '';
+  
+  // Debug: log token status when creating ViewModel
+  print('ChatbotProvider: Creating ViewModel with token length: ${token.length}');
+  if (token.isNotEmpty) {
+    print('ChatbotProvider: Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...');
+  } else {
+    print('ChatbotProvider: WARNING - Token is empty!');
+  }
   
   return ChatbotViewModel(
     remoteDataSource: remoteDataSource,

@@ -43,7 +43,6 @@ class IbuHamilData with _$IbuHamilData {
     @JsonKey(name: 'pernah_perdarahan_saat_hamil') @Default(false) bool pernahPerdarahanSaatHamil,
     @JsonKey(name: 'previous_pregnancy_complications') String? previousPregnancyComplications,
     required String provinsi,
-    @JsonKey(name: 'risk_level') String? riskLevel,
     @JsonKey(name: 'riwayat_kesehatan_ibu') required RiwayatKesehatanIbuData riwayatKesehatanIbu,
     @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
     @JsonKey(name: 'whatsapp_consent') @Default(false) bool whatsappConsent,
@@ -72,7 +71,7 @@ class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
 @freezed
 class UserData with _$UserData {
   const factory UserData({
-    required String email,
+    required String email, // Required: email must be provided
     @JsonKey(name: 'full_name') required String fullName,
     required String password,
     required String phone,

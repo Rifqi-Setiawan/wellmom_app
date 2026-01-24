@@ -4,6 +4,7 @@ import 'package:wellmom_app/features/chatbot/data/models/chatbot_conversation_mo
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_history_model.dart';
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_quota_model.dart';
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_send_response_model.dart';
+import 'package:wellmom_app/features/chatbot/data/models/chatbot_status_model.dart';
 
 /// Error messages in Indonesian
 const chatbotErrors = {
@@ -12,6 +13,8 @@ const chatbotErrors = {
   'NETWORK_ERROR': 'Koneksi bermasalah. Periksa internet Anda.',
   'SERVER_ERROR': 'Server sedang sibuk. Coba lagi nanti.',
   'UNAUTHORIZED': 'Sesi habis. Silakan login ulang.',
+  'MODEL_NOT_FOUND': 'Model AI sedang tidak tersedia. Coba lagi nanti, Bunda.',
+  'API_KEY_MISSING': 'Konfigurasi AI belum lengkap. Hubungi administrator.',
 };
 
 /// Abstract remote data source for chatbot
@@ -24,6 +27,7 @@ abstract class ChatbotRemoteDataSource {
       int conversationId, String token);
   Future<ChatbotQuotaModel> getQuota(String token);
   Future<void> deleteConversation(int conversationId, String token);
+  Future<ChatbotStatusModel> getStatus(String token);
 }
 
 /// Implementation of ChatbotRemoteDataSource
@@ -138,6 +142,44 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
     }
   }
 
+  @override
+  Future<ChatbotStatusModel> getStatus(String token) async {
+    try {
+      final response = await dio.get(
+        '/chatbot/status',
+        options: Options(headers: _authHeaders(token)),
+      );
+      return ChatbotStatusModel.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      // If status endpoint fails, return unavailable status
+      print('Failed to get chatbot status: ${e.message}');
+      print('Status code: ${e.response?.statusCode}');
+      print('Response: ${e.response?.data}');
+      
+      // If 401, token is invalid
+      if (e.response?.statusCode == 401) {
+        return const ChatbotStatusModel(
+          isAvailable: false,
+          apiKeyConfigured: true,
+          error: 'Sesi habis. Silakan login ulang.',
+        );
+      }
+      
+      return const ChatbotStatusModel(
+        isAvailable: false,
+        apiKeyConfigured: false,
+        error: 'Tidak dapat memeriksa status chatbot',
+      );
+    } catch (e) {
+      return const ChatbotStatusModel(
+        isAvailable: false,
+        apiKeyConfigured: false,
+        error: 'Terjadi kesalahan saat memeriksa status',
+      );
+    }
+  }
+
   /// Handle Dio errors and convert to appropriate Failures
   Failure _handleDioError(DioException e) {
     // Debug: print error details
@@ -189,6 +231,20 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
         case 500:
         case 502:
         case 503:
+          // Check for specific AI model errors
+          final detailStr = detail?.toString().toLowerCase() ?? '';
+          if (detailStr.contains('model') && 
+              (detailStr.contains('tidak ditemukan') || 
+               detailStr.contains('not found') ||
+               detailStr.contains('unavailable'))) {
+            return ServerFailure(chatbotErrors['MODEL_NOT_FOUND']!);
+          }
+          if (detailStr.contains('api key') || 
+              detailStr.contains('api_key') ||
+              detailStr.contains('gemini')) {
+            return ServerFailure(chatbotErrors['API_KEY_MISSING']!);
+          }
+          // Return the actual error message from backend if available
           return ServerFailure(
               detail?.toString() ?? chatbotErrors['SERVER_ERROR']!);
         default:

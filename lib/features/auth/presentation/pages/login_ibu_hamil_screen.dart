@@ -46,8 +46,12 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
         final state = ref.read(loginViewModelProvider);
         if (state.loginResponse != null) {
           // Save token to provider for chatbot and other features
-          ref.read(authTokenProvider.notifier).state = 
-              state.loginResponse!.accessToken;
+          final token = state.loginResponse!.accessToken;
+          ref.read(authTokenProvider.notifier).state = token;
+          
+          // Debug: verify token is saved
+          print('Login: Token saved, length: ${token.length}');
+          print('Login: Token preview: ${token.substring(0, token.length > 30 ? 30 : token.length)}...');
           
           // Show success message
           ErrorSnackbar.showSuccess(
@@ -93,54 +97,42 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Blue gradient header at top
+          // Background image with blue overlay
           Positioned.fill(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [AppColors.gradientStart, AppColors.gradientEnd],
+            child: Stack(
+              children: [
+                // Background image - positioned at top, smaller size, fit to top
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: MediaQuery.of(context).size.height * 0.5, // ~50% of screen height
+                  child: Image.asset(
+                    'assets/images/onboarding_pregnant_bg.png',
+                    fit: BoxFit.fitWidth, // Fit width, maintain aspect ratio
+                    alignment: Alignment.topCenter,
+                  ),
                 ),
-              ),
-            ),
-          ),
-          // Top content inside header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    const Text(
-                      AppStrings.pantauKesehatanIbu,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 30,
-                        color: AppColors.darkBlue,
-                        height: 1.25,
+                // Blue transparent overlay with Figma gradient - full screen
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.19, 0.51, 0.80, 1.0],
+                        colors: [
+                          const Color(0xFF1E88E5).withOpacity(0.25), // Light blue at top - transparent
+                          const Color(0xFF1E88E5).withOpacity(0.3), // Light blue at 19%
+                          const Color(0xFF1E88E5).withOpacity(0.35), // Light blue at 51%
+                          const Color(0xFF1E88E5).withOpacity(0.45), // Medium blue at 80%
+                          const Color(0xFF12242E).withOpacity(0.55), // Very dark blue at bottom
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      AppStrings.masukDanNikmati,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           // White card with curved top
@@ -148,7 +140,7 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -169,6 +161,31 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Title - centered
+                      const Center(
+                        child: Text(
+                          'Masuk ke Akun Wellmom',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Subtitle - centered
+                      Center(
+                        child: Text(
+                          'Mulai perjalanan kehamilan yang sehat dan bahagia bersama Wellmom.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textLight,
+                                fontSize: 14,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
                       // Error message display
                       if (state.error != null) ...[
                         Container(
@@ -202,10 +219,10 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                           ),
                         ),
                       ],
-                      // Email field
+                      // Nama Pengguna / Email field
                       CustomTextField(
-                        label: 'Email',
-                        hintText: 'Masukkan email Anda',
+                        label: 'Nama Pengguna',
+                        hintText: 'Masukkan nama pengguna atau email',
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
@@ -214,11 +231,14 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Email harus diisi';
+                            return 'Nama pengguna atau email harus diisi';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                              .hasMatch(value)) {
-                            return 'Format email tidak valid';
+                          // Allow both email and username
+                          if (value.contains('@')) {
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
+                              return 'Format email tidak valid';
+                            }
                           }
                           return null;
                         },
@@ -263,7 +283,7 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                               color: AppColors.textLight,
                             ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       // Login button
                       CustomButton(
                         text: 'Masuk',
@@ -302,7 +322,7 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       // Register link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -319,6 +339,7 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primaryBlue,
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
                             ),
                             child: const Text(
                               AppStrings.daftarDisini,

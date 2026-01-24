@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
+import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/features/forum/presentation/providers/forum_providers.dart';
 
-class KonsulScreen extends StatefulWidget {
+class KonsulScreen extends ConsumerStatefulWidget {
   const KonsulScreen({super.key});
 
   @override
-  State<KonsulScreen> createState() => _KonsulScreenState();
+  ConsumerState<KonsulScreen> createState() => _KonsulScreenState();
 }
 
-class _KonsulScreenState extends State<KonsulScreen> {
+class _KonsulScreenState extends ConsumerState<KonsulScreen> {
   int _currentIndex = 3;
 
   void _onNavTap(int index) {
@@ -90,7 +93,7 @@ class _KonsulScreenState extends State<KonsulScreen> {
                   title: 'Forum Komunitas',
                   description: 'Interaksi dengan ibu yang lain',
                   onTap: () {
-                    // Handle Forum tap
+                    Navigator.of(context).pushNamed(AppRouter.forum);
                   },
                 )),
               ],
@@ -126,27 +129,7 @@ class _KonsulScreenState extends State<KonsulScreen> {
             const SizedBox(height: 16),
             
             // Discussion List
-            _buildDiscussionItem(
-              name: 'Sarah M.',
-              timeAgo: '2h ago',
-              commentCount: 12,
-              topic: 'Ada rekomendasi kelas yoga prenatal yang aman di pusat kota? Saya sedang mencari...',
-              tag: 'EXERCISE',
-            ),
-            _buildDiscussionItem(
-              name: 'Dewi K.',
-              timeAgo: '5h ago',
-              commentCount: 8,
-              topic: 'Apakah ada yang pernah mengalami morning sickness parah di trimester pertama? Bagaimana cara mengatasinya?',
-              tag: 'HEALTH',
-            ),
-            _buildDiscussionItem(
-              name: 'Rina S.',
-              timeAgo: '1d ago',
-              commentCount: 15,
-              topic: 'Tips makanan sehat untuk ibu hamil trimester kedua? Saya ingin memastikan nutrisi yang cukup...',
-              tag: 'NUTRITION',
-            ),
+            _buildDiscussionList(),
           ],
         ),
       ),
@@ -331,110 +314,197 @@ class _KonsulScreenState extends State<KonsulScreen> {
     );
   }
 
-  Widget _buildDiscussionItem({
-    required String name,
-    required String timeAgo,
-    required int commentCount,
-    required String topic,
-    required String tag,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildDiscussionList() {
+    final state = ref.watch(forumRecentPostsViewModelProvider);
+
+    if (state.isLoading && state.posts.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (state.error != null && state.posts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey[300],
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.grey,
-                  size: 24,
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.textLight,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                state.error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textLight,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          timeAgo,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.chat_bubble_outline,
-                    size: 16,
-                    color: AppColors.textLight,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$commentCount',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textLight,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(forumRecentPostsViewModelProvider.notifier).refresh();
+                },
+                child: const Text('Coba Lagi'),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            topic,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textDark,
-              height: 1.4,
+        ),
+      );
+    }
+
+    if (state.posts.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text(
+            'Belum ada diskusi',
+            style: TextStyle(
+              color: AppColors.textLight,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6),
+        ),
+      );
+    }
+
+    return Column(
+      children: state.posts.map((post) {
+        return _buildDiscussionItem(
+          post: post,
+          onTap: () {
+            Navigator.of(context).pushNamed(
+              AppRouter.forumPostDetail,
+              arguments: post.id,
+            );
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildDiscussionItem({
+    required post,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.grey,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            post.authorName,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            DateFormatter.formatRelativeTime(post.createdAt),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.chat_bubble_outline,
+                      size: 16,
+                      color: AppColors.textLight,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${post.replyCount}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: Text(
-              tag,
+            const SizedBox(height: 12),
+            Text(
+              post.title,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryBlue,
+                color: AppColors.textDark,
+                height: 1.4,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              post.details,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textDark,
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  post.isLiked ? Icons.favorite : Icons.favorite_border,
+                  size: 16,
+                  color: post.isLiked ? Colors.red : AppColors.textLight,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${post.likeCount}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

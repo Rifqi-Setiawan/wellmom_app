@@ -241,8 +241,45 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       ),
       body: Column(
         children: [
+          // Status banner when chatbot is not available
+          if (state.status != null && !state.status!.isAvailable)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, 
+                       color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.status!.error ?? 'WellBot sedang tidak tersedia',
+                      style: TextStyle(
+                        color: Colors.orange.shade900,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(chatbotViewModelProvider.notifier).checkStatus();
+                    },
+                    child: Text(
+                      'Coba Lagi',
+                      style: TextStyle(
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
           // Quota indicator
-          if (state.quota != null)
+          if (state.quota != null && state.isChatbotAvailable)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -255,7 +292,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           
           // Messages list
           Expanded(
-            child: state.isLoading
+            child: state.isLoading || state.isCheckingStatus
                 ? const Center(
                     child: CircularProgressIndicator(
                       color: AppColors.primaryBlue,

@@ -24,4 +24,20 @@ class DateFormatter {
   static String formatDateForApi(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
   }
+
+  /// Format DateTime to relative time string (e.g., "2h ago", "1d ago")
+  static String formatRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Baru saja';
+    }
+  }
 }
