@@ -6,6 +6,7 @@ import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
@@ -45,12 +46,20 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       if (success) {
         final state = ref.read(loginViewModelProvider);
         if (state.loginResponse != null) {
-          // Save token to provider for chatbot and other features
+          // Save token to provider first (this always works)
           final token = state.loginResponse!.accessToken;
           ref.read(authTokenProvider.notifier).state = token;
           
-          // Debug: verify token is saved
-          print('Login: Token saved, length: ${token.length}');
+          // Try to save token to storage (may fail if plugin not initialized)
+          try {
+            await AuthStorageService.saveAccessToken(token);
+            print('Login: Token saved to storage and provider, length: ${token.length}');
+          } catch (e) {
+            print('Login: Warning - Failed to save token to storage: $e');
+            print('Login: Token saved to provider only. Please restart app after rebuild.');
+            // Continue anyway - token is in provider and will work for current session
+          }
+          
           print('Login: Token preview: ${token.substring(0, token.length > 30 ? 30 : token.length)}...');
           
           // Show success message

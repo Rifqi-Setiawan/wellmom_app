@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
 import 'package:wellmom_app/features/home/data/models/puskesmas_detail_model.dart';
 import 'package:wellmom_app/features/home/presentation/viewmodels/home_view_model.dart';
+
+/// Helper to construct full image URL from relative path
+String _getImageUrl(String? relativePath) {
+  if (relativePath == null || relativePath.isEmpty) return '';
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath;
+  }
+  const baseUrl = 'http://103.191.92.29:8000';
+  return '$baseUrl$relativePath';
+}
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -51,34 +62,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeViewModelProvider);
+    print('HomeScreen: build() - isLoading: ${state.isLoading}, error: ${state.error}');
+    print('HomeScreen: build() - ibuHamil: ${state.ibuHamil?.namaLengkap ?? "null"}');
+    print('HomeScreen: build() - puskesmas: ${state.puskesmas?.name ?? "null"}');
+    
+    // Show error if any
+    if (state.error != null) {
+      print('HomeScreen: ERROR in state: ${state.error}');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${state.error}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      });
+    }
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Section
-              _buildHeader(state),
-              const SizedBox(height: 16),
-              // Countdown Card
-              _buildCountdownCard(state),
-              const SizedBox(height: 16),
-              // Low Risk Card
-              _buildRiskCard(state),
-              const SizedBox(height: 24),
-              // Metrik Kesehatan
-              _buildMetrikKesehatan(),
-              const SizedBox(height: 24),
-              // Puskesmas Anda
-              _buildPuskesmasSection(state),
-              const SizedBox(height: 24),
-              // Catatan Perawat
-              _buildCatatanPerawat(),
-              const SizedBox(height: 100), // Bottom padding for nav bar
-            ],
-          ),
-        ),
+        child: state.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Section
+                    _buildHeader(state),
+                    const SizedBox(height: 16),
+                    // Countdown Card
+                    _buildCountdownCard(state),
+                    const SizedBox(height: 16),
+                    // Low Risk Card
+                    _buildRiskCard(state),
+                    const SizedBox(height: 24),
+                    // Metrik Kesehatan
+                    _buildMetrikKesehatan(state),
+                    const SizedBox(height: 24),
+                    // Puskesmas Anda
+                    _buildPuskesmasSection(state),
+                    const SizedBox(height: 24),
+                    // Catatan Perawat
+                    _buildCatatanPerawat(),
+                    const SizedBox(height: 100), // Bottom padding for nav bar
+                  ],
+                ),
+              ),
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
@@ -108,16 +141,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.grey.shade300,
-              image: photo != null
-                  ? DecorationImage(
-                      image: NetworkImage(photo),
-                      fit: BoxFit.cover,
-                    )
-                  : const DecorationImage(
-                      image: AssetImage('assets/images/onboarding_pregnant_bg.png'),
-                      fit: BoxFit.cover,
-                    ),
             ),
+            child: photo != null && photo.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      _getImageUrl(photo),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey.shade300,
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : Container(
+                    color: Colors.grey.shade300,
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.grey,
+                      size: 30,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           // Name and week info
@@ -309,38 +358,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String title;
     String desc;
 
-    switch (risk) {
-      case 'rendah':
-        bg = const Color(0xFFE8F5F3);
-        iconBg = const Color(0xFFD1F2EB);
-        iconColor = const Color(0xFF27AE60);
-        icon = Icons.verified_user;
-        title = 'Risiko Rendah';
-        desc = 'Kondisi baik. Tetap jaga pola makan, istirahat, dan kontrol rutin.';
-        break;
-      case 'sedang':
-        bg = const Color(0xFFFFF4E5);
-        iconBg = const Color(0xFFFFE0B2);
-        iconColor = const Color(0xFFF57C00);
-        icon = Icons.warning_amber;
-        title = 'Risiko Sedang';
-        desc = 'Perlu perhatian. Ikuti arahan perawat dan pantau kondisi secara berkala.';
-        break;
-      case 'tinggi':
-        bg = const Color(0xFFFFEBEE);
-        iconBg = const Color(0xFFFFCDD2);
-        iconColor = const Color(0xFFC62828);
-        icon = Icons.dangerous;
-        title = 'Risiko Tinggi';
-        desc = 'Segera konsultasi dengan tenaga medis. Prioritaskan kunjungan ke fasilitas kesehatan.';
-        break;
-      default:
-        bg = const Color(0xFFE3F2FD);
-        iconBg = const Color(0xFFBBDEFB);
-        iconColor = const Color(0xFF1976D2);
-        icon = Icons.info_outline;
-        title = 'Menunggu Pemeriksaan';
-        desc = 'Risiko belum ditentukan. Silakan jadwalkan pemeriksaan dengan perawat.';
+    // Normalize risk level (handle both Indonesian and English)
+    final riskLower = risk?.toLowerCase() ?? '';
+    
+    if (riskLower == 'rendah' || riskLower == 'low') {
+      bg = const Color(0xFFE8F5F3);
+      iconBg = const Color(0xFFD1F2EB);
+      iconColor = const Color(0xFF27AE60);
+      icon = Icons.verified_user;
+      title = 'Risiko Rendah';
+      desc = 'Kondisi baik. Tetap jaga pola makan, istirahat, dan kontrol rutin.';
+    } else if (riskLower == 'sedang' || riskLower == 'normal' || riskLower == 'medium') {
+      bg = const Color(0xFFFFF4E5);
+      iconBg = const Color(0xFFFFE0B2);
+      iconColor = const Color(0xFFF57C00);
+      icon = Icons.warning_amber;
+      title = 'Risiko Sedang';
+      desc = 'Perlu perhatian. Ikuti arahan perawat dan pantau kondisi secara berkala.';
+    } else if (riskLower == 'tinggi' || riskLower == 'high') {
+      bg = const Color(0xFFFFEBEE);
+      iconBg = const Color(0xFFFFCDD2);
+      iconColor = const Color(0xFFC62828);
+      icon = Icons.dangerous;
+      title = 'Risiko Tinggi';
+      desc = 'Segera konsultasi dengan tenaga medis. Prioritaskan kunjungan ke fasilitas kesehatan.';
+    } else {
+      bg = const Color(0xFFE3F2FD);
+      iconBg = const Color(0xFFBBDEFB);
+      iconColor = const Color(0xFF1976D2);
+      icon = Icons.info_outline;
+      title = 'Menunggu Pemeriksaan';
+      desc = 'Risiko belum ditentukan. Silakan jadwalkan pemeriksaan dengan perawat.';
     }
 
     return Container(
@@ -402,7 +450,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildMetrikKesehatan() {
+  Widget _buildMetrikKesehatan(HomeState state) {
+    final healthRecord = state.latestHealthRecord;
+    final hasNoData = healthRecord == null;
+    
+    // Format last update time with better copywriting
+    String lastUpdateText = 'Belum ada data';
+    String lastUpdateDetail = '';
+    if (healthRecord?.checkupDate != null) {
+      final recordDate = healthRecord!.checkupDate;
+      final now = DateTime.now();
+      final difference = now.difference(recordDate);
+      
+      // Format date in Indonesian
+      final dateFormat = DateFormat('EEEE, dd MMMM yyyy', 'id_ID');
+      final timeFormat = DateFormat('HH:mm', 'id_ID');
+      final formattedDate = dateFormat.format(recordDate);
+      final formattedTime = timeFormat.format(recordDate);
+      
+      if (difference.inDays == 0) {
+        // Today
+        lastUpdateText = 'Pengecekan terakhir: Hari ini';
+        lastUpdateDetail = 'pada pukul $formattedTime';
+      } else if (difference.inDays == 1) {
+        // Yesterday
+        lastUpdateText = 'Pengecekan terakhir: Kemarin';
+        lastUpdateDetail = 'pada pukul $formattedTime';
+      } else if (difference.inDays < 7) {
+        // This week
+        lastUpdateText = 'Pengecekan terakhir: ${difference.inDays} hari lalu';
+        lastUpdateDetail = '$formattedDate, $formattedTime';
+      } else {
+        // Older
+        lastUpdateText = 'Pengecekan terakhir';
+        lastUpdateDetail = '$formattedDate, $formattedTime';
+      }
+    }
+    
+    // Get values from health record
+    final systolic = healthRecord?.bloodPressureSystolic;
+    final diastolic = healthRecord?.bloodPressureDiastolic;
+    final bloodPressureText = (systolic != null && diastolic != null)
+        ? '$systolic/$diastolic'
+        : '-';
+    
+    final bloodGlucose = healthRecord?.bloodGlucose;
+    final bloodGlucoseText = bloodGlucose != null
+        ? bloodGlucose.toStringAsFixed(0)
+        : '-';
+    
+    final bodyTemp = healthRecord?.bodyTemperature;
+    final bodyTempText = bodyTemp != null
+        ? bodyTemp.toStringAsFixed(1)
+        : '-';
+    
+    final heartRate = healthRecord?.heartRate;
+    final heartRateText = heartRate != null
+        ? heartRate.toString()
+        : '-';
+    
+    // Determine if values are normal (simplified logic)
+    final isBpNormal = systolic != null && diastolic != null &&
+        systolic >= 90 && systolic <= 140 &&
+        diastolic >= 60 && diastolic <= 90;
+    final isGlucoseNormal = bloodGlucose != null && bloodGlucose >= 70 && bloodGlucose <= 100;
+    final isTempNormal = bodyTemp != null && bodyTemp >= 36.0 && bodyTemp <= 37.5;
+    final isHrNormal = heartRate != null && heartRate >= 60 && heartRate <= 100;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -419,70 +533,177 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: AppColors.textDark,
                 ),
               ),
-              Text(
-                'Terakhir: Baru saja',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
+              if (!hasNoData)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      lastUpdateText,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (lastUpdateDetail.isNotEmpty)
+                      Text(
+                        lastUpdateDetail,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                  ],
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildMetricCard(
-                  icon: Icons.favorite,
-                  iconColor: const Color(0xFFFF6B6B),
-                  iconBgColor: const Color(0xFFFFE8E8),
-                  label: 'TEKANAN DARAH',
-                  value: '120/80',
-                  unit: 'mmHg',
-                  isNormal: true,
+          if (hasNoData)
+            _buildNoDataCard()
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.favorite,
+                    iconColor: const Color(0xFFFF6B6B),
+                    iconBgColor: const Color(0xFFFFE8E8),
+                    label: 'TEKANAN DARAH',
+                    value: bloodPressureText,
+                    unit: 'mmHg',
+                    isNormal: isBpNormal,
+                    hasData: systolic != null && diastolic != null,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  icon: Icons.water_drop,
-                  iconColor: const Color(0xFFFFB74D),
-                  iconBgColor: const Color(0xFFFFF4E6),
-                  label: 'GULA DARAH',
-                  value: '90',
-                  unit: 'mg/dL',
-                  isNormal: true,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.water_drop,
+                    iconColor: const Color(0xFFFFB74D),
+                    iconBgColor: const Color(0xFFFFF4E6),
+                    label: 'GULA DARAH',
+                    value: bloodGlucoseText,
+                    unit: 'mg/dL',
+                    isNormal: isGlucoseNormal,
+                    hasData: bloodGlucose != null,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.thermostat,
+                    iconColor: const Color(0xFF42A5F5),
+                    iconBgColor: const Color(0xFFE3F2FD),
+                    label: 'SUHU TUBUH',
+                    value: bodyTempText,
+                    unit: '°C',
+                    isNormal: isTempNormal,
+                    hasData: bodyTemp != null,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.monitor_heart,
+                    iconColor: const Color(0xFFAB47BC),
+                    iconBgColor: const Color(0xFFF3E5F5),
+                    label: 'DETAK JANTUNG',
+                    value: heartRateText,
+                    unit: 'bpm',
+                    isNormal: isHrNormal,
+                    hasData: heartRate != null,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoDataCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildMetricCard(
-                  icon: Icons.thermostat,
-                  iconColor: const Color(0xFF42A5F5),
-                  iconBgColor: const Color(0xFFE3F2FD),
-                  label: 'SUHU TUBUH',
-                  value: '37.0',
-                  unit: '°C',
-                  isNormal: true,
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.health_and_safety_outlined,
+              color: AppColors.primaryBlue,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Belum ada data health record',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Silakan lakukan pemeriksaan kesehatan terlebih dahulu untuk melihat metrik kesehatan Anda.',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRouter.monitor);
+              },
+              icon: const Icon(Icons.add_circle_outline, size: 18),
+              label: const Text(
+                'Tambah Data Kesehatan',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  icon: Icons.monitor_heart,
-                  iconColor: const Color(0xFFAB47BC),
-                  iconBgColor: const Color(0xFFF3E5F5),
-                  label: 'DETAK JANTUNG',
-                  value: '75',
-                  unit: 'bpm',
-                  isNormal: true,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -497,6 +718,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String value,
     required String unit,
     required bool isNormal,
+    bool hasData = true,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -529,16 +751,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   size: 20,
                 ),
               ),
-              if (isNormal)
+              if (hasData)
                 Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE8F5F3),
+                  decoration: BoxDecoration(
+                    color: isNormal
+                        ? const Color(0xFFE8F5F3)
+                        : const Color(0xFFFFEBEE),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Color(0xFF27AE60),
+                  child: Icon(
+                    isNormal ? Icons.check : Icons.warning,
+                    color: isNormal
+                        ? const Color(0xFF27AE60)
+                        : const Color(0xFFC62828),
                     size: 16,
                   ),
                 ),
@@ -625,20 +851,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFE3F2FD),
                         borderRadius: BorderRadius.circular(12),
-                        image: hasData && p.buildingPhotoUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(p.buildingPhotoUrl!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                       ),
-                      child: (!hasData || p.buildingPhotoUrl == null)
-                          ? const Icon(
+                      child: (hasData && p.buildingPhotoUrl != null && p.buildingPhotoUrl!.isNotEmpty)
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                _getImageUrl(p.buildingPhotoUrl),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.local_hospital,
+                                    color: AppColors.primaryBlue,
+                                    size: 28,
+                                  );
+                                },
+                              ),
+                            )
+                          : const Icon(
                               Icons.local_hospital,
                               color: AppColors.primaryBlue,
                               size: 28,
-                            )
-                          : null,
+                            ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -673,25 +906,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                size: 14,
-                                color: Colors.grey.shade500,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                hasData ? (p.phone ?? 'Telepon belum tersedia') : 'Memuat telepon...',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w600,
+                          if (hasData && p.phone != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.phone,
+                                  size: 14,
+                                  color: Colors.grey.shade500,
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  p.phone!,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

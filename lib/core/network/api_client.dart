@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 /// API base URL
 const String apiBaseUrl = 'http://103.191.92.29:8000/api/v1';
@@ -15,6 +16,23 @@ final dioProvider = Provider<Dio>((ref) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+      },
+    ),
+  );
+
+  // Add authentication interceptor to add token to all requests
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        // Get token from provider (reads latest value each time)
+        final token = ref.read(authTokenProvider);
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+          print('API: Adding Authorization header with token (length: ${token.length})');
+        } else {
+          print('API: WARNING - No token available for request to ${options.path}');
+        }
+        handler.next(options);
       },
     ),
   );
