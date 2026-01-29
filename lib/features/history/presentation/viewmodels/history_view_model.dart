@@ -34,6 +34,8 @@ class HistoryState {
 
 class HistoryViewModel extends StateNotifier<HistoryState> {
   final HistoryRemoteDataSource remote;
+  DateTime? _lastFetchDate;
+  int? _lastFetchIbuHamilId;
 
   HistoryViewModel({required this.remote}) : super(const HistoryState());
 
@@ -44,6 +46,11 @@ class HistoryViewModel extends StateNotifier<HistoryState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final resolvedId = ibuHamilId ?? await remote.getIbuHamilId();
+
+      // Store for refresh purposes
+      _lastFetchDate = checkupDate;
+      _lastFetchIbuHamilId = resolvedId;
+
       print(
         'HistoryViewModel: Fetching health records for ibuHamilId: $resolvedId, date: $checkupDate',
       );
@@ -72,5 +79,23 @@ class HistoryViewModel extends StateNotifier<HistoryState> {
         error: 'Terjadi kesalahan: ${e.toString()}',
       );
     }
+  }
+
+  /// Refresh health records for current selected date
+  Future<void> refreshHealthRecords() async {
+    if (_lastFetchDate == null || _lastFetchIbuHamilId == null) {
+      return; // No previous fetch to refresh
+    }
+    await fetchHealthRecordsByDate(
+      ibuHamilId: _lastFetchIbuHamilId,
+      checkupDate: _lastFetchDate!,
+    );
+  }
+
+  /// Invalidate cache (called when health record is created/updated)
+  void invalidateCache() {
+    _lastFetchDate = null;
+    _lastFetchIbuHamilId = null;
+    state = state.copyWith(recordsData: null, clearError: true);
   }
 }

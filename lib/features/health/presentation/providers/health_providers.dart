@@ -15,5 +15,8 @@ final createHealthRecordViewModelProvider =
     StateNotifierProvider.autoDispose<CreateHealthRecordViewModel,
         CreateHealthRecordState>((ref) {
   final remoteDataSource = ref.watch(healthRemoteDataSourceProvider);
-  return CreateHealthRecordViewModel(remoteDataSource: remoteDataSource);
+  return CreateHealthRecordViewModel(
+    remoteDataSource: remoteDataSource,
+    ref: ref,
+  );
 });

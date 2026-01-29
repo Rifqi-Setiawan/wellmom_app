@@ -219,17 +219,33 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   DateTime _selectedDate = DateTime.now();
   final PageController _entryPageController = PageController();
   int _entryPageIndex = 0;
+  late AppLifecycleListener _lifecycleListener;
 
   @override
   void initState() {
     super.initState();
     Future.microtask(_fetchData);
+
+    // Listen for app lifecycle changes
+    _lifecycleListener = AppLifecycleListener(
+      onResume: _handleAppResumed,
+    );
   }
 
   @override
   void dispose() {
     _entryPageController.dispose();
+    _lifecycleListener.dispose();
     super.dispose();
+  }
+
+  void _handleAppResumed() {
+    // Auto-refresh data when user returns to this screen
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _fetchData();
+      }
+    });
   }
 
   void _fetchData() {
@@ -710,8 +726,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: () =>
+            ref.read(historyViewModelProvider.notifier).refreshHealthRecords(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
@@ -820,6 +840,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             const SizedBox(height: 100),
           ],
         ),
+      ),
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,

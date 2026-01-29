@@ -3,6 +3,7 @@ import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/health/data/datasources/health_remote_datasource.dart';
 import 'package:wellmom_app/features/health/data/models/create_health_record_request_model.dart';
 import 'package:wellmom_app/features/health/data/models/health_record_model.dart';
+import 'package:wellmom_app/features/history/presentation/providers/history_providers.dart';
 
 class CreateHealthRecordState {
   final bool isLoading;
@@ -34,9 +35,13 @@ class CreateHealthRecordState {
 
 class CreateHealthRecordViewModel extends StateNotifier<CreateHealthRecordState> {
   final HealthRemoteDataSource remoteDataSource;
+  final Ref? ref;
 
-  CreateHealthRecordViewModel({required this.remoteDataSource})
-      : super(const CreateHealthRecordState());
+  CreateHealthRecordViewModel({
+    required this.remoteDataSource,
+    this.ref,
+  }) : super(const CreateHealthRecordState());
+
 
   Future<bool> createHealthRecord(
     CreateHealthRecordRequestModel request,
@@ -49,6 +54,12 @@ class CreateHealthRecordViewModel extends StateNotifier<CreateHealthRecordState>
         isLoading: false,
         createdRecord: record,
       );
+      
+      // Invalidate history cache to trigger refresh
+      if (ref != null) {
+        ref!.read(historyViewModelProvider.notifier).invalidateCache();
+      }
+      
       return true;
     } on Failure catch (e) {
       state = state.copyWith(
