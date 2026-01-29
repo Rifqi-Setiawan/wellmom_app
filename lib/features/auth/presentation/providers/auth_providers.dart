@@ -12,6 +12,9 @@ import 'package:wellmom_app/features/auth/presentation/viewmodels/medical_data_v
 import 'package:wellmom_app/features/auth/presentation/viewmodels/puskesmas_view_model.dart';
 import 'package:wellmom_app/features/auth/presentation/viewmodels/register_view_model.dart';
 
+/// Provider for storing ibu hamil id after login
+final ibuHamilIdProvider = StateProvider<int?>((ref) => null);
+
 /// Location service provider
 final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();

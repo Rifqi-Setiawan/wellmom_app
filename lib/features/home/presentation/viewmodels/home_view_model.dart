@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
 import 'package:wellmom_app/features/home/data/datasources/home_remote_datasource.dart';
+import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
+import 'package:wellmom_app/features/home/data/models/latest_perawat_notes_model.dart';
 import 'package:wellmom_app/features/home/data/models/puskesmas_detail_model.dart';
 import 'package:wellmom_app/features/health/data/models/health_record_model.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
@@ -11,6 +13,8 @@ class HomeState {
   final IbuHamilModel? ibuHamil;
   final PuskesmasDetailModel? puskesmas;
   final HealthRecordModel? latestHealthRecord;
+  final LatestPerawatNotesModel? latestPerawatNotes;
+  final IbuHamilPerawatModel? ibuHamilPerawat;
 
   const HomeState({
     this.isLoading = false,
@@ -18,6 +22,8 @@ class HomeState {
     this.ibuHamil,
     this.puskesmas,
     this.latestHealthRecord,
+    this.latestPerawatNotes,
+    this.ibuHamilPerawat,
   });
 
   HomeState copyWith({
@@ -27,6 +33,8 @@ class HomeState {
     IbuHamilModel? ibuHamil,
     PuskesmasDetailModel? puskesmas,
     HealthRecordModel? latestHealthRecord,
+    LatestPerawatNotesModel? latestPerawatNotes,
+    IbuHamilPerawatModel? ibuHamilPerawat,
   }) {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
@@ -34,6 +42,8 @@ class HomeState {
       ibuHamil: ibuHamil ?? this.ibuHamil,
       puskesmas: puskesmas ?? this.puskesmas,
       latestHealthRecord: latestHealthRecord ?? this.latestHealthRecord,
+      latestPerawatNotes: latestPerawatNotes ?? this.latestPerawatNotes,
+      ibuHamilPerawat: ibuHamilPerawat ?? this.ibuHamilPerawat,
     );
   }
 }
@@ -75,13 +85,31 @@ class HomeViewModel extends StateNotifier<HomeState> {
         // Silently fail - health records are optional
         latestHealthRecord = null;
       }
-      
+
+      // Fetch latest perawat notes for homepage
+      LatestPerawatNotesModel? latestPerawatNotes;
+      try {
+        latestPerawatNotes = await remote.getLatestPerawatNotes();
+      } catch (e) {
+        latestPerawatNotes = null;
+      }
+
+      // Fetch perawat info
+      IbuHamilPerawatModel? ibuHamilPerawat;
+      try {
+        ibuHamilPerawat = await remote.getIbuHamilPerawat();
+      } catch (e) {
+        ibuHamilPerawat = null;
+      }
+
       print('HomeViewModel: Updating state with all data...');
       state = state.copyWith(
         isLoading: false,
         ibuHamil: ibu,
         puskesmas: puskesmas,
         latestHealthRecord: latestHealthRecord,
+        latestPerawatNotes: latestPerawatNotes,
+        ibuHamilPerawat: ibuHamilPerawat,
       );
       print('HomeViewModel: State updated - ibuHamil: ${state.ibuHamil?.namaLengkap}, puskesmas: ${state.puskesmas?.name}');
     } on Failure catch (e) {

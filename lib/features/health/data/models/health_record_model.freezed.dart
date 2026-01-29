@@ -50,6 +50,8 @@ mixin _$HealthRecordModel {
   int? get fetalHeartRate => throw _privateConstructorUsedError;
   @JsonKey(name: 'fundal_height_cm')
   double? get fundalHeightCm => throw _privateConstructorUsedError;
+  @JsonKey(name: 'weight')
+  double? get weight => throw _privateConstructorUsedError;
   String? get complaints => throw _privateConstructorUsedError;
   @JsonKey(name: 'physical_examination')
   String? get physicalExamination => throw _privateConstructorUsedError;
@@ -105,6 +107,7 @@ abstract class $HealthRecordModelCopyWith<$Res> {
     @JsonKey(name: 'heart_rate') int? heartRate,
     @JsonKey(name: 'fetal_heart_rate') int? fetalHeartRate,
     @JsonKey(name: 'fundal_height_cm') double? fundalHeightCm,
+    @JsonKey(name: 'weight') double? weight,
     String? complaints,
     @JsonKey(name: 'physical_examination') String? physicalExamination,
     String? diagnosis,
@@ -151,6 +154,7 @@ class _$HealthRecordModelCopyWithImpl<$Res, $Val extends HealthRecordModel>
     Object? heartRate = freezed,
     Object? fetalHeartRate = freezed,
     Object? fundalHeightCm = freezed,
+    Object? weight = freezed,
     Object? complaints = freezed,
     Object? physicalExamination = freezed,
     Object? diagnosis = freezed,
@@ -226,6 +230,10 @@ class _$HealthRecordModelCopyWithImpl<$Res, $Val extends HealthRecordModel>
             fundalHeightCm: freezed == fundalHeightCm
                 ? _value.fundalHeightCm
                 : fundalHeightCm // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            weight: freezed == weight
+                ? _value.weight
+                : weight // ignore: cast_nullable_to_non_nullable
                       as double?,
             complaints: freezed == complaints
                 ? _value.complaints
@@ -310,6 +318,7 @@ abstract class _$$HealthRecordModelImplCopyWith<$Res>
     @JsonKey(name: 'heart_rate') int? heartRate,
     @JsonKey(name: 'fetal_heart_rate') int? fetalHeartRate,
     @JsonKey(name: 'fundal_height_cm') double? fundalHeightCm,
+    @JsonKey(name: 'weight') double? weight,
     String? complaints,
     @JsonKey(name: 'physical_examination') String? physicalExamination,
     String? diagnosis,
@@ -355,6 +364,7 @@ class __$$HealthRecordModelImplCopyWithImpl<$Res>
     Object? heartRate = freezed,
     Object? fetalHeartRate = freezed,
     Object? fundalHeightCm = freezed,
+    Object? weight = freezed,
     Object? complaints = freezed,
     Object? physicalExamination = freezed,
     Object? diagnosis = freezed,
@@ -430,6 +440,10 @@ class __$$HealthRecordModelImplCopyWithImpl<$Res>
         fundalHeightCm: freezed == fundalHeightCm
             ? _value.fundalHeightCm
             : fundalHeightCm // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        weight: freezed == weight
+            ? _value.weight
+            : weight // ignore: cast_nullable_to_non_nullable
                   as double?,
         complaints: freezed == complaints
             ? _value.complaints
@@ -507,6 +521,7 @@ class _$HealthRecordModelImpl implements _HealthRecordModel {
     @JsonKey(name: 'heart_rate') this.heartRate,
     @JsonKey(name: 'fetal_heart_rate') this.fetalHeartRate,
     @JsonKey(name: 'fundal_height_cm') this.fundalHeightCm,
+    @JsonKey(name: 'weight') this.weight,
     this.complaints,
     @JsonKey(name: 'physical_examination') this.physicalExamination,
     this.diagnosis,
@@ -572,6 +587,9 @@ class _$HealthRecordModelImpl implements _HealthRecordModel {
   @JsonKey(name: 'fundal_height_cm')
   final double? fundalHeightCm;
   @override
+  @JsonKey(name: 'weight')
+  final double? weight;
+  @override
   final String? complaints;
   @override
   @JsonKey(name: 'physical_examination')
@@ -608,7 +626,7 @@ class _$HealthRecordModelImpl implements _HealthRecordModel {
 
   @override
   String toString() {
-    return 'HealthRecordModel(id: $id, ibuHamilId: $ibuHamilId, perawatId: $perawatId, checkupDate: $checkupDate, checkupType: $checkupType, dataSource: $dataSource, gestationalAgeWeeks: $gestationalAgeWeeks, gestationalAgeDays: $gestationalAgeDays, bloodPressureSystolic: $bloodPressureSystolic, bloodPressureDiastolic: $bloodPressureDiastolic, bloodGlucose: $bloodGlucose, bodyTemperature: $bodyTemperature, heartRate: $heartRate, fetalHeartRate: $fetalHeartRate, fundalHeightCm: $fundalHeightCm, complaints: $complaints, physicalExamination: $physicalExamination, diagnosis: $diagnosis, treatmentPlan: $treatmentPlan, medications: $medications, supplements: $supplements, referralNeeded: $referralNeeded, referralNotes: $referralNotes, nextCheckupDate: $nextCheckupDate, nextCheckupNotes: $nextCheckupNotes, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'HealthRecordModel(id: $id, ibuHamilId: $ibuHamilId, perawatId: $perawatId, checkupDate: $checkupDate, checkupType: $checkupType, dataSource: $dataSource, gestationalAgeWeeks: $gestationalAgeWeeks, gestationalAgeDays: $gestationalAgeDays, bloodPressureSystolic: $bloodPressureSystolic, bloodPressureDiastolic: $bloodPressureDiastolic, bloodGlucose: $bloodGlucose, bodyTemperature: $bodyTemperature, heartRate: $heartRate, fetalHeartRate: $fetalHeartRate, fundalHeightCm: $fundalHeightCm, weight: $weight, complaints: $complaints, physicalExamination: $physicalExamination, diagnosis: $diagnosis, treatmentPlan: $treatmentPlan, medications: $medications, supplements: $supplements, referralNeeded: $referralNeeded, referralNotes: $referralNotes, nextCheckupDate: $nextCheckupDate, nextCheckupNotes: $nextCheckupNotes, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -645,6 +663,7 @@ class _$HealthRecordModelImpl implements _HealthRecordModel {
                 other.fetalHeartRate == fetalHeartRate) &&
             (identical(other.fundalHeightCm, fundalHeightCm) ||
                 other.fundalHeightCm == fundalHeightCm) &&
+            (identical(other.weight, weight) || other.weight == weight) &&
             (identical(other.complaints, complaints) ||
                 other.complaints == complaints) &&
             (identical(other.physicalExamination, physicalExamination) ||
@@ -691,6 +710,7 @@ class _$HealthRecordModelImpl implements _HealthRecordModel {
     heartRate,
     fetalHeartRate,
     fundalHeightCm,
+    weight,
     complaints,
     physicalExamination,
     diagnosis,
@@ -741,6 +761,7 @@ abstract class _HealthRecordModel implements HealthRecordModel {
     @JsonKey(name: 'heart_rate') final int? heartRate,
     @JsonKey(name: 'fetal_heart_rate') final int? fetalHeartRate,
     @JsonKey(name: 'fundal_height_cm') final double? fundalHeightCm,
+    @JsonKey(name: 'weight') final double? weight,
     final String? complaints,
     @JsonKey(name: 'physical_examination') final String? physicalExamination,
     final String? diagnosis,
@@ -803,6 +824,9 @@ abstract class _HealthRecordModel implements HealthRecordModel {
   @override
   @JsonKey(name: 'fundal_height_cm')
   double? get fundalHeightCm;
+  @override
+  @JsonKey(name: 'weight')
+  double? get weight;
   @override
   String? get complaints;
   @override

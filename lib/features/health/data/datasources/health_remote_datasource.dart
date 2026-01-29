@@ -13,7 +13,7 @@ class HealthRemoteDataSource {
   ) async {
     try {
       final response = await dio.post(
-        '/health-records/',
+        '/health-records/self',
         data: request.toJson(),
       );
 

@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
+import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
+import 'package:wellmom_app/features/home/data/models/latest_perawat_notes_model.dart';
 import 'package:wellmom_app/features/home/data/models/puskesmas_detail_model.dart';
 import 'package:wellmom_app/features/health/data/models/health_record_model.dart';
-import 'package:wellmom_app/core/models/location.dart';
 
 class HomeRemoteDataSource {
   final Dio dio;
@@ -148,6 +149,46 @@ class HomeRemoteDataSource {
       return null;
     } catch (e) {
       // Silently fail - health metrics are optional
+      return null;
+    }
+  }
+
+  Future<LatestPerawatNotesModel?> getLatestPerawatNotes() async {
+    try {
+      final response = await dio.get('/ibu-hamil/me/latest-perawat-notes');
+
+      if (response.data is! Map) {
+        return null;
+      }
+
+      final data = Map<String, dynamic>.from(response.data as Map);
+      return LatestPerawatNotesModel.fromJson(data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<IbuHamilPerawatModel?> getIbuHamilPerawat() async {
+    try {
+      final response = await dio.get('/ibu-hamil/me/perawat');
+
+      if (response.data is! Map) {
+        return null;
+      }
+
+      final data = Map<String, dynamic>.from(response.data as Map);
+      return IbuHamilPerawatModel.fromJson(data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      return null;
+    } catch (e) {
       return null;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/theme/app_theme.dart';
@@ -7,6 +8,7 @@ import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_prov
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   runApp(const ProviderScope(child: MyApp()));
 }
 

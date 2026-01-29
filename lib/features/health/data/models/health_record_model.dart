@@ -26,6 +26,7 @@ class HealthRecordModel with _$HealthRecordModel {
     @JsonKey(name: 'heart_rate') int? heartRate,
     @JsonKey(name: 'fetal_heart_rate') int? fetalHeartRate,
     @JsonKey(name: 'fundal_height_cm') double? fundalHeightCm,
+    @JsonKey(name: 'weight') double? weight,
     String? complaints,
     @JsonKey(name: 'physical_examination') String? physicalExamination,
     String? diagnosis,

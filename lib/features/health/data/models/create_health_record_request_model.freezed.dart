@@ -32,10 +32,10 @@ mixin _$CreateHealthRecordRequestModel {
   @JsonKey(name: 'body_temperature')
   double get bodyTemperature => throw _privateConstructorUsedError;
   @JsonKey(name: 'checked_by')
-  String? get checkedBy => throw _privateConstructorUsedError;
+  String get checkedBy => throw _privateConstructorUsedError;
   @JsonKey(name: 'checkup_date')
   String get checkupDate => throw _privateConstructorUsedError;
-  String? get complaints => throw _privateConstructorUsedError;
+  String get complaints => throw _privateConstructorUsedError;
   @JsonKey(name: 'fetal_heart_rate')
   int? get fetalHeartRate => throw _privateConstructorUsedError;
   @JsonKey(name: 'fundal_height')
@@ -47,8 +47,6 @@ mixin _$CreateHealthRecordRequestModel {
   @JsonKey(name: 'heart_rate')
   int get heartRate => throw _privateConstructorUsedError;
   double? get hemoglobin => throw _privateConstructorUsedError;
-  @JsonKey(name: 'ibu_hamil_id')
-  int get ibuHamilId => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   @JsonKey(name: 'perawat_id')
   int? get perawatId => throw _privateConstructorUsedError;
@@ -84,16 +82,15 @@ abstract class $CreateHealthRecordRequestModelCopyWith<$Res> {
     @JsonKey(name: 'blood_pressure_diastolic') int bloodPressureDiastolic,
     @JsonKey(name: 'blood_pressure_systolic') int bloodPressureSystolic,
     @JsonKey(name: 'body_temperature') double bodyTemperature,
-    @JsonKey(name: 'checked_by') String? checkedBy,
+    @JsonKey(name: 'checked_by') String checkedBy,
     @JsonKey(name: 'checkup_date') String checkupDate,
-    String? complaints,
+    String complaints,
     @JsonKey(name: 'fetal_heart_rate') int? fetalHeartRate,
     @JsonKey(name: 'fundal_height') double? fundalHeight,
     @JsonKey(name: 'gestational_age_days') int? gestationalAgeDays,
     @JsonKey(name: 'gestational_age_weeks') int? gestationalAgeWeeks,
     @JsonKey(name: 'heart_rate') int heartRate,
     double? hemoglobin,
-    @JsonKey(name: 'ibu_hamil_id') int ibuHamilId,
     String? notes,
     @JsonKey(name: 'perawat_id') int? perawatId,
     @JsonKey(name: 'protein_urin') String? proteinUrin,
@@ -124,16 +121,15 @@ class _$CreateHealthRecordRequestModelCopyWithImpl<
     Object? bloodPressureDiastolic = null,
     Object? bloodPressureSystolic = null,
     Object? bodyTemperature = null,
-    Object? checkedBy = freezed,
+    Object? checkedBy = null,
     Object? checkupDate = null,
-    Object? complaints = freezed,
+    Object? complaints = null,
     Object? fetalHeartRate = freezed,
     Object? fundalHeight = freezed,
     Object? gestationalAgeDays = freezed,
     Object? gestationalAgeWeeks = freezed,
     Object? heartRate = null,
     Object? hemoglobin = freezed,
-    Object? ibuHamilId = null,
     Object? notes = freezed,
     Object? perawatId = freezed,
     Object? proteinUrin = freezed,
@@ -158,18 +154,18 @@ class _$CreateHealthRecordRequestModelCopyWithImpl<
                 ? _value.bodyTemperature
                 : bodyTemperature // ignore: cast_nullable_to_non_nullable
                       as double,
-            checkedBy: freezed == checkedBy
+            checkedBy: null == checkedBy
                 ? _value.checkedBy
                 : checkedBy // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as String,
             checkupDate: null == checkupDate
                 ? _value.checkupDate
                 : checkupDate // ignore: cast_nullable_to_non_nullable
                       as String,
-            complaints: freezed == complaints
+            complaints: null == complaints
                 ? _value.complaints
                 : complaints // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as String,
             fetalHeartRate: freezed == fetalHeartRate
                 ? _value.fetalHeartRate
                 : fetalHeartRate // ignore: cast_nullable_to_non_nullable
@@ -194,10 +190,6 @@ class _$CreateHealthRecordRequestModelCopyWithImpl<
                 ? _value.hemoglobin
                 : hemoglobin // ignore: cast_nullable_to_non_nullable
                       as double?,
-            ibuHamilId: null == ibuHamilId
-                ? _value.ibuHamilId
-                : ibuHamilId // ignore: cast_nullable_to_non_nullable
-                      as int,
             notes: freezed == notes
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
@@ -238,16 +230,15 @@ abstract class _$$CreateHealthRecordRequestModelImplCopyWith<$Res>
     @JsonKey(name: 'blood_pressure_diastolic') int bloodPressureDiastolic,
     @JsonKey(name: 'blood_pressure_systolic') int bloodPressureSystolic,
     @JsonKey(name: 'body_temperature') double bodyTemperature,
-    @JsonKey(name: 'checked_by') String? checkedBy,
+    @JsonKey(name: 'checked_by') String checkedBy,
     @JsonKey(name: 'checkup_date') String checkupDate,
-    String? complaints,
+    String complaints,
     @JsonKey(name: 'fetal_heart_rate') int? fetalHeartRate,
     @JsonKey(name: 'fundal_height') double? fundalHeight,
     @JsonKey(name: 'gestational_age_days') int? gestationalAgeDays,
     @JsonKey(name: 'gestational_age_weeks') int? gestationalAgeWeeks,
     @JsonKey(name: 'heart_rate') int heartRate,
     double? hemoglobin,
-    @JsonKey(name: 'ibu_hamil_id') int ibuHamilId,
     String? notes,
     @JsonKey(name: 'perawat_id') int? perawatId,
     @JsonKey(name: 'protein_urin') String? proteinUrin,
@@ -278,16 +269,15 @@ class __$$CreateHealthRecordRequestModelImplCopyWithImpl<$Res>
     Object? bloodPressureDiastolic = null,
     Object? bloodPressureSystolic = null,
     Object? bodyTemperature = null,
-    Object? checkedBy = freezed,
+    Object? checkedBy = null,
     Object? checkupDate = null,
-    Object? complaints = freezed,
+    Object? complaints = null,
     Object? fetalHeartRate = freezed,
     Object? fundalHeight = freezed,
     Object? gestationalAgeDays = freezed,
     Object? gestationalAgeWeeks = freezed,
     Object? heartRate = null,
     Object? hemoglobin = freezed,
-    Object? ibuHamilId = null,
     Object? notes = freezed,
     Object? perawatId = freezed,
     Object? proteinUrin = freezed,
@@ -312,18 +302,18 @@ class __$$CreateHealthRecordRequestModelImplCopyWithImpl<$Res>
             ? _value.bodyTemperature
             : bodyTemperature // ignore: cast_nullable_to_non_nullable
                   as double,
-        checkedBy: freezed == checkedBy
+        checkedBy: null == checkedBy
             ? _value.checkedBy
             : checkedBy // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
         checkupDate: null == checkupDate
             ? _value.checkupDate
             : checkupDate // ignore: cast_nullable_to_non_nullable
                   as String,
-        complaints: freezed == complaints
+        complaints: null == complaints
             ? _value.complaints
             : complaints // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
         fetalHeartRate: freezed == fetalHeartRate
             ? _value.fetalHeartRate
             : fetalHeartRate // ignore: cast_nullable_to_non_nullable
@@ -348,10 +338,6 @@ class __$$CreateHealthRecordRequestModelImplCopyWithImpl<$Res>
             ? _value.hemoglobin
             : hemoglobin // ignore: cast_nullable_to_non_nullable
                   as double?,
-        ibuHamilId: null == ibuHamilId
-            ? _value.ibuHamilId
-            : ibuHamilId // ignore: cast_nullable_to_non_nullable
-                  as int,
         notes: freezed == notes
             ? _value.notes
             : notes // ignore: cast_nullable_to_non_nullable
@@ -388,16 +374,15 @@ class _$CreateHealthRecordRequestModelImpl
     @JsonKey(name: 'blood_pressure_systolic')
     required this.bloodPressureSystolic,
     @JsonKey(name: 'body_temperature') required this.bodyTemperature,
-    @JsonKey(name: 'checked_by') this.checkedBy,
+    @JsonKey(name: 'checked_by') required this.checkedBy,
     @JsonKey(name: 'checkup_date') required this.checkupDate,
-    this.complaints,
+    required this.complaints,
     @JsonKey(name: 'fetal_heart_rate') this.fetalHeartRate,
     @JsonKey(name: 'fundal_height') this.fundalHeight,
     @JsonKey(name: 'gestational_age_days') this.gestationalAgeDays,
     @JsonKey(name: 'gestational_age_weeks') this.gestationalAgeWeeks,
     @JsonKey(name: 'heart_rate') required this.heartRate,
     this.hemoglobin,
-    @JsonKey(name: 'ibu_hamil_id') required this.ibuHamilId,
     this.notes,
     @JsonKey(name: 'perawat_id') this.perawatId,
     @JsonKey(name: 'protein_urin') this.proteinUrin,
@@ -423,12 +408,12 @@ class _$CreateHealthRecordRequestModelImpl
   final double bodyTemperature;
   @override
   @JsonKey(name: 'checked_by')
-  final String? checkedBy;
+  final String checkedBy;
   @override
   @JsonKey(name: 'checkup_date')
   final String checkupDate;
   @override
-  final String? complaints;
+  final String complaints;
   @override
   @JsonKey(name: 'fetal_heart_rate')
   final int? fetalHeartRate;
@@ -447,9 +432,6 @@ class _$CreateHealthRecordRequestModelImpl
   @override
   final double? hemoglobin;
   @override
-  @JsonKey(name: 'ibu_hamil_id')
-  final int ibuHamilId;
-  @override
   final String? notes;
   @override
   @JsonKey(name: 'perawat_id')
@@ -465,7 +447,7 @@ class _$CreateHealthRecordRequestModelImpl
 
   @override
   String toString() {
-    return 'CreateHealthRecordRequestModel(bloodGlucose: $bloodGlucose, bloodPressureDiastolic: $bloodPressureDiastolic, bloodPressureSystolic: $bloodPressureSystolic, bodyTemperature: $bodyTemperature, checkedBy: $checkedBy, checkupDate: $checkupDate, complaints: $complaints, fetalHeartRate: $fetalHeartRate, fundalHeight: $fundalHeight, gestationalAgeDays: $gestationalAgeDays, gestationalAgeWeeks: $gestationalAgeWeeks, heartRate: $heartRate, hemoglobin: $hemoglobin, ibuHamilId: $ibuHamilId, notes: $notes, perawatId: $perawatId, proteinUrin: $proteinUrin, upperArmCircumference: $upperArmCircumference, weight: $weight)';
+    return 'CreateHealthRecordRequestModel(bloodGlucose: $bloodGlucose, bloodPressureDiastolic: $bloodPressureDiastolic, bloodPressureSystolic: $bloodPressureSystolic, bodyTemperature: $bodyTemperature, checkedBy: $checkedBy, checkupDate: $checkupDate, complaints: $complaints, fetalHeartRate: $fetalHeartRate, fundalHeight: $fundalHeight, gestationalAgeDays: $gestationalAgeDays, gestationalAgeWeeks: $gestationalAgeWeeks, heartRate: $heartRate, hemoglobin: $hemoglobin, notes: $notes, perawatId: $perawatId, proteinUrin: $proteinUrin, upperArmCircumference: $upperArmCircumference, weight: $weight)';
   }
 
   @override
@@ -499,8 +481,6 @@ class _$CreateHealthRecordRequestModelImpl
                 other.heartRate == heartRate) &&
             (identical(other.hemoglobin, hemoglobin) ||
                 other.hemoglobin == hemoglobin) &&
-            (identical(other.ibuHamilId, ibuHamilId) ||
-                other.ibuHamilId == ibuHamilId) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.perawatId, perawatId) ||
                 other.perawatId == perawatId) &&
@@ -513,7 +493,7 @@ class _$CreateHealthRecordRequestModelImpl
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hashAll([
+  int get hashCode => Object.hash(
     runtimeType,
     bloodGlucose,
     bloodPressureDiastolic,
@@ -528,13 +508,12 @@ class _$CreateHealthRecordRequestModelImpl
     gestationalAgeWeeks,
     heartRate,
     hemoglobin,
-    ibuHamilId,
     notes,
     perawatId,
     proteinUrin,
     upperArmCircumference,
     weight,
-  ]);
+  );
 
   /// Create a copy of CreateHealthRecordRequestModel
   /// with the given fields replaced by the non-null parameter values.
@@ -564,16 +543,15 @@ abstract class _CreateHealthRecordRequestModel
     @JsonKey(name: 'blood_pressure_systolic')
     required final int bloodPressureSystolic,
     @JsonKey(name: 'body_temperature') required final double bodyTemperature,
-    @JsonKey(name: 'checked_by') final String? checkedBy,
+    @JsonKey(name: 'checked_by') required final String checkedBy,
     @JsonKey(name: 'checkup_date') required final String checkupDate,
-    final String? complaints,
+    required final String complaints,
     @JsonKey(name: 'fetal_heart_rate') final int? fetalHeartRate,
     @JsonKey(name: 'fundal_height') final double? fundalHeight,
     @JsonKey(name: 'gestational_age_days') final int? gestationalAgeDays,
     @JsonKey(name: 'gestational_age_weeks') final int? gestationalAgeWeeks,
     @JsonKey(name: 'heart_rate') required final int heartRate,
     final double? hemoglobin,
-    @JsonKey(name: 'ibu_hamil_id') required final int ibuHamilId,
     final String? notes,
     @JsonKey(name: 'perawat_id') final int? perawatId,
     @JsonKey(name: 'protein_urin') final String? proteinUrin,
@@ -599,12 +577,12 @@ abstract class _CreateHealthRecordRequestModel
   double get bodyTemperature;
   @override
   @JsonKey(name: 'checked_by')
-  String? get checkedBy;
+  String get checkedBy;
   @override
   @JsonKey(name: 'checkup_date')
   String get checkupDate;
   @override
-  String? get complaints;
+  String get complaints;
   @override
   @JsonKey(name: 'fetal_heart_rate')
   int? get fetalHeartRate;
@@ -622,9 +600,6 @@ abstract class _CreateHealthRecordRequestModel
   int get heartRate;
   @override
   double? get hemoglobin;
-  @override
-  @JsonKey(name: 'ibu_hamil_id')
-  int get ibuHamilId;
   @override
   String? get notes;
   @override

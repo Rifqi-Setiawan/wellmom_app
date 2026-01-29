@@ -6,6 +6,7 @@ import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
+import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
 import 'package:wellmom_app/features/home/data/models/puskesmas_detail_model.dart';
 import 'package:wellmom_app/features/home/presentation/viewmodels/home_view_model.dart';
 
@@ -107,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _buildPuskesmasSection(state),
                     const SizedBox(height: 24),
                     // Catatan Perawat
-                    _buildCatatanPerawat(),
+                    _buildCatatanPerawat(state),
                     const SizedBox(height: 100), // Bottom padding for nav bar
                   ],
                 ),
@@ -494,10 +495,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ? '$systolic/$diastolic'
         : '-';
     
-    final bloodGlucose = healthRecord?.bloodGlucose;
-    final bloodGlucoseText = bloodGlucose != null
-        ? bloodGlucose.toStringAsFixed(0)
-        : '-';
+    final weight = healthRecord?.weight;
+    final weightText = weight != null
+      ? weight.toStringAsFixed(1)
+      : '-';
     
     final bodyTemp = healthRecord?.bodyTemperature;
     final bodyTempText = bodyTemp != null
@@ -513,7 +514,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isBpNormal = systolic != null && diastolic != null &&
         systolic >= 90 && systolic <= 140 &&
         diastolic >= 60 && diastolic <= 90;
-    final isGlucoseNormal = bloodGlucose != null && bloodGlucose >= 70 && bloodGlucose <= 100;
+    final isWeightNormal = weight != null;
     final isTempNormal = bodyTemp != null && bodyTemp >= 36.0 && bodyTemp <= 37.5;
     final isHrNormal = heartRate != null && heartRate >= 60 && heartRate <= 100;
     
@@ -578,14 +579,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildMetricCard(
-                    icon: Icons.water_drop,
+                    icon: Icons.monitor_weight,
                     iconColor: const Color(0xFFFFB74D),
                     iconBgColor: const Color(0xFFFFF4E6),
-                    label: 'GULA DARAH',
-                    value: bloodGlucoseText,
-                    unit: 'mg/dL',
-                    isNormal: isGlucoseNormal,
-                    hasData: bloodGlucose != null,
+                    label: 'BERAT BADAN',
+                    value: weightText,
+                    unit: 'kg',
+                    isNormal: isWeightNormal,
+                    hasData: weight != null,
                   ),
                 ),
               ],
@@ -969,7 +970,223 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildCatatanPerawat() {
+  Widget _buildCatatanPerawat(HomeState state) {
+    final notesData = state.latestPerawatNotes;
+    final perawatData = state.ibuHamilPerawat;
+    
+    final hasPerawat = perawatData?.hasPerawat == true && perawatData?.perawat != null;
+    final hasNotes = notesData?.hasNotes == true &&
+        (notesData?.notes?.trim().isNotEmpty ?? false);
+
+    // If no perawat and no notes - show CTA to find perawat
+    if (!hasPerawat && !hasNotes) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Catatan Perawat',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.person_add_outlined,
+                      color: AppColors.primaryBlue,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Belum Ada Perawat Pendamping',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Dapatkan seorang perawat profesional untuk mendampingi perjalanan kehamilan Anda.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade700,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.add_circle_outline, size: 18),
+                      label: const Text(
+                        'Cari Perawat Sekarang',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // If no perawat but has notes - show notes without perawat info
+    if (!hasPerawat && hasNotes) {
+      final labelText = _getNoteLabel(notesData!.checkupDate);
+      final notesText = notesData.notes!;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Catatan Perawat',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      labelText,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryBlue,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '"$notesText"',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade800,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.person_add_outlined, size: 18),
+                      label: const Text(
+                        'Temukan Perawat Pendamping',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primaryBlue,
+                        side: const BorderSide(
+                          color: AppColors.primaryBlue,
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // If has perawat (and may or may not have notes)
+    final perawat = perawatData!.perawat!;
+    final puskesmasName = (perawatData.puskesmas?['name'] as String?)
+        ?.toUpperCase() ?? 'Puskesmas';
+    final labelText = hasNotes ? _getNoteLabel(notesData?.checkupDate) : 'TIDAK ADA CATATAN TERBARU';
+    final notesText = hasNotes
+        ? notesData!.notes!
+        : 'Belum ada catatan dari perawat. ${perawat.namaLengkap} akan menambahkan catatan setelah pemeriksaan berikutnya.';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -1002,25 +1219,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Row(
                   children: [
+                    // Perawat Avatar
                     Container(
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.grey.shade300,
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/onboarding_pregnant_bg.png'),
-                          fit: BoxFit.cover,
-                        ),
                       ),
+                      child: perawat.profilePhotoUrl != null && 
+                              perawat.profilePhotoUrl!.isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                _getImageUrl(perawat.profilePhotoUrl),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(
+                                      Icons.person,
+                                      color: Colors.grey,
+                                      size: 30,
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          : Container(
+                              color: Colors.grey.shade300,
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                                size: 30,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Sarah',
+                          Text(
+                            perawat.namaLengkap,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -1029,7 +1269,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'PUSKESMAS MELATI',
+                            puskesmasName,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -1049,8 +1289,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         color: const Color(0xFFE3F2FD),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'CATATAN HARI INI',
+                      child: Text(
+                        labelText,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -1069,7 +1309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '"Ibu Jessica, jangan lupa hitung gerakan janin setiap pagi ya. Normalnya ada 10 gerakan dalam 2 jam. Tetap jaga pola makan dan istirahat yang cukup."',
+                    '"$notesText"',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade800,
@@ -1081,10 +1321,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: hasNotes ? () => _contactPerawat(perawat) : null,
                     icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                    label: const Text(
-                      'Hubungi Bidan Sarah',
+                    label: Text(
+                      'Hubungi ${perawat.namaLengkap.split(' ').first}',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -1107,6 +1347,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String _getNoteLabel(DateTime? checkupDate) {
+    if (checkupDate == null) return 'CATATAN TERBARU';
+    
+    final recordDate = checkupDate;
+    final today = DateTime.now();
+    final isToday = recordDate.year == today.year &&
+        recordDate.month == today.month &&
+        recordDate.day == today.day;
+    
+    if (isToday) {
+      return 'CATATAN HARI INI';
+    } else {
+      final formatted = DateFormat('dd MMM yyyy', 'id_ID').format(recordDate);
+      return 'CATATAN ${formatted.toUpperCase()}';
+    }
+  }
+
+  void _contactPerawat(PerawatModel perawat) {
+    // TODO: Implement contact functionality (WhatsApp, call, etc.)
+    print('Contacting perawat: ${perawat.namaLengkap}, Phone: ${perawat.nomorHp}');
   }
 
   int _getTrimester(int? week) {

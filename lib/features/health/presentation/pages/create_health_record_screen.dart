@@ -7,7 +7,6 @@ import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/health/data/models/create_health_record_request_model.dart';
 import 'package:wellmom_app/features/health/presentation/providers/health_providers.dart';
-import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
 
 class CreateHealthRecordScreen extends ConsumerStatefulWidget {
   const CreateHealthRecordScreen({super.key});
@@ -76,13 +75,6 @@ class _CreateHealthRecordScreenState
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final homeState = ref.read(homeViewModelProvider);
-    final ibuHamil = homeState.ibuHamil;
-    if (ibuHamil == null) {
-      ErrorSnackbar.show(context, 'Gagal mendapatkan data ibu hamil');
-      return;
-    }
-
     final now = DateTime.now();
     final checkupDate = DateFormat('yyyy-MM-dd').format(now);
 
@@ -93,11 +85,9 @@ class _CreateHealthRecordScreenState
       bloodPressureDiastolic: int.parse(_diastolicController.text),
       bloodPressureSystolic: int.parse(_systolicController.text),
       bodyTemperature: double.parse(_bodyTemperatureController.text),
-      checkedBy: 'ibu_hamil',
+      checkedBy: 'mandiri',
       checkupDate: checkupDate,
-      complaints: _complaintsController.text.trim().isEmpty
-          ? null
-          : _complaintsController.text.trim(),
+      complaints: _complaintsController.text.trim(),
       fetalHeartRate: _fetalHeartRateController.text.isNotEmpty
           ? int.tryParse(_fetalHeartRateController.text)
           : null,
@@ -110,7 +100,6 @@ class _CreateHealthRecordScreenState
       hemoglobin: _hemoglobinController.text.isNotEmpty
           ? double.tryParse(_hemoglobinController.text)
           : null,
-      ibuHamilId: ibuHamil.id,
       notes: null,
       perawatId: null,
       proteinUrin: _proteinUrinController.text.trim().isEmpty
@@ -408,7 +397,7 @@ class _CreateHealthRecordScreenState
         ),
         const SizedBox(height: 8),
         Text(
-          'Masukkan keluhan yang Anda rasakan (opsional)',
+          'Masukkan keluhan yang Anda rasakan',
           style: TextStyle(
             fontSize: 14,
             color: AppColors.textLight,
@@ -416,11 +405,17 @@ class _CreateHealthRecordScreenState
         ),
         const SizedBox(height: 24),
         CustomTextField(
-          label: 'Keluhan',
+          label: 'Keluhan *',
           hintText: 'Contoh: Pusing, mual, atau tidak ada keluhan',
           controller: _complaintsController,
           maxLines: 5,
           keyboardType: TextInputType.multiline,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Keluhan harus diisi';
+            }
+            return null;
+          },
         ),
       ],
     );

@@ -1,590 +1,15 @@
+/*
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
-import 'package:intl/intl.dart';
-import 'dart:math' as math;
-
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
-
-  @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
-}
-
-class _HistoryScreenState extends State<HistoryScreen> {
-  int _currentIndex = 1;
-  DateTime _selectedDate = DateTime.now();
-  String _selectedCategory = 'BP'; // BP, Sugar, Temp, HR
-
-  // Dummy data for chart
-  final List<double> _bpSystolicData = [118, 125, 120, 130, 115, 128, 120];
-  final List<double> _sugarData = [85, 92, 88, 95, 87, 90, 90];
-  final List<double> _tempData = [36.2, 36.5, 36.8, 36.4, 36.7, 36.3, 36.5];
-  final List<double> _hrData = [72, 78, 75, 80, 73, 76, 75];
-
-  // Get Monday of the week containing the selected date
-  DateTime _getMondayOfWeek(DateTime date) {
-    // weekday: 1 = Monday, 7 = Sunday
-    int daysToSubtract = date.weekday - 1;
-    return DateTime(date.year, date.month, date.day - daysToSubtract);
-  }
-
-  // Get list of dates for the week (Monday to Sunday)
-  List<DateTime> _getWeekDates() {
-    DateTime monday = _getMondayOfWeek(_selectedDate);
-    return List.generate(7, (index) => monday.add(Duration(days: index)));
-  }
-
-  void _onNavTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.of(context).pushReplacementNamed(AppRouter.home);
-        break;
-      case 1:
-        // Already on history
-        break;
-      case 2:
-        Navigator.of(context).pushReplacementNamed(AppRouter.monitor);
-        break;
-      case 3:
-        Navigator.of(context).pushReplacementNamed(AppRouter.konsul);
-        break;
-      case 4:
-        Navigator.of(context).pushReplacementNamed(AppRouter.profile);
-        break;
-    }
-  }
-
-  List<double> _getChartData() {
-    switch (_selectedCategory) {
-      case 'Sugar':
-        return _sugarData;
-      case 'Temp':
-        return _tempData;
-      case 'HR':
-        return _hrData;
-      default:
-        return _bpSystolicData;
-    }
-  }
-
-  String _getCurrentValue() {
-    switch (_selectedCategory) {
-      case 'Sugar':
-        return '90';
-      case 'Temp':
-        return '36.5';
-      case 'HR':
-        return '75';
-      default:
-        return '120/80';
-    }
-  }
-
-  String _getCategoryTitle() {
-    switch (_selectedCategory) {
-      case 'Sugar':
-        return 'GULA DARAH';
-      case 'Temp':
-        return 'SUHU TUBUH';
-      case 'HR':
-        return 'DETAK JANTUNG';
-      default:
-        return 'TEKANAN DARAH';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Riwayat Kesehatan',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Calendar Section
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                children: [
-                  // Month selector with navigation arrows
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Previous week button
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left, color: AppColors.textDark),
-                        onPressed: () {
-                          setState(() {
-                            _selectedDate = _selectedDate.subtract(const Duration(days: 7));
-                          });
-                        },
-                      ),
-                      // Month and year display
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            DateFormat('MMMM yyyy').format(_selectedDate),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Next week button
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right, color: AppColors.textDark),
-                        onPressed: () {
-                          setState(() {
-                            _selectedDate = _selectedDate.add(const Duration(days: 7));
-                          });
-                        },
-                      ),
-                      // Calendar button
-                      TextButton(
-                        onPressed: () {
-                          // Show calendar dialog
-                          showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          ).then((date) {
-                            if (date != null) {
-                              setState(() {
-                                _selectedDate = date;
-                              });
-                            }
-                          });
-                        },
-                        child: const Text(
-                          'KALENDER',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryBlue,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Week days
-                  _buildWeekDays(),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Metrics Cards
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricSmallCard(
-                      icon: Icons.water_drop,
-                      iconColor: const Color(0xFF42A5F5),
-                      iconBgColor: const Color(0xFFE3F2FD),
-                      label: 'Tekanan Darah',
-                      value: '120/80',
-                      unit: 'mmHg',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildMetricSmallCard(
-                      icon: Icons.water_drop,
-                      iconColor: const Color(0xFF4CAF50),
-                      iconBgColor: const Color(0xFFE8F5E9),
-                      label: 'Gula Darah',
-                      value: '90',
-                      unit: 'mg/dL',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricSmallCard(
-                      icon: Icons.thermostat,
-                      iconColor: const Color(0xFFFF9800),
-                      iconBgColor: const Color(0xFFFFF3E0),
-                      label: 'Suhu Tubuh',
-                      value: '36.5',
-                      unit: '°C',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildMetricSmallCard(
-                      icon: Icons.favorite,
-                      iconColor: const Color(0xFFE91E63),
-                      iconBgColor: const Color(0xFFFCE4EC),
-                      label: 'Detak Jantung',
-                      value: '75',
-                      unit: 'bpm',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Category Tabs
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  _buildCategoryTab('BP'),
-                  _buildCategoryTab('Sugar'),
-                  _buildCategoryTab('Temp'),
-                  _buildCategoryTab('HR'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Chart Section
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'TREN ${_getCategoryTitle()}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                _getCurrentValue(),
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.textDark,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE8F5E9),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  '↑2%',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF4CAF50),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '7 Hari Terakhir',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Chart
-                  SizedBox(
-                    height: 150,
-                    child: _buildChart(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // History Entries
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Riwayat Entry',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Lihat Semua',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Entry List
-            _buildEntryItem(
-              icon: Icons.water_drop,
-              iconColor: const Color(0xFF42A5F5),
-              iconBgColor: const Color(0xFFE3F2FD),
-              value: '122/81',
-              unit: 'mmHg',
-              time: 'Hari ini, 09:41 AM',
-              status: 'NORMAL',
-              statusColor: const Color(0xFF4CAF50),
-            ),
-            _buildEntryItem(
-              icon: Icons.water_drop,
-              iconColor: const Color(0xFF42A5F5),
-              iconBgColor: const Color(0xFFE3F2FD),
-              value: '125/85',
-              unit: 'mmHg',
-              time: 'Kemarin, 10:15 AM',
-              status: 'WASPADA',
-              statusColor: const Color(0xFFFFA726),
-            ),
-            const SizedBox(height: 100),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
-      ),
-    );
-  }
-
-  Widget _buildWeekDays() {
-    final weekDates = _getWeekDates();
-    final days = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'];
-    final today = DateTime.now();
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(7, (index) {
-        final date = weekDates[index];
-        final isSelected = date.year == _selectedDate.year &&
-            date.month == _selectedDate.month &&
-            date.day == _selectedDate.day;
-        final isToday = date.year == today.year &&
-            date.month == today.month &&
-            date.day == today.day;
-
-        return Expanded(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedDate = date;
-              });
-            },
-            child: Column(
-              children: [
-                Text(
-                  days[index],
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-                    shape: BoxShape.circle,
-                    border: isToday && !isSelected
-                        ? Border.all(
-                            color: AppColors.primaryBlue,
-                            width: 2,
-                          )
-                        : !isSelected
-                            ? Border.all(
-                                color: Colors.grey.shade300,
-                                width: 1,
-                              )
-                            : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${date.day}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.white : AppColors.textDark,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildMetricSmallCard({
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-    required String label,
-    required String value,
-    required String unit,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFE8E8),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'TAMBAH',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFFFF6B6B),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  unit,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/history/data/models/health_records_response_model.dart';
+import 'package:wellmom_app/features/history/presentation/providers/history_providers.dart';
+import 'package:wellmom_app/features/history/presentation/viewmodels/history_view_model.dart';
+        : '${void _formatNumber(record.weight, fractionDigits = 1)} kg';
+    return records.first.heartRate?.toString() ?? '-';
   }
 
   Widget _buildCategoryTab(String category) {
@@ -599,12 +24,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-                width: 3,
+                color: isSelected ? AppColors.primaryBlue : Colors.grey.shade200,
+                width: isSelected ? 3 : 1,
               ),
             ),
           ),
@@ -612,9 +37,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: isSelected ? AppColors.primaryBlue : Colors.grey.shade500,
+                letterSpacing: 0.3,
               ),
             ),
           ),
@@ -768,69 +194,704 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 }
+*/
 
-// Custom painter for the chart
-class ChartPainter extends CustomPainter {
-  final List<double> data;
-  final double maxValue;
-  final double minValue;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:wellmom_app/core/constants/app_colors.dart';
+import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
+import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/history/data/models/health_records_response_model.dart';
+import 'package:wellmom_app/features/history/presentation/providers/history_providers.dart';
+import 'package:wellmom_app/features/history/presentation/viewmodels/history_view_model.dart';
 
-  ChartPainter({
-    required this.data,
-    required this.maxValue,
-    required this.minValue,
-  });
+class HistoryScreen extends ConsumerStatefulWidget {
+  const HistoryScreen({super.key});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primaryBlue
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
 
-    final path = Path();
-    final pointSpacing = size.width / (data.length - 1);
-    final range = maxValue - minValue;
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  int _currentIndex = 1;
+  DateTime _selectedDate = DateTime.now();
+  final PageController _entryPageController = PageController();
+  int _entryPageIndex = 0;
 
-    for (int i = 0; i < data.length; i++) {
-      final x = i * pointSpacing;
-      final normalizedValue = (data[i] - minValue) / range;
-      final y = size.height - (normalizedValue * size.height);
-
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        // Create smooth curve
-        final previousX = (i - 1) * pointSpacing;
-        final previousNormalizedValue = (data[i - 1] - minValue) / range;
-        final previousY = size.height - (previousNormalizedValue * size.height);
-        
-        final controlPointX1 = previousX + pointSpacing / 3;
-        final controlPointY1 = previousY;
-        final controlPointX2 = x - pointSpacing / 3;
-        final controlPointY2 = y;
-        
-        path.cubicTo(
-          controlPointX1, controlPointY1,
-          controlPointX2, controlPointY2,
-          x, y,
-        );
-      }
-
-      // Draw point
-      canvas.drawCircle(
-        Offset(x, y),
-        4,
-        Paint()
-          ..color = AppColors.primaryBlue
-          ..style = PaintingStyle.fill,
-      );
-    }
-
-    canvas.drawPath(path, paint);
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_fetchData);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  void dispose() {
+    _entryPageController.dispose();
+    super.dispose();
+  }
+
+  void _fetchData() {
+    final ibuHamilId = ref.read(ibuHamilIdProvider);
+    ref.read(historyViewModelProvider.notifier).fetchHealthRecordsByDate(
+      ibuHamilId: ibuHamilId,
+      checkupDate: _selectedDate,
+    );
+  }
+
+  DateTime _getMondayOfWeek(DateTime date) {
+    int daysToSubtract = date.weekday - 1;
+    return DateTime(date.year, date.month, date.day - daysToSubtract);
+  }
+
+  List<DateTime> _getWeekDates() {
+    DateTime monday = _getMondayOfWeek(_selectedDate);
+    return List.generate(7, (index) => monday.add(Duration(days: index)));
+  }
+
+  void _onNavTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.of(context).pushReplacementNamed(AppRouter.home);
+        break;
+      case 1:
+        break;
+      case 2:
+        Navigator.of(context).pushReplacementNamed(AppRouter.monitor);
+        break;
+      case 3:
+        Navigator.of(context).pushReplacementNamed(AppRouter.konsul);
+        break;
+      case 4:
+        Navigator.of(context).pushReplacementNamed(AppRouter.profile);
+        break;
+    }
+  }
+
+  double _getRecordCardHeight() {
+    final height = MediaQuery.of(context).size.height * 0.72;
+    return height.clamp(520.0, 760.0).toDouble();
+  }
+
+  String _formatDateString(String dateStr) {
+    final parsed = DateTime.tryParse(dateStr);
+    if (parsed == null) return dateStr;
+    return DateFormat('dd MMM yyyy', 'id_ID').format(parsed.toLocal());
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(dateTime.toLocal());
+  }
+
+  String _formatNumber(num? value, {int fractionDigits = 1}) {
+    if (value == null) return '-';
+    return value.toDouble().toStringAsFixed(fractionDigits);
+  }
+
+  String _formatText(String? value) {
+    if (value == null || value.trim().isEmpty) return '-';
+    return value;
+  }
+
+  Widget _buildHistoryEntryList(HistoryState historyState) {
+    final records = historyState.recordsData?.records ?? [];
+    if (records.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Text(
+          'Belum ada data pemeriksaan di tanggal ini.',
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      );
+    }
+
+    if (records.length == 1) {
+      return _buildRecordDetailsCard(records.first);
+    }
+
+    final cardHeight = _getRecordCardHeight();
+    return Column(
+      children: [
+        SizedBox(
+          height: cardHeight,
+          child: PageView.builder(
+            controller: _entryPageController,
+            onPageChanged: (index) {
+              setState(() {
+                _entryPageIndex = index;
+              });
+            },
+            itemCount: records.length,
+            itemBuilder: (context, index) {
+              return _buildRecordDetailsCard(records[index]);
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(records.length, (index) {
+            final isActive = index == _entryPageIndex;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: isActive ? 18 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: isActive ? AppColors.primaryBlue : Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecordDetailsCard(HealthRecordByDateModel record) {
+    final bloodPressure = record.bloodPressureSystolic != null &&
+            record.bloodPressureDiastolic != null
+        ? '${record.bloodPressureSystolic}/${record.bloodPressureDiastolic} mmHg'
+        : '-';
+    final bloodGlucose = record.bloodGlucose == null
+        ? '-'
+        : '${_formatNumber(record.bloodGlucose, fractionDigits: 0)} mg/dL';
+    final bodyTemperature = record.bodyTemperature == null
+        ? '-'
+        : '${_formatNumber(record.bodyTemperature, fractionDigits: 1)} °C';
+    final heartRate = record.heartRate == null ? '-' : '${record.heartRate} bpm';
+    final fetalHeartRate =
+        record.fetalHeartRate == null ? '-' : '${record.fetalHeartRate} bpm';
+    final fundalHeight = record.fundalHeight == null
+        ? '-'
+        : '${_formatNumber(record.fundalHeight, fractionDigits: 1)} cm';
+    final upperArmCircumference = record.upperArmCircumference == null
+        ? '-'
+        : '${_formatNumber(record.upperArmCircumference, fractionDigits: 1)} cm';
+    final weight = record.weight == null
+        ? '-'
+        : '${_formatNumber(record.weight, fractionDigits: 1)} kg';
+    final hemoglobin = record.hemoglobin == null
+        ? '-'
+        : '${_formatText(record.hemoglobin)} g/dL';
+    final gestationalAge = record.gestationalAgeWeeks == null &&
+            record.gestationalAgeDays == null
+        ? '-'
+        : '${record.gestationalAgeWeeks ?? 0} minggu ${record.gestationalAgeDays ?? 0} hari';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pemeriksaan ${_formatDateString(record.checkupDate)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDateTime(record.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'TERCATAT',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildDetailSection(
+            'Informasi Pemeriksaan',
+            [
+              _buildDetailRow(
+                icon: Icons.event,
+                label: 'Tanggal Pemeriksaan',
+                value: _formatDateString(record.checkupDate),
+                iconColor: const Color(0xFF42A5F5),
+                iconBgColor: const Color(0xFFE3F2FD),
+              ),
+              _buildDetailRow(
+                icon: Icons.badge,
+                label: 'Diperiksa Oleh',
+                value: _formatText(record.checkedBy),
+                iconColor: const Color(0xFF7E57C2),
+                iconBgColor: const Color(0xFFEDE7F6),
+              ),
+              _buildDetailRow(
+                icon: Icons.confirmation_number,
+                label: 'ID Pemeriksaan',
+                value: record.id.toString(),
+                iconColor: const Color(0xFF616161),
+                iconBgColor: const Color(0xFFF5F5F5),
+              ),
+              _buildDetailRow(
+                icon: Icons.person,
+                label: 'ID Ibu Hamil',
+                value: record.ibuHamilId.toString(),
+                iconColor: const Color(0xFF26A69A),
+                iconBgColor: const Color(0xFFE0F2F1),
+              ),
+              _buildDetailRow(
+                icon: Icons.medical_services,
+                label: 'ID Perawat',
+                value: record.perawatId?.toString() ?? '-',
+                iconColor: const Color(0xFFEF5350),
+                iconBgColor: const Color(0xFFFFEBEE),
+              ),
+              _buildDetailRow(
+                icon: Icons.schedule,
+                label: 'Dibuat',
+                value: _formatDateTime(record.createdAt),
+                iconColor: const Color(0xFF5C6BC0),
+                iconBgColor: const Color(0xFFE8EAF6),
+              ),
+              _buildDetailRow(
+                icon: Icons.update,
+                label: 'Diperbarui',
+                value: _formatDateTime(record.updatedAt),
+                iconColor: const Color(0xFF26C6DA),
+                iconBgColor: const Color(0xFFE0F7FA),
+              ),
+            ],
+          ),
+          _buildDetailSection(
+            'Parameter Kesehatan',
+            [
+              _buildDetailRow(
+                icon: Icons.monitor_heart,
+                label: 'Tekanan Darah',
+                value: bloodPressure,
+                iconColor: const Color(0xFFE53935),
+                iconBgColor: const Color(0xFFFFEBEE),
+              ),
+              _buildDetailRow(
+                icon: Icons.water_drop,
+                label: 'Gula Darah',
+                value: bloodGlucose,
+                iconColor: const Color(0xFF43A047),
+                iconBgColor: const Color(0xFFE8F5E9),
+              ),
+              _buildDetailRow(
+                icon: Icons.thermostat,
+                label: 'Suhu Tubuh',
+                value: bodyTemperature,
+                iconColor: const Color(0xFFFB8C00),
+                iconBgColor: const Color(0xFFFFF3E0),
+              ),
+              _buildDetailRow(
+                icon: Icons.favorite,
+                label: 'Detak Jantung',
+                value: heartRate,
+                iconColor: const Color(0xFFE91E63),
+                iconBgColor: const Color(0xFFFCE4EC),
+              ),
+              _buildDetailRow(
+                icon: Icons.child_friendly,
+                label: 'Denyut Jantung Janin',
+                value: fetalHeartRate,
+                iconColor: const Color(0xFFEC407A),
+                iconBgColor: const Color(0xFFFCE4EC),
+              ),
+              _buildDetailRow(
+                icon: Icons.height,
+                label: 'Tinggi Fundus',
+                value: fundalHeight,
+                iconColor: const Color(0xFF5C6BC0),
+                iconBgColor: const Color(0xFFE8EAF6),
+              ),
+              _buildDetailRow(
+                icon: Icons.fitness_center,
+                label: 'Lingkar Lengan Atas',
+                value: upperArmCircumference,
+                iconColor: const Color(0xFF00897B),
+                iconBgColor: const Color(0xFFE0F2F1),
+              ),
+              _buildDetailRow(
+                icon: Icons.monitor_weight,
+                label: 'Berat Badan',
+                value: weight,
+                iconColor: const Color(0xFF8D6E63),
+                iconBgColor: const Color(0xFFEFEBE9),
+              ),
+              _buildDetailRow(
+                icon: Icons.bloodtype,
+                label: 'Hemoglobin',
+                value: hemoglobin,
+                iconColor: const Color(0xFFD32F2F),
+                iconBgColor: const Color(0xFFFFEBEE),
+              ),
+              _buildDetailRow(
+                icon: Icons.science,
+                label: 'Protein Urin',
+                value: _formatText(record.proteinUrin),
+                iconColor: const Color(0xFF7E57C2),
+                iconBgColor: const Color(0xFFEDE7F6),
+              ),
+              _buildDetailRow(
+                icon: Icons.calendar_month,
+                label: 'Usia Kehamilan',
+                value: gestationalAge,
+                iconColor: const Color(0xFF1E88E5),
+                iconBgColor: const Color(0xFFE3F2FD),
+              ),
+            ],
+          ),
+          _buildDetailSection(
+            'Keluhan & Catatan',
+            [
+              _buildDetailRow(
+                icon: Icons.report_problem,
+                label: 'Keluhan',
+                value: _formatText(record.complaints),
+                iconColor: const Color(0xFFFFA726),
+                iconBgColor: const Color(0xFFFFF3E0),
+              ),
+              _buildDetailRow(
+                icon: Icons.sticky_note_2,
+                label: 'Catatan',
+                value: _formatText(record.notes),
+                iconColor: const Color(0xFF607D8B),
+                iconBgColor: const Color(0xFFECEFF1),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(String title, List<Widget> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ..._withDividers(items),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  List<Widget> _withDividers(List<Widget> items) {
+    final widgets = <Widget>[];
+    for (int i = 0; i < items.length; i++) {
+      widgets.add(items[i]);
+      if (i != items.length - 1) {
+        widgets.add(Divider(color: Colors.grey.shade200, height: 16));
+      }
+    }
+    return widgets;
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color iconColor,
+    required Color iconBgColor,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor, size: 18),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final historyState = ref.watch(historyViewModelProvider);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Riwayat Kesehatan',
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat('MMMM yyyy').format(_selectedDate),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate,
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2030),
+                            ).then((date) {
+                              if (date != null) {
+                                setState(() {
+                                  _selectedDate = date;
+                                });
+                                _fetchData();
+                              }
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.calendar_today,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          label: const Text(
+                            'KALENDER',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildWeekDays(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: const Text(
+                'Detail Pemeriksaan',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (historyState.isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (historyState.error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Text(
+                  'Ibu hamil tidak melakukan pengecekan pada hari itu.',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            else
+              _buildHistoryEntryList(historyState),
+            const SizedBox(height: 100),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavTap,
+      ),
+    );
+  }
+
+  Widget _buildWeekDays() {
+    final weekDates = _getWeekDates();
+    final days = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'];
+    final today = DateTime.now();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(7, (index) {
+        final date = weekDates[index];
+        final isSelected = date.year == _selectedDate.year &&
+            date.month == _selectedDate.month &&
+            date.day == _selectedDate.day;
+        final isToday = date.year == today.year &&
+            date.month == today.month &&
+            date.day == today.day;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedDate = date;
+              });
+              _fetchData();
+            },
+            child: Column(
+              children: [
+                Text(
+                  days[index],
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primaryBlue : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: isToday && !isSelected
+                        ? Border.all(color: AppColors.primaryBlue, width: 2)
+                        : !isSelected
+                            ? Border.all(color: Colors.grey.shade200, width: 1)
+                            : null,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : AppColors.textDark,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
 }

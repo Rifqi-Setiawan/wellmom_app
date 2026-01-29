@@ -49,6 +49,8 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
           // Save token to provider first (this always works)
           final token = state.loginResponse!.accessToken;
           ref.read(authTokenProvider.notifier).state = token;
+            ref.read(ibuHamilIdProvider.notifier).state =
+              state.loginResponse!.ibuHamilId;
           
           // Try to save token to storage (may fail if plugin not initialized)
           try {
