@@ -455,34 +455,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final healthRecord = state.latestHealthRecord;
     final hasNoData = healthRecord == null;
     
-    // Format last update time with better copywriting
+    // Format last update time from created_at (waktu record disimpan) agar sesuai data backend
     String lastUpdateText = 'Belum ada data';
     String lastUpdateDetail = '';
-    if (healthRecord?.checkupDate != null) {
-      final recordDate = healthRecord!.checkupDate;
+    if (healthRecord?.createdAt != null) {
+      final recordTime = healthRecord!.createdAt.toLocal();
       final now = DateTime.now();
-      final difference = now.difference(recordDate);
+      final difference = now.difference(recordTime);
       
-      // Format date in Indonesian
       final dateFormat = DateFormat('EEEE, dd MMMM yyyy', 'id_ID');
       final timeFormat = DateFormat('HH:mm', 'id_ID');
-      final formattedDate = dateFormat.format(recordDate);
-      final formattedTime = timeFormat.format(recordDate);
+      final formattedDate = dateFormat.format(recordTime);
+      final formattedTime = timeFormat.format(recordTime);
       
       if (difference.inDays == 0) {
-        // Today
         lastUpdateText = 'Pengecekan terakhir: Hari ini';
         lastUpdateDetail = 'pada pukul $formattedTime';
       } else if (difference.inDays == 1) {
-        // Yesterday
         lastUpdateText = 'Pengecekan terakhir: Kemarin';
         lastUpdateDetail = 'pada pukul $formattedTime';
       } else if (difference.inDays < 7) {
-        // This week
         lastUpdateText = 'Pengecekan terakhir: ${difference.inDays} hari lalu';
         lastUpdateDetail = '$formattedDate, $formattedTime';
       } else {
-        // Older
         lastUpdateText = 'Pengecekan terakhir';
         lastUpdateDetail = '$formattedDate, $formattedTime';
       }

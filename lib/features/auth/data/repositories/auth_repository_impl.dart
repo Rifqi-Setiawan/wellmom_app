@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:wellmom_app/features/auth/data/datasources/puskesmas_remote_datasource.dart';
@@ -65,6 +67,18 @@ class AuthRepositoryImpl implements AuthRepository {
       // TODO: Implement Google Sign-In token retrieval
       // For now, this is a placeholder
       throw const ServerFailure('Google login not implemented yet');
+    } on Failure catch (e) {
+      return Either.left(e);
+    } catch (e) {
+      return Either.left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadIbuHamilProfilePhoto(File file) async {
+    try {
+      final response = await remoteDataSource.uploadIbuHamilProfilePhoto(file);
+      return Either.right(response.filePath);
     } on Failure catch (e) {
       return Either.left(e);
     } catch (e) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
 import 'package:wellmom_app/features/auth/domain/entities/login_response_entity.dart';
@@ -19,6 +21,9 @@ abstract class AuthRepository {
   /// Register ibu hamil with complete data
   /// Returns [RegisterIbuHamilResponseEntity] containing ibu_hamil, user, and access_token
   Future<Either<Failure, RegisterIbuHamilResponseEntity>> registerIbuHamil(RegisterIbuHamilRequestModel request);
+
+  /// Upload profile photo (public, for registration). Returns file_path on success.
+  Future<Either<Failure, String>> uploadIbuHamilProfilePhoto(File file);
   
   /// Assign ibu hamil to puskesmas
   /// [accessToken] is required for authentication from registration response

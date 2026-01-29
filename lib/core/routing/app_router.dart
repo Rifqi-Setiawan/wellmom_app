@@ -13,6 +13,10 @@ import 'package:wellmom_app/features/home/presentation/pages/home_screen.dart';
 import 'package:wellmom_app/features/konsul/presentation/pages/konsul_screen.dart';
 import 'package:wellmom_app/features/monitor/presentation/pages/monitor_screen.dart';
 import 'package:wellmom_app/features/onboarding/welcome_screen.dart';
+import 'package:wellmom_app/features/kerabat/presentation/pages/complete_profile_kerabat_screen.dart';
+import 'package:wellmom_app/features/kerabat/presentation/pages/kerabat_home_screen.dart';
+import 'package:wellmom_app/features/kerabat/presentation/pages/login_kerabat_screen.dart';
+import 'package:wellmom_app/features/kerabat/presentation/pages/undang_kerabat_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/profile_screen.dart';
 
 /// App routing configuration
@@ -37,6 +41,12 @@ class AppRouter {
   static const String forum = '/forum';
   static const String forumPostDetail = '/forum-post-detail';
   static const String forumReply = '/forum-reply';
+
+  // Kerabat (Undang Kerabat, Login Kerabat, Complete Profile, Kerabat Home)
+  static const String undangKerabat = '/undang-kerabat';
+  static const String loginKerabat = '/login-kerabat';
+  static const String completeProfileKerabat = '/complete-profile-kerabat';
+  static const String kerabatHome = '/kerabat-home';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -132,6 +142,26 @@ class AppRouter {
         }
         return MaterialPageRoute(
           builder: (_) => ForumReplyScreen(postId: postId),
+          settings: settings,
+        );
+      case undangKerabat:
+        return MaterialPageRoute(
+          builder: (_) => const UndangKerabatScreen(),
+          settings: settings,
+        );
+      case loginKerabat:
+        return MaterialPageRoute(
+          builder: (_) => const LoginKerabatScreen(),
+          settings: settings,
+        );
+      case completeProfileKerabat:
+        return MaterialPageRoute(
+          builder: (_) => const CompleteProfileKerabatScreen(),
+          settings: settings,
+        );
+      case kerabatHome:
+        return MaterialPageRoute(
+          builder: (_) => const KerabatHomeScreen(),
           settings: settings,
         );
       default:

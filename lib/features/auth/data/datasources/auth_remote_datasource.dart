@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
+import 'package:wellmom_app/core/models/upload_profile_photo_response.dart';
 import 'package:wellmom_app/features/auth/data/models/login_response_model.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_response_model.dart';
@@ -11,6 +14,8 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> login(String email, String password);
   Future<UserModel> loginWithGoogle(String token);
   Future<RegisterIbuHamilResponseModel> registerIbuHamil(RegisterIbuHamilRequestModel request);
+  /// Upload profile photo (public, no auth) - for registration.
+  Future<UploadProfilePhotoResponse> uploadIbuHamilProfilePhoto(File file);
 }
 
 /// Implementation of AuthRemoteDataSource
@@ -199,6 +204,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (e is Failure) {
         rethrow;
       }
+      throw UnknownFailure('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<UploadProfilePhotoResponse> uploadIbuHamilProfilePhoto(File file) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split(RegExp(r'[/\\]')).last,
+        ),
+      });
+      final response = await dio.post(
+        '/upload/ibu-hamil/profile-photo',
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+      if (response.data is! Map) {
+        throw ServerFailure('Format respons upload tidak valid');
+      }
+      return UploadProfilePhotoResponse.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final detail = e.response?.data?['detail'] ?? e.response?.data?['message'];
+        throw ServerFailure(
+          detail?.toString() ?? 'Upload foto gagal',
+        );
+      }
+      throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');
+    } catch (e) {
+      if (e is Failure) rethrow;
       throw UnknownFailure('Terjadi kesalahan: ${e.toString()}');
     }
   }

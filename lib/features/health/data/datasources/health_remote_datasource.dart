@@ -21,9 +21,34 @@ class HealthRemoteDataSource {
         throw ServerFailure('Format respons tidak valid');
       }
 
-      return HealthRecordModel.fromJson(
-        Map<String, dynamic>.from(response.data as Map),
-      );
+      final data = Map<String, dynamic>.from(response.data as Map);
+
+      // Backend may return null or omit checkup_type/data_source; model expects non-null String
+      if (data['checkup_type'] == null || data['checkup_type'].toString().isEmpty) {
+        data['checkup_type'] = 'ad-hoc';
+      }
+      if (data['data_source'] == null || data['data_source'].toString().isEmpty) {
+        final checkedBy = data['checked_by'];
+        if (checkedBy != null &&
+            checkedBy.toString().toLowerCase().contains('iot')) {
+          data['data_source'] = 'iot_device';
+        } else {
+          data['data_source'] = 'manual';
+        }
+      }
+
+      // Ensure DateTime strings exist for required fields (backend might omit)
+      if (data['checkup_date'] == null) {
+        data['checkup_date'] = DateTime.now().toIso8601String();
+      }
+      if (data['created_at'] == null) {
+        data['created_at'] = DateTime.now().toIso8601String();
+      }
+      if (data['updated_at'] == null) {
+        data['updated_at'] = DateTime.now().toIso8601String();
+      }
+
+      return HealthRecordModel.fromJson(data);
     } on DioException catch (e) {
       if (e.response != null) {
         final errorData = e.response?.data;

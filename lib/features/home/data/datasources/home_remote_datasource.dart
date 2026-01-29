@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
+import 'package:wellmom_app/core/models/upload_profile_photo_response.dart';
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
 import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
 import 'package:wellmom_app/features/home/data/models/latest_perawat_notes_model.dart';
@@ -190,6 +193,45 @@ class HomeRemoteDataSource {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Update profile photo (authenticated). PUT /upload/ibu-hamil/{ibu_hamil_id}/profile-photo
+  Future<UploadProfilePhotoResponse> updateIbuHamilProfilePhoto(
+    int ibuHamilId,
+    File file,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split(RegExp(r'[/\\]')).last,
+        ),
+      });
+      final response = await dio.put(
+        '/upload/ibu-hamil/$ibuHamilId/profile-photo',
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+      if (response.data is! Map) {
+        throw ServerFailure('Format respons upload tidak valid');
+      }
+      return UploadProfilePhotoResponse.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final detail = e.response?.data?['detail'] ?? e.response?.data?['message'];
+        throw ServerFailure(
+          detail?.toString() ?? 'Update foto gagal',
+        );
+      }
+      throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');
+    } catch (e) {
+      if (e is Failure) rethrow;
+      throw UnknownFailure('Terjadi kesalahan: ${e.toString()}');
     }
   }
 }

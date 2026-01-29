@@ -1,21 +1,37 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/utils/profile_photo_validator.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
+import 'package:wellmom_app/core/errors/failures.dart';
+import 'package:wellmom_app/core/widgets/error_snackbar.dart';
+import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
 
-class ProfileScreen extends StatefulWidget {
+/// Base URL for profile/image assets (API host without /api/v1).
+String _profileImageUrl(String? relativePath) {
+  if (relativePath == null || relativePath.isEmpty) return '';
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath;
+  }
+  const base = 'http://103.191.92.29:8000';
+  return '$base$relativePath';
+}
+
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   int _currentIndex = 4;
-
-  // TODO: Get from login response or user state
-  final String userName = 'Aarushi Sharma';
-  final String userEmail = 'aarushi.sharma@email.com';
+  bool _isUpdatingPhoto = false;
 
   void _onNavTap(int index) {
     setState(() {
@@ -38,6 +54,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case 4:
         // Already on profile
         break;
+    }
+  }
+
+  Future<void> _pickAndUpdateProfilePhoto(int ibuHamilId) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      imageQuality: 85,
+    );
+    if (picked == null || !mounted) return;
+
+    final file = File(picked.path);
+    final validationError = ProfilePhotoValidator.validateFile(
+      file.path,
+      await file.length(),
+    );
+    if (validationError != null) {
+      if (mounted) ErrorSnackbar.show(context, validationError);
+      return;
+    }
+
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => _ProfilePhotoPreviewDialog(file: file),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isUpdatingPhoto = true);
+    try {
+      final ds = ref.read(homeRemoteDataSourceProvider);
+      await ds.updateIbuHamilProfilePhoto(ibuHamilId, file);
+      ref.invalidate(ibuHamilMeProvider);
+      if (mounted) {
+        ErrorSnackbar.showSuccess(context, 'Foto profil berhasil diperbarui');
+      }
+    } catch (e) {
+      if (mounted) {
+        final message = e is Failure
+            ? e.message
+            : e.toString().replaceFirst('Exception: ', '');
+        ErrorSnackbar.show(context, message);
+      }
+    } finally {
+      if (mounted) setState(() => _isUpdatingPhoto = false);
     }
   }
 
@@ -152,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     iconBgColor: const Color(0xFFE3F2FD),
                     title: 'Undang Kerabat',
                     onTap: () {
-                      // TODO: Navigate to invite relative
+                      Navigator.of(context).pushNamed(AppRouter.undangKerabat);
                     },
                     isLast: true,
                   ),
@@ -282,9 +344,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserProfileSection() {
+    final ibuAsync = ref.watch(ibuHamilMeProvider);
+    final loginState = ref.watch(loginViewModelProvider);
+    final email = loginState.loginResponse?.email;
+
+    return ibuAsync.when(
+      loading: () => _buildProfilePlaceholder(isLoading: true),
+      error: (_, __) => _buildProfilePlaceholder(
+        name: 'Ibu Hamil',
+        email: email,
+      ),
+      data: (ibu) {
+        final name = ibu?.namaLengkap ?? 'Ibu Hamil';
+        final photoUrl = ibu?.profilePhotoUrl;
+        final ibuHamilId = ibu?.id;
+        return _buildProfileContent(
+          name: name,
+          email: email,
+          profilePhotoUrl: photoUrl,
+          onEditPhotoTap: ibuHamilId != null
+              ? () => _pickAndUpdateProfilePhoto(ibuHamilId)
+              : null,
+          isUpdatingPhoto: _isUpdatingPhoto,
+        );
+      },
+    );
+  }
+
+  Widget _buildProfilePlaceholder({
+    bool isLoading = false,
+    String? name,
+    String? email,
+  }) {
     return Column(
       children: [
-        // Avatar with edit icon
         Stack(
           children: [
             Container(
@@ -292,37 +385,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey.shade100,
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/onboarding_pregnant_bg.png'),
-                  fit: BoxFit.cover,
+                color: Colors.grey.shade200,
+              ),
+              child: isLoading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 56, color: Colors.grey),
+            ),
+            if (!isLoading)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: const Icon(Icons.edit, size: 18, color: Colors.white),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 4,
-              right: 4,
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBlue,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(
-                  Icons.edit,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 16),
-        // User Name
         Text(
-          userName,
+          name ?? 'Memuat...',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 22,
@@ -331,9 +425,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        // User Email
         Text(
-          userEmail,
+          email ?? '-',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileContent({
+    required String name,
+    String? email,
+    String? profilePhotoUrl,
+    VoidCallback? onEditPhotoTap,
+    bool isUpdatingPhoto = false,
+  }) {
+    final hasPhoto = profilePhotoUrl != null && profilePhotoUrl.isNotEmpty;
+    final imageUrl = hasPhoto ? _profileImageUrl(profilePhotoUrl) : null;
+    final canEdit = onEditPhotoTap != null && !isUpdatingPhoto;
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: canEdit ? onEditPhotoTap : null,
+          child: Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade100,
+                ),
+                child: ClipOval(
+                  child: isUpdatingPhoto
+                      ? Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        )
+                      : imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              width: 120,
+                              height: 120,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: Colors.grey.shade200,
+                                child: const Icon(Icons.person, size: 56, color: Colors.grey),
+                              ),
+                            )
+                          : Container(
+                              color: Colors.grey.shade200,
+                              child: const Icon(Icons.person, size: 56, color: Colors.grey),
+                            ),
+                ),
+              ),
+              if (!isUpdatingPhoto)
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: const Icon(Icons.edit, size: 18, color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          email ?? '-',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -423,6 +610,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
         thickness: 1,
         color: Colors.grey.shade200,
       ),
+    );
+  }
+}
+
+/// Dialog to preview picked image and confirm upload.
+class _ProfilePhotoPreviewDialog extends StatelessWidget {
+  const _ProfilePhotoPreviewDialog({required this.file});
+
+  final File file;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Ubah Foto Profil'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.file(
+              file,
+              width: 200,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Gunakan foto ini sebagai foto profil?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primaryBlue,
+          ),
+          child: const Text('Unggah'),
+        ),
+      ],
     );
   }
 }

@@ -15,7 +15,7 @@ class PerawatModel {
 
   factory PerawatModel.fromJson(Map<String, dynamic> json) {
     return PerawatModel(
-      id: json['id'] as int,
+      id: (json['id'] as num).toInt(),
       namaLengkap: json['nama_lengkap'] as String,
       email: json['email'] as String,
       nomorHp: json['nomor_hp'] as String,

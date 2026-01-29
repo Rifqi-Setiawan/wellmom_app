@@ -330,7 +330,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
 
     if (records.length == 1) {
-      return _buildRecordDetailsCard(records.first);
+      return _buildRecordDetailsCard(records.first, scrollable: false);
     }
 
     final cardHeight = _getRecordCardHeight();
@@ -347,7 +347,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             },
             itemCount: records.length,
             itemBuilder: (context, index) {
-              return _buildRecordDetailsCard(records[index]);
+              return _buildRecordDetailsCard(records[index], scrollable: true);
             },
           ),
         ),
@@ -372,7 +372,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildRecordDetailsCard(HealthRecordByDateModel record) {
+  Widget _buildRecordDetailsCard(HealthRecordByDateModel record,
+      {bool scrollable = false}) {
     final bloodPressure = record.bloodPressureSystolic != null &&
             record.bloodPressureDiastolic != null
         ? '${record.bloodPressureSystolic}/${record.bloodPressureDiastolic} mmHg'
@@ -403,32 +404,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ? '-'
         : '${record.gestationalAgeWeeks ?? 0} minggu ${record.gestationalAgeDays ?? 0} hari';
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Pemeriksaan ${_formatDateString(record.checkupDate)}',
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pemeriksaan ${_formatDateString(record.checkupDate)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -480,41 +467,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 value: _formatText(record.checkedBy),
                 iconColor: const Color(0xFF7E57C2),
                 iconBgColor: const Color(0xFFEDE7F6),
-              ),
-              _buildDetailRow(
-                icon: Icons.confirmation_number,
-                label: 'ID Pemeriksaan',
-                value: record.id.toString(),
-                iconColor: const Color(0xFF616161),
-                iconBgColor: const Color(0xFFF5F5F5),
-              ),
-              _buildDetailRow(
-                icon: Icons.person,
-                label: 'ID Ibu Hamil',
-                value: record.ibuHamilId.toString(),
-                iconColor: const Color(0xFF26A69A),
-                iconBgColor: const Color(0xFFE0F2F1),
-              ),
-              _buildDetailRow(
-                icon: Icons.medical_services,
-                label: 'ID Perawat',
-                value: record.perawatId?.toString() ?? '-',
-                iconColor: const Color(0xFFEF5350),
-                iconBgColor: const Color(0xFFFFEBEE),
-              ),
-              _buildDetailRow(
-                icon: Icons.schedule,
-                label: 'Dibuat',
-                value: _formatDateTime(record.createdAt),
-                iconColor: const Color(0xFF5C6BC0),
-                iconBgColor: const Color(0xFFE8EAF6),
-              ),
-              _buildDetailRow(
-                icon: Icons.update,
-                label: 'Diperbarui',
-                value: _formatDateTime(record.updatedAt),
-                iconColor: const Color(0xFF26C6DA),
-                iconBgColor: const Color(0xFFE0F7FA),
               ),
             ],
           ),
@@ -620,7 +572,29 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             ],
           ),
         ],
+    );
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      child: scrollable
+          ? SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: content,
+            )
+          : content,
     );
   }
 
@@ -708,14 +682,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final historyState = ref.watch(historyViewModelProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         title: const Text(
           'Riwayat Kesehatan',
           style: TextStyle(
@@ -724,7 +697,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             fontSize: 18,
           ),
         ),
-        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: () =>

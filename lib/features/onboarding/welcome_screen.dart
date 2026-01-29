@@ -119,7 +119,7 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.of(context).pushNamed(AppRouter.expectingLogin);
+                          Navigator.of(context).pushNamed(AppRouter.loginKerabat);
                         },
                         child: const Text(AppStrings.masukSebagaiSuamiKerabat),
                       ),
