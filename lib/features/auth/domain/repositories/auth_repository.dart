@@ -28,6 +28,9 @@ abstract class AuthRepository {
   /// Assign ibu hamil to puskesmas
   /// [accessToken] is required for authentication from registration response
   Future<Either<Failure, void>> assignIbuHamilToPuskesmas(int puskesmasId, int ibuHamilId, String accessToken);
+
+  /// Logout ibu hamil. Calls API then caller should clear token and navigate.
+  Future<Either<Failure, void>> logoutIbuHamil();
 }
 
 /// Either type for error handling (simple implementation)

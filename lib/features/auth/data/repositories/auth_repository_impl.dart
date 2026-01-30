@@ -112,4 +112,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return Either.left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> logoutIbuHamil() async {
+    try {
+      await remoteDataSource.logoutIbuHamil();
+      return Either.right(null);
+    } on Failure catch (e) {
+      return Either.left(e);
+    } catch (e) {
+      return Either.left(UnknownFailure(e.toString()));
+    }
+  }
 }

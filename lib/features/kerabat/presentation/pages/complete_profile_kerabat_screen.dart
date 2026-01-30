@@ -20,7 +20,10 @@ const List<String> _relationOptions = [
 ];
 
 class CompleteProfileKerabatScreen extends ConsumerStatefulWidget {
-  const CompleteProfileKerabatScreen({super.key});
+  const CompleteProfileKerabatScreen({super.key, this.isEditMode = false});
+
+  /// When true, used from Profile tab; on success pops with true instead of navigating to home.
+  final bool isEditMode;
 
   @override
   ConsumerState<CompleteProfileKerabatScreen> createState() =>
@@ -69,10 +72,14 @@ class _CompleteProfileKerabatScreenState
       (_) {
         setState(() => _isSubmitting = false);
         ErrorSnackbar.showSuccess(context, 'Profil berhasil disimpan');
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRouter.kerabatHome,
-          (route) => false,
-        );
+        if (widget.isEditMode) {
+          Navigator.of(context).pop(true);
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            AppRouter.kerabatHome,
+            (route) => false,
+          );
+        }
       },
     );
   }
@@ -86,9 +93,9 @@ class _CompleteProfileKerabatScreenState
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Lengkapi Profil',
-          style: TextStyle(
+        title: Text(
+          widget.isEditMode ? 'Edit Profil' : 'Lengkapi Profil',
+          style: const TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.w700,
             fontSize: 18,

@@ -14,7 +14,7 @@ import 'package:wellmom_app/features/konsul/presentation/pages/konsul_screen.dar
 import 'package:wellmom_app/features/monitor/presentation/pages/monitor_screen.dart';
 import 'package:wellmom_app/features/onboarding/welcome_screen.dart';
 import 'package:wellmom_app/features/kerabat/presentation/pages/complete_profile_kerabat_screen.dart';
-import 'package:wellmom_app/features/kerabat/presentation/pages/kerabat_home_screen.dart';
+import 'package:wellmom_app/features/kerabat/presentation/pages/kerabat_shell_screen.dart';
 import 'package:wellmom_app/features/kerabat/presentation/pages/login_kerabat_screen.dart';
 import 'package:wellmom_app/features/kerabat/presentation/pages/undang_kerabat_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/profile_screen.dart';
@@ -161,7 +161,7 @@ class AppRouter {
         );
       case kerabatHome:
         return MaterialPageRoute(
-          builder: (_) => const KerabatHomeScreen(),
+          builder: (_) => const KerabatShellScreen(),
           settings: settings,
         );
       default:

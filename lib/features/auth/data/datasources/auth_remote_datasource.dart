@@ -16,6 +16,8 @@ abstract class AuthRemoteDataSource {
   Future<RegisterIbuHamilResponseModel> registerIbuHamil(RegisterIbuHamilRequestModel request);
   /// Upload profile photo (public, no auth) - for registration.
   Future<UploadProfilePhotoResponse> uploadIbuHamilProfilePhoto(File file);
+  /// Logout ibu hamil. POST /auth/logout/ibu-hamil with Bearer token.
+  Future<void> logoutIbuHamil();
 }
 
 /// Implementation of AuthRemoteDataSource
@@ -241,6 +243,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       if (e is Failure) rethrow;
       throw UnknownFailure('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> logoutIbuHamil() async {
+    try {
+      await dio.post('/auth/logout/ibu-hamil');
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final detail = e.response?.data?['detail'] ?? e.response?.data?['message'];
+        final message = detail?.toString() ?? 'Logout gagal';
+        throw ServerFailure(message);
+      }
+      throw NetworkFailure(e.message ?? 'Koneksi jaringan bermasalah');
+    } catch (e) {
+      if (e is Failure) rethrow;
+      throw UnknownFailure(e.toString());
     }
   }
 }

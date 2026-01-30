@@ -5,12 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/utils/profile_photo_validator.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
+import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
 /// Base URL for profile/image assets (API host without /api/v1).
 String _profileImageUrl(String? relativePath) {
@@ -106,20 +109,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _handleLogout() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Log Out'),
         content: const Text('Apakah Anda yakin ingin keluar?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Batal'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Clear token and user data
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              // Panggil API logout (best effort); lalu bersihkan token & arahkan ke welcome
+              final repo = ref.read(authRepositoryProvider);
+              final result = await repo.logoutIbuHamil();
+              if (!mounted) return;
+              result.fold(
+                (failure) {
+                  // Tetap keluar lokal meskipun API gagal (mis. offline)
+                  ErrorSnackbar.show(context, failure.message);
+                },
+                (_) {},
+              );
+              ref.read(authTokenProvider.notifier).state = null;
+              ref.read(ibuHamilIdProvider.notifier).state = null;
+              ref.read(kerabatIdProvider.notifier).state = null;
+              ref.read(kerabatIbuHamilIdProvider.notifier).state = null;
+              ref.read(kerabatIbuHamilNameProvider.notifier).state = null;
+              try {
+                await AuthStorageService.clearAccessToken();
+              } catch (_) {}
+              if (!mounted) return;
               Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRouter.loginIbuHamil,
+                AppRouter.welcome,
                 (route) => false,
               );
             },
