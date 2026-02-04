@@ -7,7 +7,6 @@ import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
-import 'package:wellmom_app/features/kerabat/domain/repositories/kerabat_repository.dart';
 import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
 /// Valid: 8 alphanumeric characters
@@ -57,12 +56,18 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
       },
       (response) async {
         setState(() => _isLoading = false);
-        // Simpan token ke provider dan storage
+
+        // 1. Simpan access_token ke provider (langsung dipakai Dio interceptor untuk semua request API)
         ref.read(authTokenProvider.notifier).state = response.accessToken;
+
+        // 2. Simpan token ke persistent storage (agar tetap dipakai setelah app restart)
         try {
           await AuthStorageService.saveAccessToken(response.accessToken);
-        } catch (_) {}
-        // Simpan info kerabat (bisa dipakai di complete profile / kerabat home)
+        } catch (e) {
+          debugPrint('Login Kerabat: Gagal simpan token ke storage: $e');
+        }
+
+        // 3. Simpan data kerabat untuk dipakai di complete profile / dashboard
         ref.read(kerabatIdProvider.notifier).state = response.kerabatId;
         ref.read(kerabatIbuHamilIdProvider.notifier).state = response.ibuHamilId;
         ref.read(kerabatIbuHamilNameProvider.notifier).state = response.ibuHamilName;

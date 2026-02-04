@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
-import 'package:wellmom_app/features/kerabat/domain/repositories/kerabat_repository.dart';
 import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
 class KerabatHealthRecordDetailScreen extends ConsumerStatefulWidget {

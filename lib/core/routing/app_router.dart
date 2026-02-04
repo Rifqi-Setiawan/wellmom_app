@@ -4,6 +4,7 @@ import 'package:wellmom_app/features/auth/presentation/pages/login_ibu_hamil_scr
 import 'package:wellmom_app/features/auth/presentation/pages/medical_data_screen.dart';
 import 'package:wellmom_app/features/auth/presentation/pages/register_ibu_hamil_screen.dart';
 import 'package:wellmom_app/features/auth/presentation/pages/select_puskesmas_screen.dart';
+import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.dart';
 import 'package:wellmom_app/features/chatbot/presentation/pages/chatbot_screen.dart';
 import 'package:wellmom_app/features/forum/presentation/pages/forum_post_detail_screen.dart';
 import 'package:wellmom_app/features/forum/presentation/pages/forum_reply_screen.dart';
@@ -41,6 +42,9 @@ class AppRouter {
   static const String forum = '/forum';
   static const String forumPostDetail = '/forum-post-detail';
   static const String forumReply = '/forum-reply';
+
+  /// Chat dengan Perawat (Konsul) - args: KonsulChatArgs or Map (conversationId, perawatId, perawatName, perawatPhotoUrl).
+  static const String konsulChat = '/konsul-chat';
 
   // Kerabat (Undang Kerabat, Login Kerabat, Complete Profile, Kerabat Home)
   static const String undangKerabat = '/undang-kerabat';
@@ -142,6 +146,12 @@ class AppRouter {
         }
         return MaterialPageRoute(
           builder: (_) => ForumReplyScreen(postId: postId),
+          settings: settings,
+        );
+      case konsulChat:
+        final args = KonsulChatArgs.fromDynamic(settings.arguments);
+        return MaterialPageRoute(
+          builder: (_) => KonsulChatScreen(args: args),
           settings: settings,
         );
       case undangKerabat:

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.dart';
 import 'package:wellmom_app/features/forum/presentation/providers/forum_providers.dart';
 import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
@@ -467,40 +467,30 @@ class _KonsulScreenState extends ConsumerState<KonsulScreen> {
           ),
           if (hasPerawat && perawat != null) ...[
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _contactPerawat(perawat, useWhatsApp: true),
-                    icon: const Icon(Icons.chat_rounded, size: 18),
-                    label: const Text('WhatsApp'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF25D366),
-                      side: const BorderSide(color: Color(0xFF25D366)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    AppRouter.konsulChat,
+                    arguments: KonsulChatArgs(
+                      perawatId: perawat.id,
+                      perawatName: perawat.namaLengkap,
+                      perawatPhotoUrl: perawat.profilePhotoUrl,
                     ),
+                  );
+                },
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                label: const Text('Chat'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => _contactPerawat(perawat, useWhatsApp: false),
-                    icon: const Icon(Icons.phone_rounded, size: 18),
-                    label: const Text('Telepon'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ],
@@ -516,21 +506,6 @@ class _KonsulScreenState extends ConsumerState<KonsulScreen> {
         size: 28,
       ),
     );
-  }
-
-  Future<void> _contactPerawat(PerawatModel perawat, {required bool useWhatsApp}) async {
-    final phone = perawat.nomorHp.trim().replaceAll(RegExp(r'[\s\-]'), '');
-    final cleanPhone = phone.startsWith('+') ? phone.replaceFirst('+', '') : phone;
-    final uri = useWhatsApp
-        ? Uri.parse('https://wa.me/$cleanPhone')
-        : Uri.parse('tel:$phone');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tidak dapat membuka: ${useWhatsApp ? "WhatsApp" : "Telepon"}')),
-      );
-    }
   }
 
   Widget _buildSupportOptionCard({

@@ -206,6 +206,7 @@ import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.
 import 'package:wellmom_app/features/history/data/models/health_records_response_model.dart';
 import 'package:wellmom_app/features/history/presentation/providers/history_providers.dart';
 import 'package:wellmom_app/features/history/presentation/viewmodels/history_view_model.dart';
+import 'package:wellmom_app/features/history/presentation/widgets/lightweight_date_picker_dialog.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -734,20 +735,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: TextButton.icon(
-                          onPressed: () {
-                            showDatePicker(
+                          onPressed: () async {
+                            final date = await LightweightDatePickerDialog.show(
                               context: context,
                               initialDate: _selectedDate,
                               firstDate: DateTime(2020),
                               lastDate: DateTime(2030),
-                            ).then((date) {
-                              if (date != null) {
-                                setState(() {
-                                  _selectedDate = date;
-                                });
-                                _fetchData();
-                              }
-                            });
+                            );
+                            if (date != null && mounted) {
+                              setState(() {
+                                _selectedDate = date;
+                              });
+                              _fetchData();
+                            }
                           },
                           icon: const Icon(
                             Icons.calendar_today,

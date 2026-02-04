@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
 import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
 import 'package:wellmom_app/features/home/data/models/puskesmas_detail_model.dart';
@@ -195,6 +196,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
+          // Chat Icon (ke konsul chat dengan perawat)
+          IconButton(
+            onPressed: () async {
+              // Gunakan state dulu; jika perawat belum ada, ambil dari provider (fetch terbaru)
+              var perawatData = state.ibuHamilPerawat;
+              if (perawatData == null) {
+                try {
+                  perawatData = await ref.read(ibuHamilPerawatProvider.future);
+                } catch (_) {
+                  perawatData = null;
+                }
+              }
+              final perawat = perawatData?.perawat;
+              if (perawatData?.hasPerawat == true && perawat != null) {
+                if (context.mounted) {
+                  Navigator.of(context).pushNamed(
+                    AppRouter.konsulChat,
+                    arguments: KonsulChatArgs(
+                      perawatId: perawat.id,
+                      perawatName: perawat.namaLengkap,
+                      perawatPhotoUrl: perawat.profilePhotoUrl,
+                    ),
+                  );
+                }
+              } else {
+                if (context.mounted) {
+                  Navigator.of(context).pushNamed(AppRouter.konsul);
+                }
+              }
+            },
+            icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textDark, size: 22),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white,
+              padding: const EdgeInsets.all(8),
+            ),
+          ),
+          const SizedBox(width: 8),
           // Notification Icon
           Container(
             width: 40,

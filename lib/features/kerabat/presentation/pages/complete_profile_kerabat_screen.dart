@@ -7,7 +7,6 @@ import 'package:wellmom_app/core/widgets/custom_dropdown.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/kerabat/data/models/complete_profile_request.dart';
-import 'package:wellmom_app/features/kerabat/domain/repositories/kerabat_repository.dart';
 import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
 const List<String> _relationOptions = [
