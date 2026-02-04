@@ -128,35 +128,56 @@ class _KonsulScreenState extends ConsumerState<KonsulScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildSectionHeader(
-                    title: 'Diskusi Terkini',
-                    subtitle: null,
-                    compact: true,
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pushNamed(AppRouter.forum),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    child: const Text(
-                      'Lihat Semua',
-                      style: TextStyle(
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildSectionHeader(
+                          title: 'Diskusi Terkini',
+                          subtitle: null,
+                          compact: true,
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pushNamed(AppRouter.forum),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            'Lihat Semua',
+                            style: TextStyle(
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    _buildDiscussionList(),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              _buildDiscussionList(),
               const SizedBox(height: 100),
             ],
           ),

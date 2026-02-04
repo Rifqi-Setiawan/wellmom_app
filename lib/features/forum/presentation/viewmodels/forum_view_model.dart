@@ -38,6 +38,7 @@ class ForumState {
     bool? isCreatingPost,
     String? error,
     int? selectedCategoryId,
+    bool clearSelectedCategory = false,
     String? searchQuery,
     bool? hasMore,
     int? total,
@@ -49,7 +50,9 @@ class ForumState {
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isCreatingPost: isCreatingPost ?? this.isCreatingPost,
       error: error,
-      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
+      selectedCategoryId: clearSelectedCategory
+          ? null
+          : (selectedCategoryId ?? this.selectedCategoryId),
       searchQuery: searchQuery ?? this.searchQuery,
       hasMore: hasMore ?? this.hasMore,
       total: total ?? this.total,
@@ -137,7 +140,10 @@ class ForumViewModel extends StateNotifier<ForumState> {
   }
 
   Future<void> filterByCategory(int? categoryId) async {
-    state = state.copyWith(selectedCategoryId: categoryId);
+    state = state.copyWith(
+      selectedCategoryId: categoryId,
+      clearSelectedCategory: categoryId == null,
+    );
     await fetchPosts(refresh: true);
   }
 

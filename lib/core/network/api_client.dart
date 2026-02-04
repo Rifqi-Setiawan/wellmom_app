@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 /// API base URL
@@ -20,17 +21,24 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  // Add authentication interceptor to add token to all requests
+  // Add authentication interceptor: pakai token dari provider, fallback dari storage
+  // Header harus persis "Authorization" (bukan authorization/Autorization) dan nilai "Bearer <token>"
   dio.interceptors.add(
     InterceptorsWrapper(
-      onRequest: (options, handler) {
-        // Get token from provider (reads latest value each time)
-        final token = ref.read(authTokenProvider);
+      onRequest: (options, handler) async {
+        var token = ref.read(authTokenProvider);
+        if (token == null || token.isEmpty) {
+          token = await AuthStorageService.getAccessToken();
+          if (token != null && token.isNotEmpty && ref.read(authTokenProvider) == null) {
+            ref.read(authTokenProvider.notifier).state = token;
+          }
+        }
+        token = token?.trim();
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
-          print('API: Adding Authorization header with token (length: ${token.length})');
+          print('API: Authorization header set for ${options.path} (token length: ${token.length})');
         } else {
-          print('API: WARNING - No token available for request to ${options.path}');
+          print('API: WARNING - No token for ${options.path}');
         }
         handler.next(options);
       },

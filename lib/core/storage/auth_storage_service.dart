@@ -4,11 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthStorageService {
   static const String _accessTokenKey = 'access_token';
 
-  /// Save access token to storage
+  /// Save access token to storage (whitespace otomatis di-trim)
   static Future<void> saveAccessToken(String token) async {
+    final trimmed = token.trim();
+    if (trimmed.isEmpty) return;
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_accessTokenKey, token);
+      await prefs.setString(_accessTokenKey, trimmed);
     } catch (e) {
       print('Error saving access token: $e');
       // If storage fails, we still continue - token is saved in provider

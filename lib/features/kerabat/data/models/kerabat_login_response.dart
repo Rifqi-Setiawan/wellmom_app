@@ -17,8 +17,10 @@ class KerabatLoginResponse {
   });
 
   factory KerabatLoginResponse.fromJson(Map<String, dynamic> json) {
+    final rawToken = json['access_token'] ?? json['accessToken'];
+    final accessToken = rawToken is String ? rawToken : '';
     return KerabatLoginResponse(
-      accessToken: json['access_token'] as String? ?? '',
+      accessToken: accessToken,
       tokenType: json['token_type'] as String? ?? 'bearer',
       kerabatId: (json['kerabat_id'] as num?)?.toInt() ?? 0,
       ibuHamilId: (json['ibu_hamil_id'] as num?)?.toInt() ?? 0,

@@ -6,15 +6,16 @@ import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
+import 'package:wellmom_app/core/network/api_client.dart';
 import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
-/// Valid: 8 alphanumeric characters
+/// Valid: 8 karakter (huruf, angka, atau underscore)
 bool _isValidInviteCode(String? value) {
   if (value == null || value.isEmpty) return false;
   final trimmed = value.trim().toUpperCase();
   if (trimmed.length != 8) return false;
-  return RegExp(r'^[A-Z0-9]{8}$').hasMatch(trimmed);
+  return RegExp(r'^[A-Z0-9_]{8}$').hasMatch(trimmed);
 }
 
 class LoginKerabatScreen extends ConsumerStatefulWidget {
@@ -40,7 +41,7 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
 
     final code = _codeController.text.trim().toUpperCase();
     if (!_isValidInviteCode(code)) {
-      ErrorSnackbar.show(context, 'Kode undangan harus 8 karakter (huruf/angka)');
+      ErrorSnackbar.show(context, 'Kode undangan harus 8 karakter (huruf, angka, atau underscore)');
       return;
     }
 
@@ -57,17 +58,27 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
       (response) async {
         setState(() => _isLoading = false);
 
-        // 1. Simpan access_token ke provider (langsung dipakai Dio interceptor untuk semua request API)
-        ref.read(authTokenProvider.notifier).state = response.accessToken;
+        final token = response.accessToken.trim();
+        if (token.isEmpty) {
+          ErrorSnackbar.show(context, 'Token tidak diterima dari server. Coba lagi.');
+          return;
+        }
+
+        // 1. Simpan access_token ke provider (dipakai Dio interceptor untuk semua request API)
+        ref.read(authTokenProvider.notifier).state = token;
 
         // 2. Simpan token ke persistent storage (agar tetap dipakai setelah app restart)
         try {
-          await AuthStorageService.saveAccessToken(response.accessToken);
+          await AuthStorageService.saveAccessToken(token);
+          debugPrint('Login Kerabat: Token tersimpan (panjang: ${token.length})');
         } catch (e) {
           debugPrint('Login Kerabat: Gagal simpan token ke storage: $e');
         }
 
-        // 3. Simpan data kerabat untuk dipakai di complete profile / dashboard
+        // 3. Agar request berikutnya pakai token baru, invalidate Dio (instance baru akan baca provider)
+        ref.invalidate(dioProvider);
+
+        // 4. Simpan data kerabat untuk dipakai di complete profile / dashboard
         ref.read(kerabatIdProvider.notifier).state = response.kerabatId;
         ref.read(kerabatIbuHamilIdProvider.notifier).state = response.ibuHamilId;
         ref.read(kerabatIbuHamilNameProvider.notifier).state = response.ibuHamilName;
@@ -151,7 +162,7 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
                 CustomTextField(
                   controller: _codeController,
                   label: 'Kode Undangan',
-                  hintText: 'Contoh: ABC123XY',
+                  hintText: 'Contoh: LLJWK_TO',
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Kode undangan harus diisi';
@@ -160,8 +171,8 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
                     if (trimmed.length != 8) {
                       return 'Kode harus 8 karakter';
                     }
-                    if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(trimmed)) {
-                      return 'Kode hanya huruf dan angka';
+                    if (!RegExp(r'^[A-Za-z0-9_]+$').hasMatch(trimmed)) {
+                      return 'Kode hanya huruf, angka, atau underscore (_)';
                     }
                     return null;
                   },
