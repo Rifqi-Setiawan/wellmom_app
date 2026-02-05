@@ -2,6 +2,7 @@ import 'package:wellmom_app/core/errors/failures.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:wellmom_app/features/kerabat/data/datasources/kerabat_remote_datasource.dart';
 import 'package:wellmom_app/features/kerabat/data/models/complete_profile_request.dart';
+import 'package:wellmom_app/features/kerabat/data/models/complete_profile_response.dart';
 import 'package:wellmom_app/features/kerabat/data/models/invite_code_response.dart';
 import 'package:wellmom_app/features/kerabat/data/models/kerabat_dashboard_model.dart';
 import 'package:wellmom_app/features/kerabat/data/models/kerabat_health_records_response_model.dart';
@@ -44,7 +45,7 @@ class KerabatRepositoryImpl implements KerabatRepository {
   }
 
   @override
-  Future<Either<Failure, MyKerabatItemModel>> completeProfile(
+  Future<Either<Failure, CompleteProfileResponse>> completeProfile(
     CompleteProfileRequest request,
   ) async {
     try {

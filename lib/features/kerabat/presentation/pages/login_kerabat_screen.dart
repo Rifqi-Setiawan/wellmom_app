@@ -77,6 +77,9 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
 
         // 3. Agar request berikutnya pakai token baru, invalidate Dio (instance baru akan baca provider)
         ref.invalidate(dioProvider);
+        
+        // ✅ TAMBAHKAN INI - Tunggu agar Dio instance baru siap dengan token
+        await Future.delayed(const Duration(milliseconds: 150));
 
         // 4. Simpan data kerabat untuk dipakai di complete profile / dashboard
         ref.read(kerabatIdProvider.notifier).state = response.kerabatId;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
@@ -87,23 +88,25 @@ class _ConfirmPuskesmasScreenState
     if (!mounted) return;
 
     if (success) {
-      // Save token to provider for chatbot and other features
-      final confirmState = ref.read(confirmRegistrationViewModelProvider);
-      if (confirmState.registrationResponse != null) {
-        ref.read(authTokenProvider.notifier).state = 
-            confirmState.registrationResponse!.accessToken;
+      // Clear token yang disimpan saat registrasi
+      // User perlu login dengan email/password yang sudah didaftarkan
+      ref.read(authTokenProvider.notifier).state = null;
+      try {
+        await AuthStorageService.clearAccessToken();
+      } catch (e) {
+        debugPrint('Gagal clear token: $e');
       }
       
       // Show success message
       ErrorSnackbar.showSuccess(
         context,
-        'Registrasi berhasil! Selamat datang di WellMom.',
+        'Registrasi berhasil! Silakan login dengan email dan password Anda.',
       );
       
-      // Navigate to home screen and clear all previous routes
+      // Navigate to login screen and clear all previous routes
       // This ensures user cannot go back to registration screens
       Navigator.of(context).pushNamedAndRemoveUntil(
-        AppRouter.home,
+        AppRouter.loginIbuHamil,
         (route) => false, // Remove all previous routes
       );
     } else {

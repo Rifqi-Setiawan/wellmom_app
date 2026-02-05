@@ -84,5 +84,8 @@ final puskesmasViewModelProvider =
 final confirmRegistrationViewModelProvider =
     StateNotifierProvider<ConfirmRegistrationViewModel, ConfirmRegistrationState>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  return ConfirmRegistrationViewModel(authRepository: authRepository);
+  return ConfirmRegistrationViewModel(
+    authRepository: authRepository,
+    ref: ref,
+  );
 });

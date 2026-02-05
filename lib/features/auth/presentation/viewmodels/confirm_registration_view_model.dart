@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wellmom_app/core/network/api_client.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
 import 'package:wellmom_app/features/auth/domain/entities/register_ibu_hamil_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 /// State for complete registration
 class ConfirmRegistrationState {
@@ -39,9 +42,12 @@ class ConfirmRegistrationState {
 class ConfirmRegistrationViewModel
     extends StateNotifier<ConfirmRegistrationState> {
   final AuthRepository authRepository;
+  final Ref ref;
 
-  ConfirmRegistrationViewModel({required this.authRepository})
-      : super(const ConfirmRegistrationState());
+  ConfirmRegistrationViewModel({
+    required this.authRepository,
+    required this.ref,
+  }) : super(const ConfirmRegistrationState());
 
   /// Complete registration: register ibu hamil and assign to puskesmas
   Future<bool> completeRegistration({
@@ -191,16 +197,38 @@ class ConfirmRegistrationViewModel
       
       final registerResult = await authRepository.registerIbuHamil(requestModel);
       
-      final registerSuccess = registerResult.fold(
-        (failure) {
+      final registerSuccess = await registerResult.fold(
+        (failure) async {
           state = state.copyWith(
             isSubmitting: false,
             error: failure.message,
           );
           return false;
         },
-        (response) {
+        (response) async {  // ⚠️ UBAH ke async
           registrationResponse = response;
+          
+          // ✅ TAMBAHKAN INI - Simpan token SEBELUM assign
+          final token = response.accessToken.trim();
+          if (token.isNotEmpty) {
+            // 1. Simpan ke provider (untuk Dio interceptor)
+            ref.read(authTokenProvider.notifier).state = token;
+            
+            // 2. Simpan ke storage (persistent)
+            try {
+              await AuthStorageService.saveAccessToken(token);
+              print('✅ Token tersimpan setelah registrasi (panjang: ${token.length})');
+            } catch (e) {
+              print('⚠️ Gagal simpan token ke storage: $e');
+            }
+            
+            // 3. Invalidate Dio agar pakai token baru
+            ref.invalidate(dioProvider);
+            
+            // 4. Tunggu sebentar agar Dio instance baru siap
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+          
           // Log success response for debugging
           print('═══════════════════════════════════════════════════════════');
           print('✅ REGISTRASI IBU HAMIL BERHASIL');

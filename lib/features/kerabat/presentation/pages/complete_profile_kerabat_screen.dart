@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
+import 'package:wellmom_app/core/network/api_client.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_dropdown.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 import 'package:wellmom_app/features/kerabat/data/models/complete_profile_request.dart';
 import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
@@ -68,8 +71,34 @@ class _CompleteProfileKerabatScreenState
         setState(() => _isSubmitting = false);
         ErrorSnackbar.show(context, failure.message);
       },
-      (_) {
+      (response) async {
         setState(() => _isSubmitting = false);
+        
+        // ✅ HANDLE TOKEN BARU - Jika phone diupdate, backend mengembalikan token baru
+        final newToken = response.accessToken;
+        if (newToken != null && newToken.trim().isNotEmpty) {
+          final token = newToken.trim();
+          
+          // 1. Simpan token baru ke provider (untuk Dio interceptor)
+          ref.read(authTokenProvider.notifier).state = token;
+          
+          // 2. Simpan token baru ke persistent storage
+          try {
+            await AuthStorageService.saveAccessToken(token);
+            debugPrint('Complete Profile: Token baru tersimpan (panjang: ${token.length})');
+          } catch (e) {
+            debugPrint('Complete Profile: Gagal simpan token baru ke storage: $e');
+          }
+          
+          // 3. Invalidate Dio agar pakai token baru
+          ref.invalidate(dioProvider);
+          
+          // 4. Tunggu sebentar agar Dio instance baru siap dengan token baru
+          await Future.delayed(const Duration(milliseconds: 150));
+        } else {
+          debugPrint('Complete Profile: Tidak ada token baru (phone tidak diupdate)');
+        }
+        
         ErrorSnackbar.showSuccess(context, 'Profil berhasil disimpan');
         if (widget.isEditMode) {
           Navigator.of(context).pop(true);
