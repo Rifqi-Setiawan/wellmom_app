@@ -556,24 +556,50 @@ class _RegisterIbuHamilScreenState
                                   );
                             }
                             
+                            // Helper function to normalize region names for better matching
+                            String normalizeRegionName(String name) {
+                              return name
+                                  .toLowerCase()
+                                  .replaceAll(RegExp(r'^(kabupaten|kota|kab\.?|kab|regency|city)\s+', caseSensitive: false), '')
+                                  .replaceAll(RegExp(r'\s+(kabupaten|kota|kab\.?|regency|city)$', caseSensitive: false), '')
+                                  .trim()
+                                  .replaceAll(RegExp(r'\s+'), ' ');
+                            }
+                            
+                            // Helper function for better matching (handles exact, contains, and fuzzy)
+                            bool isRegionMatch(String name1, String name2) {
+                              final normalized1 = normalizeRegionName(name1);
+                              final normalized2 = normalizeRegionName(name2);
+                              
+                              // Exact match after normalization
+                              if (normalized1 == normalized2) return true;
+                              
+                              // Contains match
+                              if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) return true;
+                              
+                              // Match without spaces
+                              final noSpace1 = normalized1.replaceAll(' ', '');
+                              final noSpace2 = normalized2.replaceAll(' ', '');
+                              if (noSpace1.contains(noSpace2) || noSpace2.contains(noSpace1)) return true;
+                              
+                              // Match with common variations (e.g., "Kerinci" vs "Kerinci Regency")
+                              final clean1 = normalized1.replaceAll(RegExp(r'[^\w]'), '');
+                              final clean2 = normalized2.replaceAll(RegExp(r'[^\w]'), '');
+                              if (clean1.contains(clean2) || clean2.contains(clean1)) return true;
+                              
+                              return false;
+                            }
+                            
                             // Try to match provinsi from geocoded address
                             if (updatedState.provinsi.isNotEmpty && state.provinces.isNotEmpty) {
                               Provinsi? matchedProvinsi;
                               try {
                                 matchedProvinsi = state.provinces.firstWhere(
-                                  (p) {
-                                    final provName = p.name.toLowerCase();
-                                    final geocodedProv = updatedState.provinsi.toLowerCase();
-                                    return provName.contains(geocodedProv) ||
-                                        geocodedProv.contains(provName) ||
-                                        provName.replaceAll(' ', '')
-                                            .contains(geocodedProv.replaceAll(' ', '')) ||
-                                        geocodedProv.replaceAll(' ', '')
-                                            .contains(provName.replaceAll(' ', ''));
-                                  },
+                                  (p) => isRegionMatch(p.name, updatedState.provinsi),
                                 );
                               } catch (e) {
                                 // No match found, keep current selection
+                                debugPrint('Provinsi tidak ditemukan: ${updatedState.provinsi}');
                               }
                               
                               if (matchedProvinsi != null) {
@@ -585,24 +611,27 @@ class _RegisterIbuHamilScreenState
                                     .updateProvinsi(
                                         matchedProvinsi.name, matchedProvinsi.id);
                                 
-                                // Wait a bit for regencies to load, then try to match kota
-                                await Future.delayed(const Duration(milliseconds: 500));
+                                // Wait for regencies to load (with retry if needed)
+                                int retryCount = 0;
+                                const maxRetries = 5;
+                                while (retryCount < maxRetries) {
+                                  await Future.delayed(const Duration(milliseconds: 500));
+                                  final tempState = ref.read(registerViewModelProvider);
+                                  
+                                  if (tempState.regencies.isNotEmpty || 
+                                      !tempState.isLoadingRegencies) {
+                                    break;
+                                  }
+                                  retryCount++;
+                                }
+                                
                                 final stateAfterRegencies = ref.read(registerViewModelProvider);
                                 
                                 if (updatedState.kota.isNotEmpty &&
                                     stateAfterRegencies.regencies.isNotEmpty) {
                                   try {
                                     final matchedKota = stateAfterRegencies.regencies.firstWhere(
-                                      (k) {
-                                        final kotaName = k.name.toLowerCase();
-                                        final geocodedKota = updatedState.kota.toLowerCase();
-                                        return kotaName.contains(geocodedKota) ||
-                                            geocodedKota.contains(kotaName) ||
-                                            kotaName.replaceAll(' ', '')
-                                                .contains(geocodedKota.replaceAll(' ', '')) ||
-                                            geocodedKota.replaceAll(' ', '')
-                                                .contains(kotaName.replaceAll(' ', ''));
-                                      },
+                                      (k) => isRegionMatch(k.name, updatedState.kota),
                                     );
                                     
                                     setState(() {
@@ -612,8 +641,19 @@ class _RegisterIbuHamilScreenState
                                         .read(registerViewModelProvider.notifier)
                                         .updateKota(matchedKota.name, matchedKota.id);
                                     
-                                    // Wait for districts to load, then try to match kecamatan
-                                    await Future.delayed(const Duration(milliseconds: 500));
+                                    // Wait for districts to load (with retry if needed)
+                                    retryCount = 0;
+                                    while (retryCount < maxRetries) {
+                                      await Future.delayed(const Duration(milliseconds: 500));
+                                      final tempState = ref.read(registerViewModelProvider);
+                                      
+                                      if (tempState.districts.isNotEmpty || 
+                                          !tempState.isLoadingDistricts) {
+                                        break;
+                                      }
+                                      retryCount++;
+                                    }
+                                    
                                     final stateAfterDistricts = ref.read(registerViewModelProvider);
                                     
                                     if (updatedState.kecamatan.isNotEmpty &&
@@ -621,16 +661,7 @@ class _RegisterIbuHamilScreenState
                                       try {
                                         final matchedKecamatan =
                                             stateAfterDistricts.districts.firstWhere(
-                                          (d) {
-                                            final kecName = d.name.toLowerCase();
-                                            final geocodedKec = updatedState.kecamatan.toLowerCase();
-                                            return kecName.contains(geocodedKec) ||
-                                                geocodedKec.contains(kecName) ||
-                                                kecName.replaceAll(' ', '')
-                                                    .contains(geocodedKec.replaceAll(' ', '')) ||
-                                                geocodedKec.replaceAll(' ', '')
-                                                    .contains(kecName.replaceAll(' ', ''));
-                                          },
+                                          (d) => isRegionMatch(d.name, updatedState.kecamatan),
                                         );
                                         
                                         setState(() {
@@ -642,10 +673,14 @@ class _RegisterIbuHamilScreenState
                                                 matchedKecamatan.name, matchedKecamatan.id);
                                       } catch (e) {
                                         // Kecamatan not matched
+                                        debugPrint('Kecamatan tidak ditemukan: ${updatedState.kecamatan}');
+                                        debugPrint('Kecamatan yang tersedia: ${stateAfterDistricts.districts.map((d) => d.name).join(", ")}');
                                       }
                                     }
                                   } catch (e) {
                                     // Kota not matched
+                                    debugPrint('Kota/Kabupaten tidak ditemukan: ${updatedState.kota}');
+                                    debugPrint('Kota/Kabupaten yang tersedia: ${stateAfterRegencies.regencies.map((k) => k.name).join(", ")}');
                                   }
                                 }
                               }

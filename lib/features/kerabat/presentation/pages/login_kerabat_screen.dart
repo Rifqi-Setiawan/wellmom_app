@@ -64,22 +64,35 @@ class _LoginKerabatScreenState extends ConsumerState<LoginKerabatScreen> {
           return;
         }
 
-        // 1. Simpan access_token ke provider (dipakai Dio interceptor untuk semua request API)
+        debugPrint('[LOGIN_KERABAT] Token diterima (panjang: ${token.length})');
+        
+        // 1. Simpan access_token ke provider FIRST (dipakai Dio interceptor untuk semua request API)
         ref.read(authTokenProvider.notifier).state = token;
+        debugPrint('[LOGIN_KERABAT] Token disimpan ke provider');
 
         // 2. Simpan token ke persistent storage (agar tetap dipakai setelah app restart)
         try {
           await AuthStorageService.saveAccessToken(token);
-          debugPrint('Login Kerabat: Token tersimpan (panjang: ${token.length})');
+          debugPrint('[LOGIN_KERABAT] Token disimpan ke storage (panjang: ${token.length})');
         } catch (e) {
-          debugPrint('Login Kerabat: Gagal simpan token ke storage: $e');
+          debugPrint('[LOGIN_KERABAT] Gagal simpan token ke storage: $e');
         }
 
         // 3. Agar request berikutnya pakai token baru, invalidate Dio (instance baru akan baca provider)
         ref.invalidate(dioProvider);
+        debugPrint('[LOGIN_KERABAT] Dio provider di-invalidate');
         
-        // ✅ TAMBAHKAN INI - Tunggu agar Dio instance baru siap dengan token
-        await Future.delayed(const Duration(milliseconds: 150));
+        // 4. PENTING: Force create new Dio instance sebelum delay
+        final _ = ref.read(dioProvider);
+        debugPrint('[LOGIN_KERABAT] Dio instance baru dibuat');
+        
+        // 5. Delay lebih lama untuk memastikan token sync (300ms seperti rekomendasi backend)
+        await Future.delayed(const Duration(milliseconds: 300));
+        
+        // 6. Verify token tersimpan dengan benar
+        final verifyToken = await AuthStorageService.getAccessToken();
+        final verifyProviderToken = ref.read(authTokenProvider);
+        debugPrint('[LOGIN_KERABAT] Verifikasi token - Storage: ${verifyToken?.length ?? 0}, Provider: ${verifyProviderToken?.length ?? 0}');
 
         // 4. Simpan data kerabat untuk dipakai di complete profile / dashboard
         ref.read(kerabatIdProvider.notifier).state = response.kerabatId;

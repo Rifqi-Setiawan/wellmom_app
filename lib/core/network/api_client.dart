@@ -26,20 +26,44 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
+        // Log request
+        print('[DIO] Request: ${options.method} ${options.path}');
+        
+        // Get token from provider first
         var token = ref.read(authTokenProvider);
+        final tokenFromProvider = token;
+        print('[DIO] Token from provider: ${tokenFromProvider?.substring(0, tokenFromProvider.length > 20 ? 20 : tokenFromProvider.length) ?? "NULL"}... (length: ${tokenFromProvider?.length ?? 0})');
+        
+        // Fallback to storage if provider is empty
         if (token == null || token.isEmpty) {
           token = await AuthStorageService.getAccessToken();
+          if (token != null) {
+            final tokenPreview = token.length > 20 ? token.substring(0, 20) : token;
+            print('[DIO] Token from storage: $tokenPreview... (length: ${token.length})');
+          } else {
+            print('[DIO] Token from storage: NULL');
+          }
+          
+          // Sync to provider if found in storage
           if (token != null && token.isNotEmpty && ref.read(authTokenProvider) == null) {
             ref.read(authTokenProvider.notifier).state = token;
+            print('[DIO] Token dari storage disinkronkan ke provider');
           }
         }
+        
+        // Trim token
         token = token?.trim();
+        
+        // Set Authorization header
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
-          print('API: Authorization header set for ${options.path} (token length: ${token.length})');
+          // Log token hash untuk tracking perubahan token
+          print('[DIO] Authorization header set for ${options.path}');
+          print('[DIO] Token length: ${token.length}, Token hash: ${token.hashCode}');
         } else {
-          print('API: WARNING - No token for ${options.path}');
+          print('[DIO] WARNING - No token for ${options.path}');
         }
+        
         handler.next(options);
       },
     ),
