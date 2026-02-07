@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "815421679070",
+    "project_id": "wellmom",
+    "storage_bucket": "wellmom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815421679070:android:91617a09f7a0c59932e94f",
+        "android_client_info": {
+          "package_name": "wellmom.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASgjxlpJoyzF2OFMvwauAcaZCkS3eopZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -258,133 +258,118 @@ class _MessageList extends ConsumerWidget {
   }
 }
 
-/// Segitiga kecil untuk ekor bubble (tail).
-class _BubbleTail extends StatelessWidget {
-  final Color color;
-  final bool tailRight;
-
-  const _BubbleTail({required this.color, required this.tailRight});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(12, 8),
-      painter: _TailPainter(color: color, tailRight: tailRight),
-    );
-  }
-}
-
-class _TailPainter extends CustomPainter {
-  final Color color;
-  final bool tailRight;
-
-  _TailPainter({required this.color, required this.tailRight});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path();
-    if (tailRight) {
-      path.moveTo(0, 0);
-      path.lineTo(0, size.height);
-      path.lineTo(size.width, size.height / 2);
-      path.close();
-    } else {
-      path.moveTo(size.width, 0);
-      path.lineTo(size.width, size.height);
-      path.lineTo(0, size.height / 2);
-      path.close();
-    }
-    canvas.drawPath(path, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _MessageBubble extends StatelessWidget {
+class _MessageBubble extends ConsumerWidget {
   final ChatMessageModel message;
 
   const _MessageBubble({required this.message});
 
   @override
-  Widget build(BuildContext context) {
-    final isFromIbuHamil = message.isFromIbuHamil;
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Tentukan isMe: pesan dari ibu hamil = pesan saya (karena user yang login adalah ibu hamil)
+    // Jika di masa depan ada role lain, bisa dibandingkan dengan currentUser.id
+    final isMe = message.isFromIbuHamil;
+    
+    // Format waktu pengiriman
     final timeStr = DateFormat('HH:mm').format(message.createdAt);
-    final maxBubbleWidth = MediaQuery.of(context).size.width * 0.78;
+    
+    // Batasi lebar maksimum bubble (70% dari lebar layar)
+    final maxBubbleWidth = MediaQuery.of(context).size.width * 0.70;
 
-    final bubbleColor = isFromIbuHamil
-        ? AppColors.primaryBlue
-        : const Color(0xFFE8ECF1);
-    final textColor = isFromIbuHamil ? Colors.white : AppColors.textDark;
-    final timeColor = isFromIbuHamil ? Colors.white.withOpacity(0.85) : AppColors.textLight;
+    // Warna untuk pesan saya (isMe == true)
+    final myBubbleColor = AppColors.primaryBlue;
+    final myTextColor = Colors.white;
+    final myTimeColor = Colors.white.withOpacity(0.85);
 
+    // Warna untuk pesan lawan bicara (isMe == false)
+    final otherBubbleColor = Colors.grey.shade200;
+    final otherTextColor = AppColors.textDark;
+    final otherTimeColor = AppColors.textLight;
+
+    // Tentukan warna berdasarkan isMe
+    final bubbleColor = isMe ? myBubbleColor : otherBubbleColor;
+    final textColor = isMe ? myTextColor : otherTextColor;
+    final timeColor = isMe ? myTimeColor : otherTimeColor;
+
+    // BorderRadius dengan sudut yang lebih lancip di sisi pengirim
     const radius = 18.0;
-    final borderRadius = BorderRadius.only(
-      topLeft: const Radius.circular(radius),
-      topRight: const Radius.circular(radius),
-      bottomLeft: Radius.circular(isFromIbuHamil ? radius : 6),
-      bottomRight: Radius.circular(isFromIbuHamil ? 6 : radius),
-    );
+    const sharpRadius = 4.0; // Sudut lancip untuk "tail"
+    
+    final borderRadius = isMe
+        ? BorderRadius.only(
+            // Pesan saya: sudut kiri atas dan bawah lancip, kanan membulat
+            topLeft: const Radius.circular(radius),
+            topRight: const Radius.circular(radius),
+            bottomLeft: const Radius.circular(sharpRadius),
+            bottomRight: const Radius.circular(radius),
+          )
+        : BorderRadius.only(
+            // Pesan lawan: sudut kanan atas dan bawah lancip, kiri membulat
+            topLeft: const Radius.circular(radius),
+            topRight: const Radius.circular(radius),
+            bottomLeft: const Radius.circular(radius),
+            bottomRight: const Radius.circular(sharpRadius),
+          );
 
+    // Content bubble dengan padding yang nyaman
     final content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       constraints: BoxConstraints(maxWidth: maxBubbleWidth),
       decoration: BoxDecoration(
         color: bubbleColor,
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 6,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 4,
             offset: const Offset(0, 2),
+            spreadRadius: 0,
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Teks pesan
           Text(
             message.messageText,
             style: TextStyle(
               fontSize: 15,
               color: textColor,
-              height: 1.45,
+              height: 1.4,
+              letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            timeStr,
-            style: TextStyle(
-              fontSize: 11,
-              color: timeColor,
-            ),
+          const SizedBox(height: 6),
+          // Waktu pengiriman di sudut bawah
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                timeStr,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: timeColor,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
 
+    // Alignment: kanan untuk pesan saya, kiri untuk pesan lawan
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Align(
-        alignment: isFromIbuHamil ? Alignment.centerRight : Alignment.centerLeft,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: isFromIbuHamil
-              ? Alignment.bottomRight
-              : Alignment.bottomLeft,
-          children: [
-            content,
-            Positioned(
-              bottom: -4,
-              right: isFromIbuHamil ? -6 : null,
-              left: isFromIbuHamil ? null : -6,
-              child: _BubbleTail(
-                color: bubbleColor,
-                tailRight: isFromIbuHamil,
-              ),
-            ),
-          ],
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: isMe ? 40 : 0,
+            right: isMe ? 0 : 40,
+          ),
+          child: content,
         ),
       ),
     );

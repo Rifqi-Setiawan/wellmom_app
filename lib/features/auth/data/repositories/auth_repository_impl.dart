@@ -124,4 +124,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return Either.left(UnknownFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateFcmToken(String fcmToken) async {
+    try {
+      await remoteDataSource.updateFcmToken(fcmToken);
+      return Either.right(null);
+    } on Failure catch (e) {
+      return Either.left(e);
+    } catch (e) {
+      return Either.left(UnknownFailure(e.toString()));
+    }
+  }
 }

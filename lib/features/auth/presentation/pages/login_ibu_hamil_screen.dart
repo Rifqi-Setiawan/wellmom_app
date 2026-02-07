@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/constants/app_strings.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/services/notification_service.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
 import 'package:wellmom_app/core/widgets/error_snackbar.dart';
@@ -64,6 +65,9 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
           
           print('Login: Token preview: ${token.substring(0, token.length > 30 ? 30 : token.length)}...');
           
+          // Update FCM token to backend
+          _updateFcmTokenToBackend(ref);
+          
           // Show success message
           ErrorSnackbar.showSuccess(
             context,
@@ -97,6 +101,31 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       if (state.error != null) {
         ErrorSnackbar.show(context, state.error!);
       }
+    }
+  }
+
+  /// Update FCM token to backend after successful login
+  Future<void> _updateFcmTokenToBackend(WidgetRef ref) async {
+    try {
+      final fcmToken = await NotificationService().getCurrentFcmToken();
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        final authRepository = ref.read(authRepositoryProvider);
+        final result = await authRepository.updateFcmToken(fcmToken);
+        result.fold(
+          (failure) {
+            debugPrint('[Login] Failed to update FCM token: ${failure.message}');
+            // Don't show error to user, just log it
+          },
+          (_) {
+            debugPrint('[Login] FCM token updated successfully');
+          },
+        );
+      } else {
+        debugPrint('[Login] FCM token is null or empty, skipping update');
+      }
+    } catch (e) {
+      debugPrint('[Login] Error updating FCM token: $e');
+      // Don't show error to user, just log it
     }
   }
 

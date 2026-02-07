@@ -24,6 +24,9 @@ import 'package:wellmom_app/features/profile/presentation/pages/profile_screen.d
 class AppRouter {
   AppRouter._();
 
+  /// Global navigator key for navigation from services/outside of widget tree
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   static const String welcome = '/';
   static const String loginIbuHamil = '/login-ibu-hamil';
   static const String registerIbuHamil = '/register-ibu-hamil';

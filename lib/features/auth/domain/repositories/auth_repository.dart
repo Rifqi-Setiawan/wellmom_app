@@ -31,6 +31,9 @@ abstract class AuthRepository {
 
   /// Logout ibu hamil. Calls API then caller should clear token and navigate.
   Future<Either<Failure, void>> logoutIbuHamil();
+  
+  /// Update FCM token for current user. PUT /users/me/fcm-token
+  Future<Either<Failure, void>> updateFcmToken(String fcmToken);
 }
 
 /// Either type for error handling (simple implementation)
