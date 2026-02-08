@@ -6,9 +6,9 @@ part of 'forum_post_detail_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ForumPostDetailModelImpl _$$ForumPostDetailModelImplFromJson(
+_ForumPostDetailModel _$ForumPostDetailModelFromJson(
   Map<String, dynamic> json,
-) => _$ForumPostDetailModelImpl(
+) => _ForumPostDetailModel(
   id: (json['id'] as num).toInt(),
   authorUserId: (json['author_user_id'] as num).toInt(),
   authorName: json['author_name'] as String,
@@ -25,8 +25,8 @@ _$ForumPostDetailModelImpl _$$ForumPostDetailModelImplFromJson(
       .toList(),
 );
 
-Map<String, dynamic> _$$ForumPostDetailModelImplToJson(
-  _$ForumPostDetailModelImpl instance,
+Map<String, dynamic> _$ForumPostDetailModelToJson(
+  _ForumPostDetailModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'author_user_id': instance.authorUserId,

@@ -6,9 +6,9 @@ part of 'chatbot_conversation_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ChatbotConversationModelImpl _$$ChatbotConversationModelImplFromJson(
+_ChatbotConversationModel _$ChatbotConversationModelFromJson(
   Map<String, dynamic> json,
-) => _$ChatbotConversationModelImpl(
+) => _ChatbotConversationModel(
   id: (json['id'] as num).toInt(),
   title: json['title'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
@@ -16,8 +16,8 @@ _$ChatbotConversationModelImpl _$$ChatbotConversationModelImplFromJson(
   messageCount: (json['message_count'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$ChatbotConversationModelImplToJson(
-  _$ChatbotConversationModelImpl instance,
+Map<String, dynamic> _$ChatbotConversationModelToJson(
+  _ChatbotConversationModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,

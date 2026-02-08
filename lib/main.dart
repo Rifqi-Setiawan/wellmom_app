@@ -41,9 +41,33 @@ class _MyAppState extends ConsumerState<MyApp> {
       ref.read(authTokenProvider.notifier).state = savedToken;
       print('App: Loaded token from storage, length: ${savedToken.length}');
       
+      // Setup token refresh callback untuk otomatis kirim ke backend
+      _setupTokenRefreshCallback();
+      
       // Update FCM token to backend if user is already logged in
       _updateFcmTokenToBackend();
     }
+  }
+
+  /// Setup callback untuk otomatis kirim token ke backend saat token refresh
+  void _setupTokenRefreshCallback() {
+    NotificationService().setTokenRefreshCallback((String newToken) async {
+      try {
+        final authRepository = ref.read(authRepositoryProvider);
+        final result = await authRepository.updateFcmToken(newToken);
+        result.fold(
+          (failure) {
+            debugPrint('[App] Failed to update refreshed FCM token: ${failure.message}');
+          },
+          (_) {
+            print("DEBUG: Refreshed FCM Token sent to backend: $newToken");
+            debugPrint('[App] Refreshed FCM token updated successfully');
+          },
+        );
+      } catch (e) {
+        debugPrint('[App] Error updating refreshed FCM token: $e');
+      }
+    });
   }
 
   /// Update FCM token to backend when app opens (if user is logged in)

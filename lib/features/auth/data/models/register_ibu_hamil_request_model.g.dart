@@ -6,22 +6,22 @@ part of 'register_ibu_hamil_request_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RegisterIbuHamilRequestModelImpl _$$RegisterIbuHamilRequestModelImplFromJson(
+_RegisterIbuHamilRequestModel _$RegisterIbuHamilRequestModelFromJson(
   Map<String, dynamic> json,
-) => _$RegisterIbuHamilRequestModelImpl(
+) => _RegisterIbuHamilRequestModel(
   ibuHamil: IbuHamilData.fromJson(json['ibu_hamil'] as Map<String, dynamic>),
   user: UserData.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$$RegisterIbuHamilRequestModelImplToJson(
-  _$RegisterIbuHamilRequestModelImpl instance,
+Map<String, dynamic> _$RegisterIbuHamilRequestModelToJson(
+  _RegisterIbuHamilRequestModel instance,
 ) => <String, dynamic>{
   'ibu_hamil': instance.ibuHamil.toJson(),
   'user': instance.user.toJson(),
 };
 
-_$IbuHamilDataImpl _$$IbuHamilDataImplFromJson(Map<String, dynamic> json) =>
-    _$IbuHamilDataImpl(
+_IbuHamilData _$IbuHamilDataFromJson(Map<String, dynamic> json) =>
+    _IbuHamilData(
       address: json['address'] as String,
       age: (json['age'] as num?)?.toInt(),
       bloodType: json['blood_type'] as String?,
@@ -58,8 +58,8 @@ _$IbuHamilDataImpl _$$IbuHamilDataImplFromJson(Map<String, dynamic> json) =>
       whatsappConsent: json['whatsapp_consent'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$$IbuHamilDataImplToJson(
-  _$IbuHamilDataImpl instance,
+Map<String, dynamic> _$IbuHamilDataToJson(
+  _IbuHamilData instance,
 ) => <String, dynamic>{
   'address': instance.address,
   'age': instance.age,
@@ -91,9 +91,9 @@ Map<String, dynamic> _$$IbuHamilDataImplToJson(
   'whatsapp_consent': instance.whatsappConsent,
 };
 
-_$RiwayatKesehatanIbuDataImpl _$$RiwayatKesehatanIbuDataImplFromJson(
+_RiwayatKesehatanIbuData _$RiwayatKesehatanIbuDataFromJson(
   Map<String, dynamic> json,
-) => _$RiwayatKesehatanIbuDataImpl(
+) => _RiwayatKesehatanIbuData(
   anemia: json['anemia'] as bool? ?? false,
   asma: json['asma'] as bool? ?? false,
   darahTinggi: json['darah_tinggi'] as bool? ?? false,
@@ -103,8 +103,8 @@ _$RiwayatKesehatanIbuDataImpl _$$RiwayatKesehatanIbuDataImplFromJson(
   tbcMalaria: json['tbc_malaria'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$$RiwayatKesehatanIbuDataImplToJson(
-  _$RiwayatKesehatanIbuDataImpl instance,
+Map<String, dynamic> _$RiwayatKesehatanIbuDataToJson(
+  _RiwayatKesehatanIbuData instance,
 ) => <String, dynamic>{
   'anemia': instance.anemia,
   'asma': instance.asma,
@@ -115,20 +115,18 @@ Map<String, dynamic> _$$RiwayatKesehatanIbuDataImplToJson(
   'tbc_malaria': instance.tbcMalaria,
 };
 
-_$UserDataImpl _$$UserDataImplFromJson(Map<String, dynamic> json) =>
-    _$UserDataImpl(
-      email: json['email'] as String,
-      fullName: json['full_name'] as String,
-      password: json['password'] as String,
-      phone: json['phone'] as String,
-      role: json['role'] as String,
-    );
+_UserData _$UserDataFromJson(Map<String, dynamic> json) => _UserData(
+  email: json['email'] as String,
+  fullName: json['full_name'] as String,
+  password: json['password'] as String,
+  phone: json['phone'] as String,
+  role: json['role'] as String,
+);
 
-Map<String, dynamic> _$$UserDataImplToJson(_$UserDataImpl instance) =>
-    <String, dynamic>{
-      'email': instance.email,
-      'full_name': instance.fullName,
-      'password': instance.password,
-      'phone': instance.phone,
-      'role': instance.role,
-    };
+Map<String, dynamic> _$UserDataToJson(_UserData instance) => <String, dynamic>{
+  'email': instance.email,
+  'full_name': instance.fullName,
+  'password': instance.password,
+  'phone': instance.phone,
+  'role': instance.role,
+};

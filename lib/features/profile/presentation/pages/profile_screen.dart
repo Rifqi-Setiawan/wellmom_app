@@ -207,8 +207,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.person_outline,
                     iconBgColor: const Color(0xFFE3F2FD),
                     title: 'Edit Personal Information',
-                    onTap: () {
-                      // TODO: Navigate to edit personal information
+                    onTap: () async {
+                      final updated = await Navigator.of(context).pushNamed<bool>(
+                        AppRouter.editProfile,
+                      );
+                      if (updated == true && mounted) {
+                        ref.invalidate(ibuHamilMeProvider);
+                      }
                     },
                     isFirst: true,
                   ),

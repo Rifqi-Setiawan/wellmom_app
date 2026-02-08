@@ -6,9 +6,9 @@ part of 'riwayat_kesehatan_ibu_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RiwayatKesehatanIbuModelImpl _$$RiwayatKesehatanIbuModelImplFromJson(
+_RiwayatKesehatanIbuModel _$RiwayatKesehatanIbuModelFromJson(
   Map<String, dynamic> json,
-) => _$RiwayatKesehatanIbuModelImpl(
+) => _RiwayatKesehatanIbuModel(
   darahTinggi: json['darah_tinggi'] as bool? ?? false,
   diabetes: json['diabetes'] as bool? ?? false,
   anemia: json['anemia'] as bool? ?? false,
@@ -18,8 +18,8 @@ _$RiwayatKesehatanIbuModelImpl _$$RiwayatKesehatanIbuModelImplFromJson(
   tbcMalaria: json['tbc_malaria'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$$RiwayatKesehatanIbuModelImplToJson(
-  _$RiwayatKesehatanIbuModelImpl instance,
+Map<String, dynamic> _$RiwayatKesehatanIbuModelToJson(
+  _RiwayatKesehatanIbuModel instance,
 ) => <String, dynamic>{
   'darah_tinggi': instance.darahTinggi,
   'diabetes': instance.diabetes,

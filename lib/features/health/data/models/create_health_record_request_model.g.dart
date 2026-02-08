@@ -6,32 +6,31 @@ part of 'create_health_record_request_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CreateHealthRecordRequestModelImpl
-_$$CreateHealthRecordRequestModelImplFromJson(Map<String, dynamic> json) =>
-    _$CreateHealthRecordRequestModelImpl(
-      bloodGlucose: (json['blood_glucose'] as num?)?.toDouble(),
-      bloodPressureDiastolic: (json['blood_pressure_diastolic'] as num).toInt(),
-      bloodPressureSystolic: (json['blood_pressure_systolic'] as num).toInt(),
-      bodyTemperature: (json['body_temperature'] as num).toDouble(),
-      checkedBy: json['checked_by'] as String,
-      checkupDate: json['checkup_date'] as String,
-      complaints: json['complaints'] as String,
-      fetalHeartRate: (json['fetal_heart_rate'] as num?)?.toInt(),
-      fundalHeight: (json['fundal_height'] as num?)?.toDouble(),
-      gestationalAgeDays: (json['gestational_age_days'] as num?)?.toInt(),
-      gestationalAgeWeeks: (json['gestational_age_weeks'] as num?)?.toInt(),
-      heartRate: (json['heart_rate'] as num).toInt(),
-      hemoglobin: (json['hemoglobin'] as num?)?.toDouble(),
-      notes: json['notes'] as String?,
-      perawatId: (json['perawat_id'] as num?)?.toInt(),
-      proteinUrin: json['protein_urin'] as String?,
-      upperArmCircumference: (json['upper_arm_circumference'] as num?)
-          ?.toDouble(),
-      weight: (json['weight'] as num).toDouble(),
-    );
+_CreateHealthRecordRequestModel _$CreateHealthRecordRequestModelFromJson(
+  Map<String, dynamic> json,
+) => _CreateHealthRecordRequestModel(
+  bloodGlucose: (json['blood_glucose'] as num?)?.toDouble(),
+  bloodPressureDiastolic: (json['blood_pressure_diastolic'] as num).toInt(),
+  bloodPressureSystolic: (json['blood_pressure_systolic'] as num).toInt(),
+  bodyTemperature: (json['body_temperature'] as num).toDouble(),
+  checkedBy: json['checked_by'] as String,
+  checkupDate: json['checkup_date'] as String,
+  complaints: json['complaints'] as String,
+  fetalHeartRate: (json['fetal_heart_rate'] as num?)?.toInt(),
+  fundalHeight: (json['fundal_height'] as num?)?.toDouble(),
+  gestationalAgeDays: (json['gestational_age_days'] as num?)?.toInt(),
+  gestationalAgeWeeks: (json['gestational_age_weeks'] as num?)?.toInt(),
+  heartRate: (json['heart_rate'] as num).toInt(),
+  hemoglobin: (json['hemoglobin'] as num?)?.toDouble(),
+  notes: json['notes'] as String?,
+  perawatId: (json['perawat_id'] as num?)?.toInt(),
+  proteinUrin: json['protein_urin'] as String?,
+  upperArmCircumference: (json['upper_arm_circumference'] as num?)?.toDouble(),
+  weight: (json['weight'] as num).toDouble(),
+);
 
-Map<String, dynamic> _$$CreateHealthRecordRequestModelImplToJson(
-  _$CreateHealthRecordRequestModelImpl instance,
+Map<String, dynamic> _$CreateHealthRecordRequestModelToJson(
+  _CreateHealthRecordRequestModel instance,
 ) => <String, dynamic>{
   'blood_glucose': instance.bloodGlucose,
   'blood_pressure_diastolic': instance.bloodPressureDiastolic,

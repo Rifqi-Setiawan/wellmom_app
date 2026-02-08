@@ -1,4 +1,4 @@
-package com.example.wellmom_app
+package wellmom.com
 
 import io.flutter.embedding.android.FlutterActivity
 

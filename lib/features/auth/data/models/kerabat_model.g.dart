@@ -6,8 +6,8 @@ part of 'kerabat_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$KerabatModelImpl _$$KerabatModelImplFromJson(Map<String, dynamic> json) =>
-    _$KerabatModelImpl(
+_KerabatModel _$KerabatModelFromJson(Map<String, dynamic> json) =>
+    _KerabatModel(
       id: (json['id'] as num).toInt(),
       kerabatUserId: (json['kerabat_user_id'] as num).toInt(),
       ibuHamilId: (json['ibu_hamil_id'] as num).toInt(),
@@ -21,7 +21,7 @@ _$KerabatModelImpl _$$KerabatModelImplFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
 
-Map<String, dynamic> _$$KerabatModelImplToJson(_$KerabatModelImpl instance) =>
+Map<String, dynamic> _$KerabatModelToJson(_KerabatModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'kerabat_user_id': instance.kerabatUserId,

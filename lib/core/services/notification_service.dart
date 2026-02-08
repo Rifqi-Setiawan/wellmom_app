@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.dart';
@@ -23,12 +22,29 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  FirebaseMessaging? _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
   String? _fcmToken;
+  
+  /// Callback untuk update token ke backend saat token refresh
+  Future<void> Function(String token)? _onTokenRefreshCallback;
+  
+  /// Getter untuk FirebaseMessaging dengan lazy initialization
+  FirebaseMessaging get _messaging {
+    if (_firebaseMessaging == null) {
+      throw StateError('NotificationService not initialized. Call NotificationService.initialize() first.');
+    }
+    return _firebaseMessaging!;
+  }
+  
+  /// Set callback untuk update token ke backend saat token refresh
+  void setTokenRefreshCallback(Future<void> Function(String token) callback) {
+    _onTokenRefreshCallback = callback;
+    debugPrint('[NotificationService] Token refresh callback set');
+  }
 
   /// Initialize Firebase Messaging dan Local Notifications
   static Future<void> initialize() async {
@@ -47,6 +63,10 @@ class NotificationService {
         await Firebase.initializeApp();
         debugPrint('[NotificationService] Firebase initialized');
       }
+
+      // Initialize FirebaseMessaging setelah Firebase siap
+      _firebaseMessaging = FirebaseMessaging.instance;
+      debugPrint('[NotificationService] FirebaseMessaging initialized');
 
       // Initialize Local Notifications
       await _initializeLocalNotifications();
@@ -88,8 +108,9 @@ class NotificationService {
     );
 
     await _localNotifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveBackgroundNotificationResponse: _onNotificationTapped,
     );
 
     // Create notification channel untuk Android
@@ -113,7 +134,7 @@ class NotificationService {
   /// Request permission untuk notifications
   Future<void> _requestPermission() async {
     try {
-      final settings = await _firebaseMessaging.requestPermission(
+      final settings = await _messaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -177,10 +198,10 @@ class NotificationService {
     final payload = message.data.toString();
     
     await _localNotifications.show(
-      message.hashCode,
-      notification.title,
-      notification.body,
-      notificationDetails,
+      id: message.hashCode,
+      title: notification.title ?? '',
+      body: notification.body ?? '',
+      notificationDetails: notificationDetails,
       payload: payload,
     );
   }
@@ -189,7 +210,7 @@ class NotificationService {
   /// Handles both terminated state and background/foreground state
   void setupInteractedMessage() {
     // Handle notification when app was opened from terminated state
-    _firebaseMessaging.getInitialMessage().then((RemoteMessage? message) {
+    _messaging.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
         debugPrint('[NotificationService] App opened from terminated state');
         _handleMessage(message);
@@ -353,14 +374,25 @@ class NotificationService {
   /// Internal method untuk get FCM token
   Future<void> _getFcmToken() async {
     try {
-      _fcmToken = await _firebaseMessaging.getToken();
+      _fcmToken = await _messaging.getToken();
       debugPrint('[NotificationService] FCM Token obtained: ${_fcmToken?.substring(0, _fcmToken!.length > 50 ? 50 : _fcmToken!.length)}...');
 
       // Listen untuk token refresh
-      _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      _messaging.onTokenRefresh.listen((newToken) async {
         _fcmToken = newToken;
         debugPrint('[NotificationService] FCM Token refreshed: ${newToken.substring(0, newToken.length > 50 ? 50 : newToken.length)}...');
-        // Token refresh akan di-handle oleh caller yang memanggil updateFcmToken
+        
+        // Otomatis kirim token baru ke backend jika callback tersedia
+        if (_onTokenRefreshCallback != null) {
+          try {
+            await _onTokenRefreshCallback!(newToken);
+            debugPrint('[NotificationService] FCM Token automatically sent to backend after refresh');
+          } catch (e) {
+            debugPrint('[NotificationService] Error sending refreshed token to backend: $e');
+          }
+        } else {
+          debugPrint('[NotificationService] Token refresh callback not set, skipping auto-update to backend');
+        }
       });
     } catch (e) {
       debugPrint('[NotificationService] Error getting FCM token: $e');
@@ -375,7 +407,7 @@ class NotificationService {
     // Refresh token if null
     if (_fcmToken == null || _fcmToken!.isEmpty) {
       try {
-        _fcmToken = await _firebaseMessaging.getToken();
+        _fcmToken = await _messaging.getToken();
         debugPrint('[NotificationService] FCM Token refreshed: ${_fcmToken?.substring(0, _fcmToken != null && _fcmToken!.length > 50 ? 50 : _fcmToken?.length ?? 0)}...');
       } catch (e) {
         debugPrint('[NotificationService] Error refreshing FCM token: $e');
@@ -387,7 +419,7 @@ class NotificationService {
   /// Subscribe to topic (optional)
   Future<void> subscribeToTopic(String topic) async {
     try {
-      await _firebaseMessaging.subscribeToTopic(topic);
+      await _messaging.subscribeToTopic(topic);
       debugPrint('[NotificationService] Subscribed to topic: $topic');
     } catch (e) {
       debugPrint('[NotificationService] Error subscribing to topic: $e');
@@ -397,7 +429,7 @@ class NotificationService {
   /// Unsubscribe from topic (optional)
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
-      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      await _messaging.unsubscribeFromTopic(topic);
       debugPrint('[NotificationService] Unsubscribed from topic: $topic');
     } catch (e) {
       debugPrint('[NotificationService] Error unsubscribing from topic: $e');

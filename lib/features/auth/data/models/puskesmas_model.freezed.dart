@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,545 +9,574 @@ part of 'puskesmas_model.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-PuskesmasModel _$PuskesmasModelFromJson(Map<String, dynamic> json) {
-  return _PuskesmasModel.fromJson(json);
-}
 
 /// @nodoc
 mixin _$PuskesmasModel {
-  int get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  @JsonKey(name: 'registration_status')
-  String get registrationStatus => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_active')
-  bool get isActive => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
-  String? get email => throw _privateConstructorUsedError;
-  String? get address => throw _privateConstructorUsedError;
+
+ int get id; String get name;@JsonKey(name: 'registration_status') String get registrationStatus;@JsonKey(name: 'is_active') bool get isActive; String? get phone; String? get email; String? get address;
+/// Create a copy of PuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PuskesmasModelCopyWith<PuskesmasModel> get copyWith => _$PuskesmasModelCopyWithImpl<PuskesmasModel>(this as PuskesmasModel, _$identity);
 
   /// Serializes this PuskesmasModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of PuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PuskesmasModelCopyWith<PuskesmasModel> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PuskesmasModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.registrationStatus, registrationStatus) || other.registrationStatus == registrationStatus)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,registrationStatus,isActive,phone,email,address);
+
+@override
+String toString() {
+  return 'PuskesmasModel(id: $id, name: $name, registrationStatus: $registrationStatus, isActive: $isActive, phone: $phone, email: $email, address: $address)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PuskesmasModelCopyWith<$Res> {
-  factory $PuskesmasModelCopyWith(
-    PuskesmasModel value,
-    $Res Function(PuskesmasModel) then,
-  ) = _$PuskesmasModelCopyWithImpl<$Res, PuskesmasModel>;
-  @useResult
-  $Res call({
-    int id,
-    String name,
-    @JsonKey(name: 'registration_status') String registrationStatus,
-    @JsonKey(name: 'is_active') bool isActive,
-    String? phone,
-    String? email,
-    String? address,
-  });
-}
+abstract mixin class $PuskesmasModelCopyWith<$Res>  {
+  factory $PuskesmasModelCopyWith(PuskesmasModel value, $Res Function(PuskesmasModel) _then) = _$PuskesmasModelCopyWithImpl;
+@useResult
+$Res call({
+ int id, String name,@JsonKey(name: 'registration_status') String registrationStatus,@JsonKey(name: 'is_active') bool isActive, String? phone, String? email, String? address
+});
 
+
+
+
+}
 /// @nodoc
-class _$PuskesmasModelCopyWithImpl<$Res, $Val extends PuskesmasModel>
+class _$PuskesmasModelCopyWithImpl<$Res>
     implements $PuskesmasModelCopyWith<$Res> {
-  _$PuskesmasModelCopyWithImpl(this._value, this._then);
+  _$PuskesmasModelCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final PuskesmasModel _self;
+  final $Res Function(PuskesmasModel) _then;
 
-  /// Create a copy of PuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? registrationStatus = null,
-    Object? isActive = null,
-    Object? phone = freezed,
-    Object? email = freezed,
-    Object? address = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as int,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            registrationStatus: null == registrationStatus
-                ? _value.registrationStatus
-                : registrationStatus // ignore: cast_nullable_to_non_nullable
-                      as String,
-            isActive: null == isActive
-                ? _value.isActive
-                : isActive // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            phone: freezed == phone
-                ? _value.phone
-                : phone // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            email: freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            address: freezed == address
-                ? _value.address
-                : address // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of PuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? registrationStatus = null,Object? isActive = null,Object? phone = freezed,Object? email = freezed,Object? address = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,registrationStatus: null == registrationStatus ? _self.registrationStatus : registrationStatus // ignore: cast_nullable_to_non_nullable
+as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$PuskesmasModelImplCopyWith<$Res>
-    implements $PuskesmasModelCopyWith<$Res> {
-  factory _$$PuskesmasModelImplCopyWith(
-    _$PuskesmasModelImpl value,
-    $Res Function(_$PuskesmasModelImpl) then,
-  ) = __$$PuskesmasModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    int id,
-    String name,
-    @JsonKey(name: 'registration_status') String registrationStatus,
-    @JsonKey(name: 'is_active') bool isActive,
-    String? phone,
-    String? email,
-    String? address,
-  });
 }
 
-/// @nodoc
-class __$$PuskesmasModelImplCopyWithImpl<$Res>
-    extends _$PuskesmasModelCopyWithImpl<$Res, _$PuskesmasModelImpl>
-    implements _$$PuskesmasModelImplCopyWith<$Res> {
-  __$$PuskesmasModelImplCopyWithImpl(
-    _$PuskesmasModelImpl _value,
-    $Res Function(_$PuskesmasModelImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of PuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? registrationStatus = null,
-    Object? isActive = null,
-    Object? phone = freezed,
-    Object? email = freezed,
-    Object? address = freezed,
-  }) {
-    return _then(
-      _$PuskesmasModelImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as int,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        registrationStatus: null == registrationStatus
-            ? _value.registrationStatus
-            : registrationStatus // ignore: cast_nullable_to_non_nullable
-                  as String,
-        isActive: null == isActive
-            ? _value.isActive
-            : isActive // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        phone: freezed == phone
-            ? _value.phone
-            : phone // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        email: freezed == email
-            ? _value.email
-            : email // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        address: freezed == address
-            ? _value.address
-            : address // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [PuskesmasModel].
+extension PuskesmasModelPatterns on PuskesmasModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PuskesmasModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PuskesmasModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PuskesmasModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _PuskesmasModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PuskesmasModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PuskesmasModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name, @JsonKey(name: 'registration_status')  String registrationStatus, @JsonKey(name: 'is_active')  bool isActive,  String? phone,  String? email,  String? address)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PuskesmasModel() when $default != null:
+return $default(_that.id,_that.name,_that.registrationStatus,_that.isActive,_that.phone,_that.email,_that.address);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name, @JsonKey(name: 'registration_status')  String registrationStatus, @JsonKey(name: 'is_active')  bool isActive,  String? phone,  String? email,  String? address)  $default,) {final _that = this;
+switch (_that) {
+case _PuskesmasModel():
+return $default(_that.id,_that.name,_that.registrationStatus,_that.isActive,_that.phone,_that.email,_that.address);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name, @JsonKey(name: 'registration_status')  String registrationStatus, @JsonKey(name: 'is_active')  bool isActive,  String? phone,  String? email,  String? address)?  $default,) {final _that = this;
+switch (_that) {
+case _PuskesmasModel() when $default != null:
+return $default(_that.id,_that.name,_that.registrationStatus,_that.isActive,_that.phone,_that.email,_that.address);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$PuskesmasModelImpl implements _PuskesmasModel {
-  const _$PuskesmasModelImpl({
-    required this.id,
-    required this.name,
-    @JsonKey(name: 'registration_status') required this.registrationStatus,
-    @JsonKey(name: 'is_active') this.isActive = true,
-    this.phone,
-    this.email,
-    this.address,
-  });
 
-  factory _$PuskesmasModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PuskesmasModelImplFromJson(json);
+class _PuskesmasModel implements PuskesmasModel {
+  const _PuskesmasModel({required this.id, required this.name, @JsonKey(name: 'registration_status') required this.registrationStatus, @JsonKey(name: 'is_active') this.isActive = true, this.phone, this.email, this.address});
+  factory _PuskesmasModel.fromJson(Map<String, dynamic> json) => _$PuskesmasModelFromJson(json);
 
-  @override
-  final int id;
-  @override
-  final String name;
-  @override
-  @JsonKey(name: 'registration_status')
-  final String registrationStatus;
-  @override
-  @JsonKey(name: 'is_active')
-  final bool isActive;
-  @override
-  final String? phone;
-  @override
-  final String? email;
-  @override
-  final String? address;
+@override final  int id;
+@override final  String name;
+@override@JsonKey(name: 'registration_status') final  String registrationStatus;
+@override@JsonKey(name: 'is_active') final  bool isActive;
+@override final  String? phone;
+@override final  String? email;
+@override final  String? address;
 
-  @override
-  String toString() {
-    return 'PuskesmasModel(id: $id, name: $name, registrationStatus: $registrationStatus, isActive: $isActive, phone: $phone, email: $email, address: $address)';
-  }
+/// Create a copy of PuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PuskesmasModelCopyWith<_PuskesmasModel> get copyWith => __$PuskesmasModelCopyWithImpl<_PuskesmasModel>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PuskesmasModelImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.registrationStatus, registrationStatus) ||
-                other.registrationStatus == registrationStatus) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
-            (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.address, address) || other.address == address));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    registrationStatus,
-    isActive,
-    phone,
-    email,
-    address,
-  );
-
-  /// Create a copy of PuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PuskesmasModelImplCopyWith<_$PuskesmasModelImpl> get copyWith =>
-      __$$PuskesmasModelImplCopyWithImpl<_$PuskesmasModelImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PuskesmasModelImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$PuskesmasModelToJson(this, );
 }
 
-abstract class _PuskesmasModel implements PuskesmasModel {
-  const factory _PuskesmasModel({
-    required final int id,
-    required final String name,
-    @JsonKey(name: 'registration_status')
-    required final String registrationStatus,
-    @JsonKey(name: 'is_active') final bool isActive,
-    final String? phone,
-    final String? email,
-    final String? address,
-  }) = _$PuskesmasModelImpl;
-
-  factory _PuskesmasModel.fromJson(Map<String, dynamic> json) =
-      _$PuskesmasModelImpl.fromJson;
-
-  @override
-  int get id;
-  @override
-  String get name;
-  @override
-  @JsonKey(name: 'registration_status')
-  String get registrationStatus;
-  @override
-  @JsonKey(name: 'is_active')
-  bool get isActive;
-  @override
-  String? get phone;
-  @override
-  String? get email;
-  @override
-  String? get address;
-
-  /// Create a copy of PuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PuskesmasModelImplCopyWith<_$PuskesmasModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PuskesmasModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.registrationStatus, registrationStatus) || other.registrationStatus == registrationStatus)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address));
 }
 
-NearestPuskesmasModel _$NearestPuskesmasModelFromJson(
-  Map<String, dynamic> json,
-) {
-  return _NearestPuskesmasModel.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,registrationStatus,isActive,phone,email,address);
+
+@override
+String toString() {
+  return 'PuskesmasModel(id: $id, name: $name, registrationStatus: $registrationStatus, isActive: $isActive, phone: $phone, email: $email, address: $address)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PuskesmasModelCopyWith<$Res> implements $PuskesmasModelCopyWith<$Res> {
+  factory _$PuskesmasModelCopyWith(_PuskesmasModel value, $Res Function(_PuskesmasModel) _then) = __$PuskesmasModelCopyWithImpl;
+@override @useResult
+$Res call({
+ int id, String name,@JsonKey(name: 'registration_status') String registrationStatus,@JsonKey(name: 'is_active') bool isActive, String? phone, String? email, String? address
+});
+
+
+
+
+}
+/// @nodoc
+class __$PuskesmasModelCopyWithImpl<$Res>
+    implements _$PuskesmasModelCopyWith<$Res> {
+  __$PuskesmasModelCopyWithImpl(this._self, this._then);
+
+  final _PuskesmasModel _self;
+  final $Res Function(_PuskesmasModel) _then;
+
+/// Create a copy of PuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? registrationStatus = null,Object? isActive = null,Object? phone = freezed,Object? email = freezed,Object? address = freezed,}) {
+  return _then(_PuskesmasModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,registrationStatus: null == registrationStatus ? _self.registrationStatus : registrationStatus // ignore: cast_nullable_to_non_nullable
+as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$NearestPuskesmasModel {
-  PuskesmasModel get puskesmas => throw _privateConstructorUsedError;
-  @JsonKey(name: 'distance_km')
-  double get distanceKm => throw _privateConstructorUsedError;
-  String get address => throw _privateConstructorUsedError;
+
+ PuskesmasModel get puskesmas;@JsonKey(name: 'distance_km') double get distanceKm; String get address;
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NearestPuskesmasModelCopyWith<NearestPuskesmasModel> get copyWith => _$NearestPuskesmasModelCopyWithImpl<NearestPuskesmasModel>(this as NearestPuskesmasModel, _$identity);
 
   /// Serializes this NearestPuskesmasModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $NearestPuskesmasModelCopyWith<NearestPuskesmasModel> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NearestPuskesmasModel&&(identical(other.puskesmas, puskesmas) || other.puskesmas == puskesmas)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.address, address) || other.address == address));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,puskesmas,distanceKm,address);
+
+@override
+String toString() {
+  return 'NearestPuskesmasModel(puskesmas: $puskesmas, distanceKm: $distanceKm, address: $address)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $NearestPuskesmasModelCopyWith<$Res> {
-  factory $NearestPuskesmasModelCopyWith(
-    NearestPuskesmasModel value,
-    $Res Function(NearestPuskesmasModel) then,
-  ) = _$NearestPuskesmasModelCopyWithImpl<$Res, NearestPuskesmasModel>;
-  @useResult
-  $Res call({
-    PuskesmasModel puskesmas,
-    @JsonKey(name: 'distance_km') double distanceKm,
-    String address,
-  });
+abstract mixin class $NearestPuskesmasModelCopyWith<$Res>  {
+  factory $NearestPuskesmasModelCopyWith(NearestPuskesmasModel value, $Res Function(NearestPuskesmasModel) _then) = _$NearestPuskesmasModelCopyWithImpl;
+@useResult
+$Res call({
+ PuskesmasModel puskesmas,@JsonKey(name: 'distance_km') double distanceKm, String address
+});
 
-  $PuskesmasModelCopyWith<$Res> get puskesmas;
+
+$PuskesmasModelCopyWith<$Res> get puskesmas;
+
 }
-
 /// @nodoc
-class _$NearestPuskesmasModelCopyWithImpl<
-  $Res,
-  $Val extends NearestPuskesmasModel
->
+class _$NearestPuskesmasModelCopyWithImpl<$Res>
     implements $NearestPuskesmasModelCopyWith<$Res> {
-  _$NearestPuskesmasModelCopyWithImpl(this._value, this._then);
+  _$NearestPuskesmasModelCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final NearestPuskesmasModel _self;
+  final $Res Function(NearestPuskesmasModel) _then;
 
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? puskesmas = null,
-    Object? distanceKm = null,
-    Object? address = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            puskesmas: null == puskesmas
-                ? _value.puskesmas
-                : puskesmas // ignore: cast_nullable_to_non_nullable
-                      as PuskesmasModel,
-            distanceKm: null == distanceKm
-                ? _value.distanceKm
-                : distanceKm // ignore: cast_nullable_to_non_nullable
-                      as double,
-            address: null == address
-                ? _value.address
-                : address // ignore: cast_nullable_to_non_nullable
-                      as String,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $PuskesmasModelCopyWith<$Res> get puskesmas {
-    return $PuskesmasModelCopyWith<$Res>(_value.puskesmas, (value) {
-      return _then(_value.copyWith(puskesmas: value) as $Val);
-    });
-  }
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? puskesmas = null,Object? distanceKm = null,Object? address = null,}) {
+  return _then(_self.copyWith(
+puskesmas: null == puskesmas ? _self.puskesmas : puskesmas // ignore: cast_nullable_to_non_nullable
+as PuskesmasModel,distanceKm: null == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
 }
-
-/// @nodoc
-abstract class _$$NearestPuskesmasModelImplCopyWith<$Res>
-    implements $NearestPuskesmasModelCopyWith<$Res> {
-  factory _$$NearestPuskesmasModelImplCopyWith(
-    _$NearestPuskesmasModelImpl value,
-    $Res Function(_$NearestPuskesmasModelImpl) then,
-  ) = __$$NearestPuskesmasModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    PuskesmasModel puskesmas,
-    @JsonKey(name: 'distance_km') double distanceKm,
-    String address,
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PuskesmasModelCopyWith<$Res> get puskesmas {
+  
+  return $PuskesmasModelCopyWith<$Res>(_self.puskesmas, (value) {
+    return _then(_self.copyWith(puskesmas: value));
   });
-
-  @override
-  $PuskesmasModelCopyWith<$Res> get puskesmas;
+}
 }
 
-/// @nodoc
-class __$$NearestPuskesmasModelImplCopyWithImpl<$Res>
-    extends
-        _$NearestPuskesmasModelCopyWithImpl<$Res, _$NearestPuskesmasModelImpl>
-    implements _$$NearestPuskesmasModelImplCopyWith<$Res> {
-  __$$NearestPuskesmasModelImplCopyWithImpl(
-    _$NearestPuskesmasModelImpl _value,
-    $Res Function(_$NearestPuskesmasModelImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? puskesmas = null,
-    Object? distanceKm = null,
-    Object? address = null,
-  }) {
-    return _then(
-      _$NearestPuskesmasModelImpl(
-        puskesmas: null == puskesmas
-            ? _value.puskesmas
-            : puskesmas // ignore: cast_nullable_to_non_nullable
-                  as PuskesmasModel,
-        distanceKm: null == distanceKm
-            ? _value.distanceKm
-            : distanceKm // ignore: cast_nullable_to_non_nullable
-                  as double,
-        address: null == address
-            ? _value.address
-            : address // ignore: cast_nullable_to_non_nullable
-                  as String,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [NearestPuskesmasModel].
+extension NearestPuskesmasModelPatterns on NearestPuskesmasModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _NearestPuskesmasModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _NearestPuskesmasModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _NearestPuskesmasModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PuskesmasModel puskesmas, @JsonKey(name: 'distance_km')  double distanceKm,  String address)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel() when $default != null:
+return $default(_that.puskesmas,_that.distanceKm,_that.address);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PuskesmasModel puskesmas, @JsonKey(name: 'distance_km')  double distanceKm,  String address)  $default,) {final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel():
+return $default(_that.puskesmas,_that.distanceKm,_that.address);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PuskesmasModel puskesmas, @JsonKey(name: 'distance_km')  double distanceKm,  String address)?  $default,) {final _that = this;
+switch (_that) {
+case _NearestPuskesmasModel() when $default != null:
+return $default(_that.puskesmas,_that.distanceKm,_that.address);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$NearestPuskesmasModelImpl implements _NearestPuskesmasModel {
-  const _$NearestPuskesmasModelImpl({
-    required this.puskesmas,
-    @JsonKey(name: 'distance_km') required this.distanceKm,
-    required this.address,
+
+class _NearestPuskesmasModel implements NearestPuskesmasModel {
+  const _NearestPuskesmasModel({required this.puskesmas, @JsonKey(name: 'distance_km') required this.distanceKm, required this.address});
+  factory _NearestPuskesmasModel.fromJson(Map<String, dynamic> json) => _$NearestPuskesmasModelFromJson(json);
+
+@override final  PuskesmasModel puskesmas;
+@override@JsonKey(name: 'distance_km') final  double distanceKm;
+@override final  String address;
+
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$NearestPuskesmasModelCopyWith<_NearestPuskesmasModel> get copyWith => __$NearestPuskesmasModelCopyWithImpl<_NearestPuskesmasModel>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$NearestPuskesmasModelToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NearestPuskesmasModel&&(identical(other.puskesmas, puskesmas) || other.puskesmas == puskesmas)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.address, address) || other.address == address));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,puskesmas,distanceKm,address);
+
+@override
+String toString() {
+  return 'NearestPuskesmasModel(puskesmas: $puskesmas, distanceKm: $distanceKm, address: $address)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$NearestPuskesmasModelCopyWith<$Res> implements $NearestPuskesmasModelCopyWith<$Res> {
+  factory _$NearestPuskesmasModelCopyWith(_NearestPuskesmasModel value, $Res Function(_NearestPuskesmasModel) _then) = __$NearestPuskesmasModelCopyWithImpl;
+@override @useResult
+$Res call({
+ PuskesmasModel puskesmas,@JsonKey(name: 'distance_km') double distanceKm, String address
+});
+
+
+@override $PuskesmasModelCopyWith<$Res> get puskesmas;
+
+}
+/// @nodoc
+class __$NearestPuskesmasModelCopyWithImpl<$Res>
+    implements _$NearestPuskesmasModelCopyWith<$Res> {
+  __$NearestPuskesmasModelCopyWithImpl(this._self, this._then);
+
+  final _NearestPuskesmasModel _self;
+  final $Res Function(_NearestPuskesmasModel) _then;
+
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? puskesmas = null,Object? distanceKm = null,Object? address = null,}) {
+  return _then(_NearestPuskesmasModel(
+puskesmas: null == puskesmas ? _self.puskesmas : puskesmas // ignore: cast_nullable_to_non_nullable
+as PuskesmasModel,distanceKm: null == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+/// Create a copy of NearestPuskesmasModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PuskesmasModelCopyWith<$Res> get puskesmas {
+  
+  return $PuskesmasModelCopyWith<$Res>(_self.puskesmas, (value) {
+    return _then(_self.copyWith(puskesmas: value));
   });
-
-  factory _$NearestPuskesmasModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$NearestPuskesmasModelImplFromJson(json);
-
-  @override
-  final PuskesmasModel puskesmas;
-  @override
-  @JsonKey(name: 'distance_km')
-  final double distanceKm;
-  @override
-  final String address;
-
-  @override
-  String toString() {
-    return 'NearestPuskesmasModel(puskesmas: $puskesmas, distanceKm: $distanceKm, address: $address)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$NearestPuskesmasModelImpl &&
-            (identical(other.puskesmas, puskesmas) ||
-                other.puskesmas == puskesmas) &&
-            (identical(other.distanceKm, distanceKm) ||
-                other.distanceKm == distanceKm) &&
-            (identical(other.address, address) || other.address == address));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, puskesmas, distanceKm, address);
-
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$NearestPuskesmasModelImplCopyWith<_$NearestPuskesmasModelImpl>
-  get copyWith =>
-      __$$NearestPuskesmasModelImplCopyWithImpl<_$NearestPuskesmasModelImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$NearestPuskesmasModelImplToJson(this);
-  }
+}
 }
 
-abstract class _NearestPuskesmasModel implements NearestPuskesmasModel {
-  const factory _NearestPuskesmasModel({
-    required final PuskesmasModel puskesmas,
-    @JsonKey(name: 'distance_km') required final double distanceKm,
-    required final String address,
-  }) = _$NearestPuskesmasModelImpl;
-
-  factory _NearestPuskesmasModel.fromJson(Map<String, dynamic> json) =
-      _$NearestPuskesmasModelImpl.fromJson;
-
-  @override
-  PuskesmasModel get puskesmas;
-  @override
-  @JsonKey(name: 'distance_km')
-  double get distanceKm;
-  @override
-  String get address;
-
-  /// Create a copy of NearestPuskesmasModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$NearestPuskesmasModelImplCopyWith<_$NearestPuskesmasModelImpl>
-  get copyWith => throw _privateConstructorUsedError;
-}
+// dart format on

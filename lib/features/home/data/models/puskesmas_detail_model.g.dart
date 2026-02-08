@@ -6,9 +6,9 @@ part of 'puskesmas_detail_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PuskesmasDetailModelImpl _$$PuskesmasDetailModelImplFromJson(
+_PuskesmasDetailModel _$PuskesmasDetailModelFromJson(
   Map<String, dynamic> json,
-) => _$PuskesmasDetailModelImpl(
+) => _PuskesmasDetailModel(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
   phone: json['phone'] as String?,
@@ -18,8 +18,8 @@ _$PuskesmasDetailModelImpl _$$PuskesmasDetailModelImplFromJson(
   longitude: (json['longitude'] as num?)?.toDouble(),
 );
 
-Map<String, dynamic> _$$PuskesmasDetailModelImplToJson(
-  _$PuskesmasDetailModelImpl instance,
+Map<String, dynamic> _$PuskesmasDetailModelToJson(
+  _PuskesmasDetailModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,

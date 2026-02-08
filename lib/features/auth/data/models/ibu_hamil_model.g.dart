@@ -6,9 +6,9 @@ part of 'ibu_hamil_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$IbuHamilModelImpl _$$IbuHamilModelImplFromJson(
+_IbuHamilModel _$IbuHamilModelFromJson(
   Map<String, dynamic> json,
-) => _$IbuHamilModelImpl(
+) => _IbuHamilModel(
   id: (json['id'] as num).toInt(),
   userId: (json['user_id'] as num).toInt(),
   namaLengkap: json['nama_lengkap'] as String,
@@ -65,8 +65,8 @@ _$IbuHamilModelImpl _$$IbuHamilModelImplFromJson(
   updatedAt: DateTime.parse(json['updated_at'] as String),
 );
 
-Map<String, dynamic> _$$IbuHamilModelImplToJson(
-  _$IbuHamilModelImpl instance,
+Map<String, dynamic> _$IbuHamilModelToJson(
+  _IbuHamilModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'user_id': instance.userId,

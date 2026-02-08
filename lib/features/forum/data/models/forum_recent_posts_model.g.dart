@@ -6,9 +6,9 @@ part of 'forum_recent_posts_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ForumRecentPostsModelImpl _$$ForumRecentPostsModelImplFromJson(
+_ForumRecentPostsModel _$ForumRecentPostsModelFromJson(
   Map<String, dynamic> json,
-) => _$ForumRecentPostsModelImpl(
+) => _ForumRecentPostsModel(
   posts: (json['posts'] as List<dynamic>)
       .map((e) => ForumPostModel.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -16,8 +16,8 @@ _$ForumRecentPostsModelImpl _$$ForumRecentPostsModelImplFromJson(
   hasMore: json['has_more'] as bool,
 );
 
-Map<String, dynamic> _$$ForumRecentPostsModelImplToJson(
-  _$ForumRecentPostsModelImpl instance,
+Map<String, dynamic> _$ForumRecentPostsModelToJson(
+  _ForumRecentPostsModel instance,
 ) => <String, dynamic>{
   'posts': instance.posts,
   'total': instance.total,

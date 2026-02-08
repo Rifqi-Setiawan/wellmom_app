@@ -6,16 +6,16 @@ part of 'forum_create_post_request_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ForumCreatePostRequestModelImpl _$$ForumCreatePostRequestModelImplFromJson(
+_ForumCreatePostRequestModel _$ForumCreatePostRequestModelFromJson(
   Map<String, dynamic> json,
-) => _$ForumCreatePostRequestModelImpl(
+) => _ForumCreatePostRequestModel(
   title: json['title'] as String,
   details: json['details'] as String,
   categoryId: (json['category_id'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$ForumCreatePostRequestModelImplToJson(
-  _$ForumCreatePostRequestModelImpl instance,
+Map<String, dynamic> _$ForumCreatePostRequestModelToJson(
+  _ForumCreatePostRequestModel instance,
 ) => <String, dynamic>{
   'title': instance.title,
   'details': instance.details,

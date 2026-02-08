@@ -6,8 +6,8 @@ part of 'puskesmas_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PuskesmasModelImpl _$$PuskesmasModelImplFromJson(Map<String, dynamic> json) =>
-    _$PuskesmasModelImpl(
+_PuskesmasModel _$PuskesmasModelFromJson(Map<String, dynamic> json) =>
+    _PuskesmasModel(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       registrationStatus: json['registration_status'] as String,
@@ -17,28 +17,27 @@ _$PuskesmasModelImpl _$$PuskesmasModelImplFromJson(Map<String, dynamic> json) =>
       address: json['address'] as String?,
     );
 
-Map<String, dynamic> _$$PuskesmasModelImplToJson(
-  _$PuskesmasModelImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'registration_status': instance.registrationStatus,
-  'is_active': instance.isActive,
-  'phone': instance.phone,
-  'email': instance.email,
-  'address': instance.address,
-};
+Map<String, dynamic> _$PuskesmasModelToJson(_PuskesmasModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'registration_status': instance.registrationStatus,
+      'is_active': instance.isActive,
+      'phone': instance.phone,
+      'email': instance.email,
+      'address': instance.address,
+    };
 
-_$NearestPuskesmasModelImpl _$$NearestPuskesmasModelImplFromJson(
+_NearestPuskesmasModel _$NearestPuskesmasModelFromJson(
   Map<String, dynamic> json,
-) => _$NearestPuskesmasModelImpl(
+) => _NearestPuskesmasModel(
   puskesmas: PuskesmasModel.fromJson(json['puskesmas'] as Map<String, dynamic>),
   distanceKm: (json['distance_km'] as num).toDouble(),
   address: json['address'] as String,
 );
 
-Map<String, dynamic> _$$NearestPuskesmasModelImplToJson(
-  _$NearestPuskesmasModelImpl instance,
+Map<String, dynamic> _$NearestPuskesmasModelToJson(
+  _NearestPuskesmasModel instance,
 ) => <String, dynamic>{
   'puskesmas': instance.puskesmas,
   'distance_km': instance.distanceKm,

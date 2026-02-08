@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/services/notification_service.dart';
+import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.dart';
 import 'package:wellmom_app/features/home/presentation/providers/home_providers.dart';
 import 'package:wellmom_app/features/home/data/models/ibu_hamil_perawat_model.dart';
@@ -34,7 +36,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(homeViewModelProvider.notifier).fetchHome());
+    Future.microtask(() {
+      ref.read(homeViewModelProvider.notifier).fetchHome();
+      // Sinkronisasi FCM token ke backend saat HomeScreen dimuat
+      _syncFcmTokenToBackend();
+    });
+  }
+
+  /// Sinkronisasi FCM token ke backend
+  Future<void> _syncFcmTokenToBackend() async {
+    try {
+      final fcmToken = await NotificationService().getCurrentFcmToken();
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        final authRepository = ref.read(authRepositoryProvider);
+        final result = await authRepository.updateFcmToken(fcmToken);
+        result.fold(
+          (failure) {
+            debugPrint('[HomeScreen] Failed to update FCM token: ${failure.message}');
+            // Don't show error to user, just log it
+          },
+          (_) {
+            print("DEBUG: FCM Token sent to backend: $fcmToken");
+            debugPrint('[HomeScreen] FCM token updated successfully');
+          },
+        );
+      } else {
+        debugPrint('[HomeScreen] FCM token is null or empty, skipping update');
+      }
+    } catch (e) {
+      debugPrint('[HomeScreen] Error updating FCM token: $e');
+      // Don't show error to user, just log it
+    }
   }
 
   void _onNavTap(int index) {

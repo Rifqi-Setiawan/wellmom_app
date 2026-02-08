@@ -6,16 +6,16 @@ part of 'chatbot_send_response_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ChatbotSendResponseModelImpl _$$ChatbotSendResponseModelImplFromJson(
+_ChatbotSendResponseModel _$ChatbotSendResponseModelFromJson(
   Map<String, dynamic> json,
-) => _$ChatbotSendResponseModelImpl(
+) => _ChatbotSendResponseModel(
   response: json['response'] as String,
   conversationId: (json['conversation_id'] as num).toInt(),
   quota: ChatbotQuotaModel.fromJson(json['quota'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$$ChatbotSendResponseModelImplToJson(
-  _$ChatbotSendResponseModelImpl instance,
+Map<String, dynamic> _$ChatbotSendResponseModelToJson(
+  _ChatbotSendResponseModel instance,
 ) => <String, dynamic>{
   'response': instance.response,
   'conversation_id': instance.conversationId,

@@ -7,13 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wellmom_app"
+    namespace = "wellmom.com"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -21,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.wellmom_app"
+        applicationId = "wellmom.com"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -46,4 +47,7 @@ dependencies {
     // Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase library dependencies
     implementation 'com.google.firebase:firebase-messaging'
+    
+    // Core library desugaring for flutter_local_notifications
+   coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
