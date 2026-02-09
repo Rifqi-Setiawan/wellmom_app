@@ -4,7 +4,7 @@ part 'forum_post_full_model.freezed.dart';
 part 'forum_post_full_model.g.dart';
 
 @freezed
-class ForumPostFullModel with _$ForumPostFullModel {
+abstract class ForumPostFullModel with _$ForumPostFullModel {
   const factory ForumPostFullModel({
     required int id,
     @JsonKey(name: 'author_user_id') required int authorUserId,
@@ -28,7 +28,7 @@ class ForumPostFullModel with _$ForumPostFullModel {
 }
 
 @freezed
-class ForumPostsResponseModel with _$ForumPostsResponseModel {
+abstract class ForumPostsResponseModel with _$ForumPostsResponseModel {
   const factory ForumPostsResponseModel({
     required List<ForumPostFullModel> posts,
     required int total,

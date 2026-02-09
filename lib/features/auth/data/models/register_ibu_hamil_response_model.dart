@@ -6,7 +6,7 @@ part 'register_ibu_hamil_response_model.g.dart';
 /// Response model for ibu hamil registration
 /// Contains ibu_hamil, user, access_token, token_type, and message
 @freezed
-class RegisterIbuHamilResponseModel with _$RegisterIbuHamilResponseModel {
+abstract class RegisterIbuHamilResponseModel with _$RegisterIbuHamilResponseModel {
   const factory RegisterIbuHamilResponseModel({
     @JsonKey(name: 'ibu_hamil') required IbuHamilResponseData ibuHamil,
     required UserResponseData user,
@@ -21,7 +21,7 @@ class RegisterIbuHamilResponseModel with _$RegisterIbuHamilResponseModel {
 
 /// Simplified ibu hamil data from registration response
 @freezed
-class IbuHamilResponseData with _$IbuHamilResponseData {
+abstract class IbuHamilResponseData with _$IbuHamilResponseData {
   const factory IbuHamilResponseData({
     required int id,
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,
@@ -34,7 +34,7 @@ class IbuHamilResponseData with _$IbuHamilResponseData {
 
 /// User data from registration response
 @freezed
-class UserResponseData with _$UserResponseData {
+abstract class UserResponseData with _$UserResponseData {
   const factory UserResponseData({
     required int id,
     required String phone,

@@ -5,7 +5,7 @@ part 'puskesmas_detail_model.g.dart';
 
 /// Detail info for Puskesmas used on home screen
 @freezed
-class PuskesmasDetailModel with _$PuskesmasDetailModel {
+abstract class PuskesmasDetailModel with _$PuskesmasDetailModel {
   const factory PuskesmasDetailModel({
     required int id,
     required String name,

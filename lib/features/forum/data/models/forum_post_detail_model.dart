@@ -6,7 +6,7 @@ part 'forum_post_detail_model.g.dart';
 
 /// Model for forum post detail with replies
 @freezed
-class ForumPostDetailModel with _$ForumPostDetailModel {
+abstract class ForumPostDetailModel with _$ForumPostDetailModel {
   const factory ForumPostDetailModel({
     required int id,
     @JsonKey(name: 'author_user_id') required int authorUserId,

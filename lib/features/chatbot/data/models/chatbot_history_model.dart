@@ -7,7 +7,7 @@ part 'chatbot_history_model.g.dart';
 
 /// Model for conversation history from API
 @freezed
-class ChatbotHistoryModel with _$ChatbotHistoryModel {
+abstract class ChatbotHistoryModel with _$ChatbotHistoryModel {
   const factory ChatbotHistoryModel({
     required ChatbotConversationModel conversation,
     required List<ChatbotMessageModel> messages,

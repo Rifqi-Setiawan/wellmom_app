@@ -14,6 +14,10 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   debugPrint('[FCM] Title: ${message.notification?.title}');
   debugPrint('[FCM] Body: ${message.notification?.body}');
   debugPrint('[FCM] Data: ${message.data}');
+  
+  // Note: Background messages are handled automatically by the system
+  // Local notifications are not needed here as FCM handles it
+  // Navigation will be handled when user taps the notification
 }
 
 /// Service untuk menangani Firebase Cloud Messaging (FCM) dan Local Notifications
@@ -194,8 +198,10 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Store data as JSON string for payload
-    final payload = message.data.toString();
+    // Store data as JSON string for payload (properly encoded)
+    final payload = message.data.isNotEmpty 
+        ? message.data.entries.map((e) => '${e.key}:${e.value}').join('|')
+        : '';
     
     await _localNotifications.show(
       id: message.hashCode,
@@ -231,15 +237,36 @@ class NotificationService {
     // Parse payload if available
     if (response.payload != null && response.payload!.isNotEmpty) {
       try {
-        // Payload is stored as data.toString(), so we need to reconstruct it
-        // For now, we'll handle it through the RemoteMessage data structure
-        // This is a limitation - we need to store the actual data structure
-        // For better handling, consider using a different approach or store data in a more parseable format
-        debugPrint('[NotificationService] Payload received: ${response.payload}');
-        // Note: Local notification payload handling is limited
-        // The main navigation should be handled via RemoteMessage handlers
+        // Parse payload format: "key1:value1|key2:value2"
+        final Map<String, String> data = {};
+        final pairs = response.payload!.split('|');
+        for (final pair in pairs) {
+          final parts = pair.split(':');
+          if (parts.length == 2) {
+            data[parts[0]] = parts[1];
+          }
+        }
+        
+        if (data.isNotEmpty) {
+          // Create a mock RemoteMessage for navigation
+          final mockMessage = RemoteMessage(
+            messageId: response.id?.toString(),
+            data: data,
+          );
+          
+          // Handle navigation using the same logic as RemoteMessage
+          _handleMessage(mockMessage);
+        }
       } catch (e) {
         debugPrint('[NotificationService] Error parsing notification payload: $e');
+        // Fallback: navigate to home
+        final navigator = AppRouter.navigatorKey.currentState;
+        if (navigator != null) {
+          navigator.pushNamedAndRemoveUntil(
+            AppRouter.home,
+            (route) => false,
+          );
+        }
       }
     }
   }

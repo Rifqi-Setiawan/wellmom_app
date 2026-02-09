@@ -5,7 +5,7 @@ part 'register_ibu_hamil_request_model.g.dart';
 
 /// Request model for complete ibu hamil registration
 @freezed
-class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
+abstract class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
   @JsonSerializable(explicitToJson: true)
   const factory RegisterIbuHamilRequestModel({
     @JsonKey(name: 'ibu_hamil') required IbuHamilData ibuHamil,
@@ -17,7 +17,7 @@ class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
 }
 
 @freezed
-class IbuHamilData with _$IbuHamilData {
+abstract class IbuHamilData with _$IbuHamilData {
   @JsonSerializable(explicitToJson: true)
   const factory IbuHamilData({
     required String address,
@@ -55,7 +55,7 @@ class IbuHamilData with _$IbuHamilData {
 }
 
 @freezed
-class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
+abstract class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
   const factory RiwayatKesehatanIbuData({
     @Default(false) bool anemia,
     @Default(false) bool asma,
@@ -71,7 +71,7 @@ class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
 }
 
 @freezed
-class UserData with _$UserData {
+abstract class UserData with _$UserData {
   const factory UserData({
     required String email, // Required: email must be provided
     @JsonKey(name: 'full_name') required String fullName,

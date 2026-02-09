@@ -5,7 +5,7 @@ part 'create_health_record_request_model.g.dart';
 
 /// Request model for creating a health record
 @freezed
-class CreateHealthRecordRequestModel with _$CreateHealthRecordRequestModel {
+abstract class CreateHealthRecordRequestModel with _$CreateHealthRecordRequestModel {
   const factory CreateHealthRecordRequestModel({
     @JsonKey(name: 'blood_glucose') double? bloodGlucose,
     @JsonKey(name: 'blood_pressure_diastolic') required int bloodPressureDiastolic,

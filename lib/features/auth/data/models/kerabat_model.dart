@@ -5,7 +5,7 @@ part 'kerabat_model.g.dart';
 
 /// Kerabat model for family/relative relationships
 @freezed
-class KerabatModel with _$KerabatModel {
+abstract class KerabatModel with _$KerabatModel {
   const factory KerabatModel({
     required int id,
     @JsonKey(name: 'kerabat_user_id') required int kerabatUserId, // user_id dari kerabat

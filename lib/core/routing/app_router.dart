@@ -19,6 +19,7 @@ import 'package:wellmom_app/features/kerabat/presentation/pages/kerabat_shell_sc
 import 'package:wellmom_app/features/kerabat/presentation/pages/login_kerabat_screen.dart';
 import 'package:wellmom_app/features/kerabat/presentation/pages/undang_kerabat_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/edit_profile_screen.dart';
+import 'package:wellmom_app/features/profile/presentation/pages/health_profile_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/profile_screen.dart';
 
 /// App routing configuration
@@ -43,6 +44,7 @@ class AppRouter {
   static const String konsul = '/konsul';
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
+  static const String healthProfile = '/health-profile';
   static const String chatbot = '/chatbot';
   static const String forum = '/forum';
   static const String forumPostDetail = '/forum-post-detail';
@@ -120,8 +122,13 @@ class AppRouter {
           settings: settings,
         );
       case editProfile:
-        return MaterialPageRoute(
+        return MaterialPageRoute<bool?>(
           builder: (_) => const EditProfileScreen(),
+          settings: settings,
+        );
+      case healthProfile:
+        return MaterialPageRoute<bool?>(
+          builder: (_) => const HealthProfileScreen(),
           settings: settings,
         );
       case chatbot:

@@ -6,7 +6,7 @@ part 'forum_replies_response_model.g.dart';
 
 /// Model for replies response
 @freezed
-class ForumRepliesResponseModel with _$ForumRepliesResponseModel {
+abstract class ForumRepliesResponseModel with _$ForumRepliesResponseModel {
   const factory ForumRepliesResponseModel({
     required List<ForumReplyModel> replies,
     required int total,

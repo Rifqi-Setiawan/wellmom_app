@@ -5,7 +5,7 @@ part 'chatbot_quota_model.g.dart';
 
 /// Model for chatbot quota from API
 @freezed
-class ChatbotQuotaModel with _$ChatbotQuotaModel {
+abstract class ChatbotQuotaModel with _$ChatbotQuotaModel {
   const factory ChatbotQuotaModel({
     @JsonKey(name: 'used_today') required int usedToday,
     required int limit,

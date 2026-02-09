@@ -222,8 +222,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.favorite_outline,
                     iconBgColor: const Color(0xFFE3F2FD),
                     title: 'Health Profile',
-                    onTap: () {
-                      // TODO: Navigate to health profile
+                    onTap: () async {
+                      final updated = await Navigator.of(context).pushNamed<bool>(
+                        AppRouter.healthProfile,
+                      );
+                      if (updated == true && mounted) {
+                        ref.invalidate(ibuHamilMeProvider);
+                      }
                     },
                   ),
                   _buildDivider(),

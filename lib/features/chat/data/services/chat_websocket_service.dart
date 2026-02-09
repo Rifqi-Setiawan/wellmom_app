@@ -90,7 +90,9 @@ class ChatWebSocketService {
       debugPrint('[WebSocket] Received message type: $type');
       
       if (type == 'new_message') {
-        final payload = map['data'] ?? map['message'] ?? map;
+        // Backend WebSocket format: {"type": "new_message", "message": {...}}
+        // message object memiliki struktur yang sama dengan REST API response
+        final payload = map['message'] ?? map['data'] ?? map;
         final msg = ChatMessageModel.fromJson(
           Map<String, dynamic>.from(payload is Map ? payload : {}),
         );

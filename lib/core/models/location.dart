@@ -5,7 +5,7 @@ part 'location.g.dart';
 
 /// Location model for latitude and longitude
 @freezed
-class Location with _$Location {
+abstract class Location with _$Location {
   const factory Location({
     required double latitude,
     required double longitude,

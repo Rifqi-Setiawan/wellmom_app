@@ -4,7 +4,7 @@ part 'forum_category_model.freezed.dart';
 part 'forum_category_model.g.dart';
 
 @freezed
-class ForumCategoryModel with _$ForumCategoryModel {
+abstract class ForumCategoryModel with _$ForumCategoryModel {
   const factory ForumCategoryModel({
     required int id,
     required String name,
@@ -21,7 +21,7 @@ class ForumCategoryModel with _$ForumCategoryModel {
 }
 
 @freezed
-class ForumCategoriesResponseModel with _$ForumCategoriesResponseModel {
+abstract class ForumCategoriesResponseModel with _$ForumCategoriesResponseModel {
   const factory ForumCategoriesResponseModel({
     required List<ForumCategoryModel> categories,
   }) = _ForumCategoriesResponseModel;

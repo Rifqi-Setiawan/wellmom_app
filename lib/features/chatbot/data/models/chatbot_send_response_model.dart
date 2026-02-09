@@ -6,7 +6,7 @@ part 'chatbot_send_response_model.g.dart';
 
 /// Model for send message response from API
 @freezed
-class ChatbotSendResponseModel with _$ChatbotSendResponseModel {
+abstract class ChatbotSendResponseModel with _$ChatbotSendResponseModel {
   const factory ChatbotSendResponseModel({
     required String response,
     @JsonKey(name: 'conversation_id') required int conversationId,

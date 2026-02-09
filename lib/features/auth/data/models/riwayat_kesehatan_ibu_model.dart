@@ -5,7 +5,7 @@ part 'riwayat_kesehatan_ibu_model.g.dart';
 
 /// Riwayat kesehatan ibu model (nested object)
 @freezed
-class RiwayatKesehatanIbuModel with _$RiwayatKesehatanIbuModel {
+abstract class RiwayatKesehatanIbuModel with _$RiwayatKesehatanIbuModel {
   const factory RiwayatKesehatanIbuModel({
     @JsonKey(name: 'darah_tinggi') @Default(false) bool darahTinggi,
     @Default(false) bool diabetes,

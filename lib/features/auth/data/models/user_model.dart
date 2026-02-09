@@ -5,7 +5,7 @@ part 'user_model.g.dart';
 
 /// User model for authentication and user management
 @freezed
-class UserModel with _$UserModel {
+abstract class UserModel with _$UserModel {
   const factory UserModel({
     required int id,
     String? email,

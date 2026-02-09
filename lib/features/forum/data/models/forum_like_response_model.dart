@@ -5,7 +5,7 @@ part 'forum_like_response_model.g.dart';
 
 /// Model for like post response
 @freezed
-class ForumLikeResponseModel with _$ForumLikeResponseModel {
+abstract class ForumLikeResponseModel with _$ForumLikeResponseModel {
   const factory ForumLikeResponseModel({
     @JsonKey(name: 'post_id') required int postId,
     @JsonKey(name: 'is_liked') required bool isLiked,

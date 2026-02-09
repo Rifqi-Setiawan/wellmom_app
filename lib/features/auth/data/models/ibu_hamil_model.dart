@@ -7,7 +7,7 @@ part 'ibu_hamil_model.g.dart';
 
 /// Ibu Hamil model with comprehensive pregnancy and health data
 @freezed
-class IbuHamilModel with _$IbuHamilModel {
+abstract class IbuHamilModel with _$IbuHamilModel {
   const factory IbuHamilModel({
     required int id,
     @JsonKey(name: 'user_id') required int userId,

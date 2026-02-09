@@ -5,7 +5,7 @@ part 'chatbot_conversation_model.g.dart';
 
 /// Model for chatbot conversation from API
 @freezed
-class ChatbotConversationModel with _$ChatbotConversationModel {
+abstract class ChatbotConversationModel with _$ChatbotConversationModel {
   const factory ChatbotConversationModel({
     required int id,
     required String title,

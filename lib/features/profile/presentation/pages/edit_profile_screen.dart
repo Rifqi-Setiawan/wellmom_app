@@ -46,7 +46,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProfile();
-      _syncControllersWithState();
+      // Delay sync untuk memastikan state sudah siap
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _syncControllersWithState();
+        }
+      });
     });
   }
 
@@ -55,20 +60,42 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   void _syncControllersWithState() {
-    final state = ref.read(editProfileViewModelProvider);
-    _namaLengkapController.text = state.namaLengkap;
-    _nikController.text = state.nik;
-    _tanggalLahirController.text = state.dateOfBirth != null
-        ? DateFormatter.formatDate(state.dateOfBirth!)
-        : '';
-    _addressController.text = state.address;
-    _jalanController.text = state.jalan;
-    _kelurahanController.text = state.kelurahan;
+    try {
+      final state = ref.read(editProfileViewModelProvider);
+      
+      // Guard: pastikan controllers sudah initialized
+      if (!mounted) return;
+      
+      _namaLengkapController.text = state.namaLengkap;
+      _nikController.text = state.nik;
+      _tanggalLahirController.text = state.dateOfBirth != null
+          ? DateFormatter.formatDate(state.dateOfBirth!)
+          : '';
+      _jalanController.text = state.jalan;
+      _kelurahanController.text = state.kelurahan;
 
-    // Sync dropdowns
-    _selectedProvinsi = state.selectedProvinsi;
-    _selectedKota = state.selectedKota;
-    _selectedKecamatan = state.selectedKecamatan;
+      // Sync dropdowns - only if item exists in list
+      if (state.selectedProvinsi != null && state.provinces.contains(state.selectedProvinsi)) {
+        _selectedProvinsi = state.selectedProvinsi;
+      } else {
+        _selectedProvinsi = null;
+      }
+      
+      if (state.selectedKota != null && state.regencies.contains(state.selectedKota)) {
+        _selectedKota = state.selectedKota;
+      } else {
+        _selectedKota = null;
+      }
+      
+      if (state.selectedKecamatan != null && state.districts.contains(state.selectedKecamatan)) {
+        _selectedKecamatan = state.selectedKecamatan;
+      } else {
+        _selectedKecamatan = null;
+      }
+    } catch (e) {
+      // Silently fail jika state belum siap
+      debugPrint('Failed to sync controllers: $e');
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -107,6 +134,66 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
+  /// Normalize region name for better matching (removes prefixes/suffixes)
+  String _normalizeRegionName(String name) {
+    return name
+        .toLowerCase()
+        .replaceAll(RegExp(r'^(kabupaten|kota|kab\.?|kab|regency|city)\s+', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s+(kabupaten|kota|kab\.?|regency|city)$', caseSensitive: false), '')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  /// Check if two region names match (handles exact, contains, and fuzzy matching)
+  /// Enhanced for rural areas like "Air Hangat", "Kerinci", etc.
+  bool _isRegionMatch(String name1, String name2) {
+    if (name1.isEmpty || name2.isEmpty) return false;
+    
+    final normalized1 = _normalizeRegionName(name1);
+    final normalized2 = _normalizeRegionName(name2);
+    
+    // Exact match after normalization
+    if (normalized1 == normalized2) {
+      debugPrint('[EditProfile] Exact match: "$normalized1" == "$normalized2"');
+      return true;
+    }
+    
+    // Contains match (handles "Air Hangat" vs "Air Hangat Timur", etc.)
+    if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
+      debugPrint('[EditProfile] Contains match: "$normalized1" contains "$normalized2" or vice versa');
+      return true;
+    }
+    
+    // Match without spaces (handles "Air Hangat" vs "AirHangat")
+    final noSpace1 = normalized1.replaceAll(' ', '');
+    final noSpace2 = normalized2.replaceAll(' ', '');
+    if (noSpace1.contains(noSpace2) || noSpace2.contains(noSpace1)) {
+      debugPrint('[EditProfile] No-space match: "$noSpace1" contains "$noSpace2" or vice versa');
+      return true;
+    }
+    
+    // Match with common variations (e.g., "Kerinci" vs "Kerinci Regency")
+    final clean1 = normalized1.replaceAll(RegExp(r'[^\w]'), '');
+    final clean2 = normalized2.replaceAll(RegExp(r'[^\w]'), '');
+    if (clean1.contains(clean2) || clean2.contains(clean1)) {
+      debugPrint('[EditProfile] Clean match: "$clean1" contains "$clean2" or vice versa');
+      return true;
+    }
+    
+    // Additional: Check if one is a substring of the other (for partial matches)
+    // This helps with cases where geocoding returns partial names
+    if (normalized1.length >= 3 && normalized2.length >= 3) {
+      if (normalized1.substring(0, normalized1.length > 5 ? 5 : normalized1.length) == 
+          normalized2.substring(0, normalized2.length > 5 ? 5 : normalized2.length)) {
+        debugPrint('[EditProfile] Prefix match: "$normalized1" and "$normalized2" share prefix');
+        return true;
+      }
+    }
+    
+    debugPrint('[EditProfile] No match: "$normalized1" vs "$normalized2"');
+    return false;
+  }
+
   Future<void> _handleDetectLocation() async {
     final viewModel = ref.read(editProfileViewModelProvider.notifier);
     await viewModel.getCurrentLocation();
@@ -121,12 +208,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     // Update text fields
     setState(() {
-      _addressController.text = state.address;
       _jalanController.text = state.jalan;
       _kelurahanController.text = state.kelurahan;
     });
 
-    // Try to match provinsi
+    // Try to match provinsi from geocoded address
     if (state.provinsiName.isNotEmpty && state.provinces.isNotEmpty) {
       Provinsi? matchedProvinsi;
       try {
@@ -134,7 +220,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           (p) => _isRegionMatch(p.name, state.provinsiName),
         );
       } catch (e) {
-        // No match found
+        debugPrint('Provinsi tidak ditemukan: ${state.provinsiName}');
       }
 
       if (matchedProvinsi != null) {
@@ -143,9 +229,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         });
         await viewModel.updateProvinsi(matchedProvinsi.name, matchedProvinsi.id);
 
-        // Wait for regencies to load
+        // Wait for regencies to load (with retry if needed)
         int retryCount = 0;
-        while (retryCount < 5) {
+        const maxRetries = 5;
+        while (retryCount < maxRetries) {
           await Future.delayed(const Duration(milliseconds: 500));
           final tempState = ref.read(editProfileViewModelProvider);
           if (tempState.regencies.isNotEmpty || !tempState.isLoadingRegencies) {
@@ -167,13 +254,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             });
             await viewModel.updateKota(matchedKota.name, matchedKota.id);
 
-            // Wait for districts to load
+            // Wait for districts to load (with retry if needed)
             retryCount = 0;
-            while (retryCount < 5) {
+            while (retryCount < maxRetries) {
               await Future.delayed(const Duration(milliseconds: 500));
               final tempState = ref.read(editProfileViewModelProvider);
-              if (tempState.districts.isNotEmpty ||
-                  !tempState.isLoadingDistricts) {
+              if (tempState.districts.isNotEmpty || !tempState.isLoadingDistricts) {
                 break;
               }
               retryCount++;
@@ -184,10 +270,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             if (stateAfterDistricts.kecamatanName.isNotEmpty &&
                 stateAfterDistricts.districts.isNotEmpty) {
               try {
-                final matchedKecamatan =
-                    stateAfterDistricts.districts.firstWhere(
-                  (d) =>
-                      _isRegionMatch(d.name, stateAfterDistricts.kecamatanName),
+                final matchedKecamatan = stateAfterDistricts.districts.firstWhere(
+                  (d) => _isRegionMatch(d.name, stateAfterDistricts.kecamatanName),
                 );
                 setState(() {
                   _selectedKecamatan = matchedKecamatan;
@@ -195,11 +279,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 viewModel.updateKecamatan(
                     matchedKecamatan.name, matchedKecamatan.id);
               } catch (e) {
-                // No match found
+                debugPrint('Kecamatan tidak ditemukan: ${stateAfterDistricts.kecamatanName}');
               }
             }
           } catch (e) {
-            // No match found
+            debugPrint('Kota/Kabupaten tidak ditemukan: ${stateAfterRegencies.kotaName}');
           }
         }
       }
@@ -208,20 +292,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (mounted) {
       ErrorSnackbar.showSuccess(context, 'Lokasi berhasil dideteksi');
     }
-  }
-
-  bool _isRegionMatch(String name1, String name2) {
-    final normalized1 = name1.toLowerCase().trim();
-    final normalized2 = name2.toLowerCase().trim();
-
-    if (normalized1 == normalized2) return true;
-    if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
-      return true;
-    }
-
-    final clean1 = normalized1.replaceAll(RegExp(r'[^\w]'), '');
-    final clean2 = normalized2.replaceAll(RegExp(r'[^\w]'), '');
-    return clean1.contains(clean2) || clean2.contains(clean1);
   }
 
   Future<void> _handleSubmit() async {
@@ -259,23 +329,35 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (state.nik != _nikController.text) {
         _nikController.text = state.nik;
       }
-      if (state.address != _addressController.text) {
-        _addressController.text = state.address;
-      }
       if (state.jalan != _jalanController.text) {
         _jalanController.text = state.jalan;
       }
       if (state.kelurahan != _kelurahanController.text) {
         _kelurahanController.text = state.kelurahan;
       }
+      // Sync dropdowns - only if item exists in list
       if (state.selectedProvinsi != _selectedProvinsi) {
-        _selectedProvinsi = state.selectedProvinsi;
+        if (state.selectedProvinsi != null && state.provinces.contains(state.selectedProvinsi)) {
+          _selectedProvinsi = state.selectedProvinsi;
+        } else if (_selectedProvinsi != null && !state.provinces.contains(_selectedProvinsi)) {
+          _selectedProvinsi = null; // Clear if current selection is not in list
+        }
       }
+      
       if (state.selectedKota != _selectedKota) {
-        _selectedKota = state.selectedKota;
+        if (state.selectedKota != null && state.regencies.contains(state.selectedKota)) {
+          _selectedKota = state.selectedKota;
+        } else if (_selectedKota != null && !state.regencies.contains(_selectedKota)) {
+          _selectedKota = null; // Clear if current selection is not in list
+        }
       }
+      
       if (state.selectedKecamatan != _selectedKecamatan) {
-        _selectedKecamatan = state.selectedKecamatan;
+        if (state.selectedKecamatan != null && state.districts.contains(state.selectedKecamatan)) {
+          _selectedKecamatan = state.selectedKecamatan;
+        } else if (_selectedKecamatan != null && !state.districts.contains(_selectedKecamatan)) {
+          _selectedKecamatan = null; // Clear if current selection is not in list
+        }
       }
     });
 
@@ -410,7 +492,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               foregroundColor: AppColors.primaryBlue,
                               side: const BorderSide(
                                   color: AppColors.primaryBlue),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -545,27 +630,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               ref
                                   .read(editProfileViewModelProvider.notifier)
                                   .updateKelurahan(value);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // ALAMAT LENGKAP (read-only, built from components)
-                          CustomTextField(
-                            label: 'ALAMAT LENGKAP',
-                            hintText: 'Alamat akan terisi otomatis',
-                            controller: _addressController,
-                            readOnly: true,
-                            maxLines: 3,
-                            onChanged: (value) {
-                              ref
-                                  .read(editProfileViewModelProvider.notifier)
-                                  .updateAddress(value);
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Alamat harus diisi';
-                              }
-                              return null;
                             },
                           ),
                         ],

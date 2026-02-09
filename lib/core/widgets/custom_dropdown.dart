@@ -40,7 +40,7 @@ class CustomDropdown<T> extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<T>(
-          initialValue: value,
+          value: items.contains(value) ? value : null, // Only set value if it exists in items
           isExpanded: true,
           selectedItemBuilder: (BuildContext context) {
             return items.map<Widget>((T item) {

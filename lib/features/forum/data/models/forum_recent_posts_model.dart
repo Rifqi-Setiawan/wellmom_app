@@ -6,7 +6,7 @@ part 'forum_recent_posts_model.g.dart';
 
 /// Model for recent forum posts response
 @freezed
-class ForumRecentPostsModel with _$ForumRecentPostsModel {
+abstract class ForumRecentPostsModel with _$ForumRecentPostsModel {
   const factory ForumRecentPostsModel({
     required List<ForumPostModel> posts,
     required int total,

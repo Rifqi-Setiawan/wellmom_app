@@ -7,7 +7,7 @@ part 'health_record_model.g.dart';
 
 /// Health Record model for pregnancy checkup records
 @freezed
-class HealthRecordModel with _$HealthRecordModel {
+abstract class HealthRecordModel with _$HealthRecordModel {
   const factory HealthRecordModel({
     required int id,
     @JsonKey(name: 'ibu_hamil_id') required int ibuHamilId,

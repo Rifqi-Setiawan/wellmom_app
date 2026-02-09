@@ -5,6 +5,7 @@ import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/features/chat/data/models/chat_message_model.dart';
 import 'package:wellmom_app/features/chat/presentation/providers/chat_providers.dart';
 import 'package:wellmom_app/features/chat/presentation/providers/chat_websocket_providers.dart';
+import 'package:wellmom_app/features/chat/presentation/widgets/chat_bubble.dart';
 
 /// Arguments to open Konsul chat: either existing [conversationId] or start with assigned [perawatId].
 class KonsulChatArgs {
@@ -139,40 +140,77 @@ class _KonsulChatScreenState extends ConsumerState<KonsulChatScreen> {
     final canSend = effectiveConversationId != null || perawatId != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF9FAFC), // Cleaner, verified medical/healthcare look light grey
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 0.5,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.grey.shade300,
-              backgroundImage: (perawatPhotoUrl != null && perawatPhotoUrl.isNotEmpty)
-                  ? NetworkImage(_imageUrl(perawatPhotoUrl))
-                  : null,
-              child: (perawatPhotoUrl == null || perawatPhotoUrl.isEmpty)
-                  ? const Icon(Icons.person, color: Colors.grey)
-                  : null,
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: (perawatPhotoUrl != null && perawatPhotoUrl.isNotEmpty)
+                      ? NetworkImage(_imageUrl(perawatPhotoUrl))
+                      : null,
+                  child: (perawatPhotoUrl == null || perawatPhotoUrl.isEmpty)
+                      ? const Icon(Icons.person, color: Colors.grey)
+                      : null,
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.greenAccent.shade700,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                perawatName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    perawatName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    'Online',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+        actions: [
+            IconButton(
+                onPressed: () {}, 
+                icon: const Icon(Icons.more_vert, color: AppColors.textLight)
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -218,28 +256,153 @@ class _MessageList extends ConsumerWidget {
     required this.perawatName,
   });
 
+  // Group messages by date
+  Map<String, List<ChatMessageModel>> _groupMessagesByDate(List<ChatMessageModel> messages) {
+    final grouped = <String, List<ChatMessageModel>>{};
+    for (var msg in messages) {
+      final dateKey = _getDateKey(msg.createdAt);
+      if (!grouped.containsKey(dateKey)) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey]!.add(msg);
+    }
+    return grouped;
+  }
+
+  String _getDateKey(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final checkDate = DateTime(date.year, date.month, date.day);
+
+    if (checkDate == today) {
+        return 'Hari Ini';
+    } else if (checkDate == yesterday) {
+        return 'Kemarin';
+    } else {
+        return DateFormat('EEE, d MMM y', 'id_ID').format(date);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Note: ChatMessageModel uses senderRole ('ibu_hamil' or 'perawat') from backend field "sender_role"
+    // So we determine isMe based on senderRole == 'ibu_hamil' using isFromIbuHamil getter
+    
+    // Note: Assuming 'id_ID' locale is initialized in main.dart or supported by intl.
+    // If not, might default to English formatting or need initialization.
     final messagesAsync = ref.watch(chatMessagesWithWsProvider(conversationId));
-
     return messagesAsync.when(
       data: (messages) {
         if (messages.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               'Belum ada pesan. Mulai percakapan.',
-              style: TextStyle(color: AppColors.textLight, fontSize: 14),
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
             ),
           );
         }
+
+        // The API returns messages, likely sorted newest first or oldest first. 
+        // We need to check ordering. Assuming newest first based on previous code `reverse: true`.
+        // Let's re-sort to be safe: Oldest first for grouping logic
+        final sortedMessages = List<ChatMessageModel>.from(messages);
+        sortedMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+        final groupedMessages = _groupMessagesByDate(sortedMessages);
+        final dateKeys = groupedMessages.keys.toList();
+
         return ListView.builder(
           controller: scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+          // We use normal direction (reverse: false) for easier grouped rendering 
+          // but we need to auto-scroll to bottom on load.
+          // Or we can stick to reverse: true BUT then we have to reverse the groups.
+          // Let's use reverse: true for chat feel, so we reverse the groups and items inside.
           reverse: true,
-          itemCount: messages.length,
+          itemCount: dateKeys.length,
           itemBuilder: (context, index) {
-            final msg = messages[messages.length - 1 - index];
-            return _MessageBubble(message: msg);
+            // Reverse index to show newest group at bottom (start of list in reverse mode)
+            final dateKey = dateKeys[dateKeys.length - 1 - index]; 
+            final msgs = groupedMessages[dateKey]!;
+            // Within group, show oldest to newest? No, if list is reverse, we want
+            // the items to appear visually top-to-bottom.
+            // In a reverse listview: index 0 is at bottom.
+            // So we want the LAST group (most recent date) to be at index 0.
+            
+            return Column(
+              children: [
+                // Date Header should be at the "top" of the group visually.
+                // In reverse column? No, Column is not reverse.
+                // So: Date Header, then Messages.
+                // Wait, if ListView is reverse, the bottom-most item is the first one rendered.
+                // So if we have:
+                // [Group Today]
+                // [Group Yesterday]
+                // We render [Group Today] first (at bottom).
+                // Inside [Group Today], we want:
+                // Header (Top)
+                // Msg 1
+                // Msg 2 (Bottom)
+                // So the column children should be: Header, Msg1, Msg2...
+                // But since ListView.reverse basically flips the whole scrolling area...
+                
+                // Let's try standard ListView (reverse: false) and scroll to bottom initially 
+                // to avoid complexity with sticky headers nicely? 
+                // Or stick to reverse: true which is standard for Chat.
+                
+                // If reverse: true
+                // Item 0: Newest Group (Today)
+                // Item 1: Yesterday Group
+                
+                // Inside Item 0 (Today):
+                // We want it to look like:
+                // [Header Today]
+                // [Msg 1]
+                // [Msg 2]
+                // ...
+                
+                // So Column children:
+                // Header
+                // Msg 1
+                // Msg 2
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        dateKey,
+                        style: TextStyle(
+                            fontSize: 12, 
+                            fontWeight: FontWeight.w500, 
+                            color: Colors.grey.shade700
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ...msgs.map((msg) {
+                  // Determine if message is from current user (ibu hamil)
+                  // Backend menggunakan field "sender_role" dengan nilai "ibu_hamil" atau "perawat"
+                  // isFromIbuHamil getter sudah melakukan case-insensitive comparison
+                  final isMe = msg.isFromIbuHamil;
+                  
+                  // Debug: Uncomment to check senderRole values
+                  // debugPrint('Message: ${msg.messageText}, senderRole: ${msg.senderRole}, isMe: $isMe');
+                  
+                  return ChatBubble(
+                    message: msg, 
+                    isMe: isMe,
+                  );
+                }),
+              ],
+            );
           },
         );
       },
@@ -258,124 +421,6 @@ class _MessageList extends ConsumerWidget {
   }
 }
 
-class _MessageBubble extends ConsumerWidget {
-  final ChatMessageModel message;
-
-  const _MessageBubble({required this.message});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Tentukan isMe: pesan dari ibu hamil = pesan saya (karena user yang login adalah ibu hamil)
-    // Jika di masa depan ada role lain, bisa dibandingkan dengan currentUser.id
-    final isMe = message.isFromIbuHamil;
-    
-    // Format waktu pengiriman
-    final timeStr = DateFormat('HH:mm').format(message.createdAt);
-    
-    // Batasi lebar maksimum bubble (70% dari lebar layar)
-    final maxBubbleWidth = MediaQuery.of(context).size.width * 0.70;
-
-    // Warna untuk pesan saya (isMe == true)
-    final myBubbleColor = AppColors.primaryBlue;
-    final myTextColor = Colors.white;
-    final myTimeColor = Colors.white.withOpacity(0.85);
-
-    // Warna untuk pesan lawan bicara (isMe == false)
-    final otherBubbleColor = Colors.grey.shade200;
-    final otherTextColor = AppColors.textDark;
-    final otherTimeColor = AppColors.textLight;
-
-    // Tentukan warna berdasarkan isMe
-    final bubbleColor = isMe ? myBubbleColor : otherBubbleColor;
-    final textColor = isMe ? myTextColor : otherTextColor;
-    final timeColor = isMe ? myTimeColor : otherTimeColor;
-
-    // BorderRadius dengan sudut yang lebih lancip di sisi pengirim
-    const radius = 18.0;
-    const sharpRadius = 4.0; // Sudut lancip untuk "tail"
-    
-    final borderRadius = isMe
-        ? BorderRadius.only(
-            // Pesan saya: sudut kiri atas dan bawah lancip, kanan membulat
-            topLeft: const Radius.circular(radius),
-            topRight: const Radius.circular(radius),
-            bottomLeft: const Radius.circular(sharpRadius),
-            bottomRight: const Radius.circular(radius),
-          )
-        : BorderRadius.only(
-            // Pesan lawan: sudut kanan atas dan bawah lancip, kiri membulat
-            topLeft: const Radius.circular(radius),
-            topRight: const Radius.circular(radius),
-            bottomLeft: const Radius.circular(radius),
-            bottomRight: const Radius.circular(sharpRadius),
-          );
-
-    // Content bubble dengan padding yang nyaman
-    final content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-      decoration: BoxDecoration(
-        color: bubbleColor,
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Teks pesan
-          Text(
-            message.messageText,
-            style: TextStyle(
-              fontSize: 15,
-              color: textColor,
-              height: 1.4,
-              letterSpacing: 0.2,
-            ),
-          ),
-          const SizedBox(height: 6),
-          // Waktu pengiriman di sudut bawah
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                timeStr,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: timeColor,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    // Alignment: kanan untuk pesan saya, kiri untuk pesan lawan
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: isMe ? 40 : 0,
-            right: isMe ? 0 : 40,
-          ),
-          child: content,
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyConversation extends StatelessWidget {
   final String perawatName;
 
@@ -386,14 +431,21 @@ class _EmptyConversation extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Text(
-          'Mulai konsultasi dengan $perawatName. Ketik pesan di bawah dan kirim.',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-            height: 1.5,
-          ),
-          textAlign: TextAlign.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+             Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey.shade300),
+             const SizedBox(height: 16),
+             Text(
+              'Mulai konsultasi dengan $perawatName.\nKetik pesan di bawah dan kirim.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -416,62 +468,89 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom: 12 + MediaQuery.of(context).padding.bottom,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
+          ),
+        ],
       ),
-      color: Colors.white,
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
+      padding: EdgeInsets.only(
+        left: 12,
+        right: 12,
+        top: 10,
+        bottom: 10 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+            // Attachment Button
+            Padding(
+                padding: const EdgeInsets.only(bottom: 6, right: 8),
+                child: InkWell(
+                    onTap: () {
+                        // Action attachment
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.attach_file, color: Colors.grey),
+                    ),
+                ),
+            ),
+            
             Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Tulis pesan...',
-                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
-                  filled: true,
-                  fillColor: const Color(0xFFF0F0F0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Container(
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF2F4F5),
+                        borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                        controller: controller,
+                        decoration: const InputDecoration(
+                            hintText: 'Tulis pesan...',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        maxLines: 4,
+                        minLines: 1,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => onSend(),
+                    ),
                 ),
-                maxLines: 4,
-                minLines: 1,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-              ),
             ),
+            
             const SizedBox(width: 8),
-            Material(
-              color: canSend ? AppColors.primaryBlue : Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(24),
-              child: InkWell(
-                onTap: canSend && !sending ? onSend : null,
-                borderRadius: BorderRadius.circular(24),
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: sending
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.send_rounded, color: Colors.white, size: 24),
+
+            // Send Button
+            Padding(
+                padding: const EdgeInsets.only(bottom: 2), // Align with text field
+                child: Material(
+                  color: canSend ? AppColors.primaryBlue : Colors.grey.shade300,
+                  shape: const CircleBorder(),
+                  elevation: canSend ? 2 : 0,
+                  child: InkWell(
+                    onTap: canSend && !sending ? onSend : null,
+                    customBorder: const CircleBorder(),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: sending
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                    ),
+                  ),
                 ),
-              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

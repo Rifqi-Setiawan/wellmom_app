@@ -5,7 +5,7 @@ part 'puskesmas_model.g.dart';
 
 /// Puskesmas basic info model
 @freezed
-class PuskesmasModel with _$PuskesmasModel {
+abstract class PuskesmasModel with _$PuskesmasModel {
   const factory PuskesmasModel({
     required int id,
     required String name,
@@ -22,7 +22,7 @@ class PuskesmasModel with _$PuskesmasModel {
 
 /// Nearest puskesmas response model
 @freezed
-class NearestPuskesmasModel with _$NearestPuskesmasModel {
+abstract class NearestPuskesmasModel with _$NearestPuskesmasModel {
   const factory NearestPuskesmasModel({
     required PuskesmasModel puskesmas,
     @JsonKey(name: 'distance_km') required double distanceKm,

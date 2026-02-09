@@ -5,7 +5,7 @@ part 'forum_reply_model.g.dart';
 
 /// Model for forum reply
 @freezed
-class ForumReplyModel with _$ForumReplyModel {
+abstract class ForumReplyModel with _$ForumReplyModel {
   const factory ForumReplyModel({
     required int id,
     @JsonKey(name: 'post_id') required int postId,

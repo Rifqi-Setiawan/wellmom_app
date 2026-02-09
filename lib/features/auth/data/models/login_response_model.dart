@@ -5,7 +5,7 @@ part 'login_response_model.g.dart';
 
 /// Login response model from API
 @freezed
-class LoginResponseModel with _$LoginResponseModel {
+abstract class LoginResponseModel with _$LoginResponseModel {
   const factory LoginResponseModel({
     @JsonKey(name: 'access_token') required String accessToken,
     @JsonKey(name: 'token_type') required String tokenType,
