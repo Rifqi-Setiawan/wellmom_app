@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
 import 'package:wellmom_app/features/auth/data/models/riwayat_kesehatan_ibu_model.dart';
@@ -92,13 +93,13 @@ class HealthProfileState {
       jarakKehamilanTerakhir: jarakKehamilanTerakhir ?? this.jarakKehamilanTerakhir,
       hpht: hpht ?? this.hpht,
       hpl: hpl ?? this.hpl,
-      darahTinggi: darahTinggi ?? this.darahTinggi,
-      diabetes: diabetes ?? this.diabetes,
-      anemia: anemia ?? this.anemia,
-      penyakitJantung: penyakitJantung ?? this.penyakitJantung,
-      asma: asma ?? this.asma,
-      penyakitGinjal: penyakitGinjal ?? this.penyakitGinjal,
-      tbcMalaria: tbcMalaria ?? this.tbcMalaria,
+      darahTinggi: darahTinggi != null ? darahTinggi : this.darahTinggi,
+      diabetes: diabetes != null ? diabetes : this.diabetes,
+      anemia: anemia != null ? anemia : this.anemia,
+      penyakitJantung: penyakitJantung != null ? penyakitJantung : this.penyakitJantung,
+      asma: asma != null ? asma : this.asma,
+      penyakitGinjal: penyakitGinjal != null ? penyakitGinjal : this.penyakitGinjal,
+      tbcMalaria: tbcMalaria != null ? tbcMalaria : this.tbcMalaria,
       komplikasiKehamilanSebelumnya: komplikasiKehamilanSebelumnya ?? this.komplikasiKehamilanSebelumnya,
       pernahCaesar: pernahCaesar ?? this.pernahCaesar,
       pernahPerdarahanSaatHamil: pernahPerdarahanSaatHamil ?? this.pernahPerdarahanSaatHamil,
@@ -124,6 +125,15 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
       return;
     }
 
+    // Debug: Print loaded data
+    debugPrint('[HealthProfile] Loading data from IbuHamilModel:');
+    debugPrint('  usiaKehamilan: ${ibuHamil.usiaKehamilan}');
+    debugPrint('  kehamilanKe: ${ibuHamil.kehamilanKe}');
+    debugPrint('  jumlahAnak: ${ibuHamil.jumlahAnak}');
+    debugPrint('  darahTinggi: ${ibuHamil.riwayatKesehatanIbu.darahTinggi}');
+    debugPrint('  diabetes: ${ibuHamil.riwayatKesehatanIbu.diabetes}');
+    debugPrint('  anemia: ${ibuHamil.riwayatKesehatanIbu.anemia}');
+
     state = state.copyWith(
       usiaKehamilan: ibuHamil.usiaKehamilan,
       kehamilanKe: ibuHamil.kehamilanKe ?? 1,
@@ -147,6 +157,12 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
           : 'Tidak ada',
       isLoading: false,
     );
+    
+    debugPrint('[HealthProfile] State updated:');
+    debugPrint('  usiaKehamilan: ${state.usiaKehamilan}');
+    debugPrint('  darahTinggi: ${state.darahTinggi}');
+    debugPrint('  diabetes: ${state.diabetes}');
+    debugPrint('  anemia: ${state.anemia}');
   }
 
   // Section A: Kehamilan

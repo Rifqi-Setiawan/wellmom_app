@@ -44,28 +44,7 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadHealthProfile();
-    });
-  }
-
-  void _loadHealthProfile() {
-    // Use Future.microtask to delay provider modification until after build
-    Future.microtask(() {
-      if (!mounted) return;
-      final ibuAsync = ref.read(ibuHamilMeProvider);
-      ibuAsync.whenData((ibuHamil) {
-        if (ibuHamil != null && mounted) {
-          ref.read(healthProfileViewModelProvider.notifier).loadFromIbuHamil(ibuHamil);
-          // Delay sync to ensure state is updated
-          Future.microtask(() {
-            if (mounted) {
-              _syncControllersWithState();
-            }
-          });
-        }
-      });
-    });
+    // Load data will happen in build method to avoid timing issues
   }
 
   void _syncControllersWithState() {
@@ -156,11 +135,12 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
     final state = ref.watch(healthProfileViewModelProvider);
     final ibuAsync = ref.watch(ibuHamilMeProvider);
 
-    // Sync controllers when state changes (only if data is loaded)
-    if (state.usiaKehamilan != null && !state.isLoading) {
+    // Sync controllers when state changes (only if data is loaded and not loading)
+    if (!state.isLoading && state.usiaKehamilan != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         
+        // Sync text controllers with state
         if (_usiaKehamilanController.text != state.usiaKehamilan.toString()) {
           _usiaKehamilanController.text = state.usiaKehamilan.toString();
         }
@@ -238,13 +218,13 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
           ),
         ),
         data: (ibuHamil) {
-          // Load data immediately if not already loaded
-          if (ibuHamil != null) {
-            Future.microtask(() {
+          // Load data into view model - only once
+          if (ibuHamil != null && state.usiaKehamilan == null && !state.isLoading) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ref.read(healthProfileViewModelProvider.notifier).loadFromIbuHamil(ibuHamil);
-                // Delay sync to ensure state is updated
-                Future.microtask(() {
+                // Sync controllers after a short delay to ensure state is updated
+                Future.delayed(const Duration(milliseconds: 500), () {
                   if (mounted) {
                     _syncControllersWithState();
                   }
@@ -707,18 +687,34 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          _buildRadioOption(
-            value: true,
-            groupValue: value,
-            label: 'Ya',
-            onChanged: (_) => onChanged(),
+          GestureDetector(
+            onTap: () {
+              // Set to true if currently false
+              if (!value) {
+                onChanged();
+              }
+            },
+            child: _buildRadioOption(
+              value: true,
+              groupValue: value,
+              label: 'Ya',
+              onChanged: (_) {},
+            ),
           ),
           const SizedBox(width: 12),
-          _buildRadioOption(
-            value: false,
-            groupValue: !value,
-            label: 'Tidak',
-            onChanged: (_) => onChanged(),
+          GestureDetector(
+            onTap: () {
+              // Set to false if currently true
+              if (value) {
+                onChanged();
+              }
+            },
+            child: _buildRadioOption(
+              value: false,
+              groupValue: value,
+              label: 'Tidak',
+              onChanged: (_) {},
+            ),
           ),
         ],
       ),
