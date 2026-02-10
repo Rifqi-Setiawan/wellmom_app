@@ -44,7 +44,32 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data will happen in build method to avoid timing issues
+    // Load data when screen is first opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+  }
+
+  void _initializeData() {
+    if (!mounted) return;
+    
+    final ibuAsync = ref.read(ibuHamilMeProvider);
+    ibuAsync.whenData((ibuHamil) {
+      if (ibuHamil != null && mounted) {
+        // Load data into view model
+        Future.microtask(() {
+          if (mounted) {
+            ref.read(healthProfileViewModelProvider.notifier).loadFromIbuHamil(ibuHamil);
+            // Sync controllers after state is updated
+            Future.delayed(const Duration(milliseconds: 300), () {
+              if (mounted) {
+                _syncControllersWithState();
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   void _syncControllersWithState() {
@@ -218,13 +243,12 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
           ),
         ),
         data: (ibuHamil) {
-          // Load data into view model - only once
+          // Data loading is handled in initState, but ensure it's loaded if not already
           if (ibuHamil != null && state.usiaKehamilan == null && !state.isLoading) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ref.read(healthProfileViewModelProvider.notifier).loadFromIbuHamil(ibuHamil);
-                // Sync controllers after a short delay to ensure state is updated
-                Future.delayed(const Duration(milliseconds: 500), () {
+                Future.delayed(const Duration(milliseconds: 300), () {
                   if (mounted) {
                     _syncControllersWithState();
                   }
@@ -298,40 +322,12 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
                         const SizedBox(height: 16),
                         
                         // Riwayat Keguguran
-                        Text(
-                          'Riwayat Keguguran',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textDark,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildRadioOption(
-                                value: false,
-                                groupValue: !state.hasRiwayatKeguguran,
-                                label: 'Tidak',
-                                onChanged: (_) {
-                                  ref.read(healthProfileViewModelProvider.notifier)
-                                      .updateHasRiwayatKeguguran(false);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildRadioOption(
-                                value: true,
-                                groupValue: state.hasRiwayatKeguguran,
-                                label: 'Ya',
-                                onChanged: (_) {
-                                  ref.read(healthProfileViewModelProvider.notifier)
-                                      .updateHasRiwayatKeguguran(true);
-                                },
-                              ),
-                            ),
-                          ],
+                        _buildHealthConditionRow(
+                          label: 'Riwayat Keguguran',
+                          value: state.hasRiwayatKeguguran,
+                          onChanged: () {
+                            ref.read(healthProfileViewModelProvider.notifier).toggleHasRiwayatKeguguran();
+                          },
                         ),
                         if (state.hasRiwayatKeguguran) ...[
                           const SizedBox(height: 12),
@@ -511,40 +507,12 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
                         const SizedBox(height: 16),
                         
                         // Persalinan caesar
-                        Text(
-                          'Persalinan caesar',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textDark,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildRadioOption(
-                                value: false,
-                                groupValue: !state.pernahCaesar,
-                                label: 'Tidak',
-                                onChanged: (_) {
-                                  ref.read(healthProfileViewModelProvider.notifier)
-                                      .updatePernahCaesar(false);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildRadioOption(
-                                value: true,
-                                groupValue: state.pernahCaesar,
-                                label: 'Ya',
-                                onChanged: (_) {
-                                  ref.read(healthProfileViewModelProvider.notifier)
-                                      .updatePernahCaesar(true);
-                                },
-                              ),
-                            ),
-                          ],
+                        _buildHealthConditionRow(
+                          label: 'Persalinan caesar',
+                          value: state.pernahCaesar,
+                          onChanged: () {
+                            ref.read(healthProfileViewModelProvider.notifier).togglePernahCaesar();
+                          },
                         ),
                         const SizedBox(height: 16),
                         
@@ -619,9 +587,9 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
     required Function(bool) onChanged,
   }) {
     final isSelected = value == groupValue;
-    return InkWell(
+    return GestureDetector(
       onTap: () => onChanged(value),
-      borderRadius: BorderRadius.circular(8),
+      behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
@@ -687,34 +655,28 @@ class _HealthProfileScreenState extends ConsumerState<HealthProfileScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          GestureDetector(
-            onTap: () {
-              // Set to true if currently false
-              if (!value) {
+          _buildRadioOption(
+            value: true,
+            groupValue: value,
+            label: 'Ya',
+            onChanged: (newValue) {
+              // Only toggle if clicking "Ya" and current value is false
+              if (newValue == true && !value) {
                 onChanged();
               }
             },
-            child: _buildRadioOption(
-              value: true,
-              groupValue: value,
-              label: 'Ya',
-              onChanged: (_) {},
-            ),
           ),
           const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () {
-              // Set to false if currently true
-              if (value) {
+          _buildRadioOption(
+            value: false,
+            groupValue: value,
+            label: 'Tidak',
+            onChanged: (newValue) {
+              // Only toggle if clicking "Tidak" and current value is true
+              if (newValue == false && value) {
                 onChanged();
               }
             },
-            child: _buildRadioOption(
-              value: false,
-              groupValue: value,
-              label: 'Tidak',
-              onChanged: (_) {},
-            ),
           ),
         ],
       ),

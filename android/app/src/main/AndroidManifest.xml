@@ -39,9 +39,10 @@
             android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
         
         <!-- Firebase Cloud Messaging default notification channel -->
+        <!-- IMPORTANT: Channel ID harus match dengan backend: wellmom_notifications -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="wellmom_channel" />
+            android:value="wellmom_notifications" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

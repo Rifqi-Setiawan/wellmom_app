@@ -124,4 +124,9 @@ class HomeViewModel extends StateNotifier<HomeState> {
       );
     }
   }
+
+  /// Refresh home data (same as fetchHome but for pull-to-refresh)
+  Future<void> refreshHome() async {
+    await fetchHome();
+  }
 }

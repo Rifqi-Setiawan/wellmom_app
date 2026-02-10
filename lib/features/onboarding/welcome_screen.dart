@@ -1,10 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/constants/app_strings.dart';
+import 'package:wellmom_app/core/network/api_client.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
+import 'package:wellmom_app/core/storage/auth_storage_service.dart';
+import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
+import 'package:wellmom_app/features/kerabat/presentation/providers/kerabat_providers.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  bool _hasCheckedAuth = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check authentication status when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthAndRedirect();
+    });
+  }
+
+  Future<void> _checkAuthAndRedirect() async {
+    if (_hasCheckedAuth) return;
+    _hasCheckedAuth = true;
+
+    try {
+      // Check if token exists
+      final token = await AuthStorageService.getAccessToken();
+      if (token == null || token.isEmpty) {
+        // No token, stay on welcome screen
+        return;
+      }
+
+      // Set token to provider (already set in main.dart, but ensure it's set)
+      if (mounted) {
+        final currentToken = ref.read(authTokenProvider);
+        if (currentToken == null || currentToken.isEmpty) {
+          ref.read(authTokenProvider.notifier).state = token;
+        }
+      }
+
+      // Try to determine user type by checking ibu hamil endpoint first
+      try {
+        final dio = ref.read(dioProvider);
+        final response = await dio.get('/ibu-hamil/me');
+        if (response.statusCode == 200 && mounted) {
+          // User is ibu hamil, redirect to home
+          Navigator.of(context).pushReplacementNamed(AppRouter.home);
+          return;
+        }
+      } catch (e) {
+        // Not ibu hamil or error, try kerabat endpoint
+        try {
+          final kerabatDataSource = ref.read(kerabatRemoteDataSourceProvider);
+          final kerabatMe = await kerabatDataSource.getKerabatMe();
+          if (mounted) {
+            // User is kerabat, set providers and redirect to kerabat home
+            ref.read(kerabatIdProvider.notifier).state = kerabatMe.id;
+            ref.read(kerabatIbuHamilIdProvider.notifier).state = kerabatMe.ibuHamilId;
+            ref.read(kerabatIbuHamilNameProvider.notifier).state = kerabatMe.ibuHamilName;
+            
+            Navigator.of(context).pushReplacementNamed(AppRouter.kerabatHome);
+            return;
+          }
+        } catch (e2) {
+          // Not kerabat either, token might be invalid
+          // Clear token and stay on welcome screen
+          debugPrint('[WelcomeScreen] Token invalid, clearing: $e2');
+          await AuthStorageService.clearAccessToken();
+          if (mounted) {
+            ref.read(authTokenProvider.notifier).state = null;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[WelcomeScreen] Error checking auth: $e');
+      // On error, stay on welcome screen
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

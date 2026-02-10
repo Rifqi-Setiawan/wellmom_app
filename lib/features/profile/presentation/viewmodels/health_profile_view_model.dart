@@ -186,6 +186,16 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
     );
   }
 
+  void toggleHasRiwayatKeguguran() {
+    debugPrint('[HealthProfile] Toggling hasRiwayatKeguguran from ${state.hasRiwayatKeguguran} to ${!state.hasRiwayatKeguguran}');
+    final newValue = !state.hasRiwayatKeguguran;
+    state = state.copyWith(
+      hasRiwayatKeguguran: newValue,
+      jumlahKeguguran: newValue ? state.jumlahKeguguran : null,
+      clearError: true,
+    );
+  }
+
   void updateJumlahKeguguran(int? value) {
     state = state.copyWith(jumlahKeguguran: value, clearError: true);
   }
@@ -227,30 +237,38 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
 
   // Section B: Riwayat Kesehatan Ibu
   void toggleDarahTinggi() {
+    debugPrint('[HealthProfile] Toggling darahTinggi from ${state.darahTinggi} to ${!state.darahTinggi}');
     state = state.copyWith(darahTinggi: !state.darahTinggi, clearError: true);
+    debugPrint('[HealthProfile] darahTinggi updated to: ${state.darahTinggi}');
   }
 
   void toggleDiabetes() {
+    debugPrint('[HealthProfile] Toggling diabetes from ${state.diabetes} to ${!state.diabetes}');
     state = state.copyWith(diabetes: !state.diabetes, clearError: true);
   }
 
   void toggleAnemia() {
+    debugPrint('[HealthProfile] Toggling anemia from ${state.anemia} to ${!state.anemia}');
     state = state.copyWith(anemia: !state.anemia, clearError: true);
   }
 
   void togglePenyakitJantung() {
+    debugPrint('[HealthProfile] Toggling penyakitJantung from ${state.penyakitJantung} to ${!state.penyakitJantung}');
     state = state.copyWith(penyakitJantung: !state.penyakitJantung, clearError: true);
   }
 
   void toggleAsma() {
+    debugPrint('[HealthProfile] Toggling asma from ${state.asma} to ${!state.asma}');
     state = state.copyWith(asma: !state.asma, clearError: true);
   }
 
   void togglePenyakitGinjal() {
+    debugPrint('[HealthProfile] Toggling penyakitGinjal from ${state.penyakitGinjal} to ${!state.penyakitGinjal}');
     state = state.copyWith(penyakitGinjal: !state.penyakitGinjal, clearError: true);
   }
 
   void toggleTbcMalaria() {
+    debugPrint('[HealthProfile] Toggling tbcMalaria from ${state.tbcMalaria} to ${!state.tbcMalaria}');
     state = state.copyWith(tbcMalaria: !state.tbcMalaria, clearError: true);
   }
 
@@ -261,6 +279,11 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
 
   void updatePernahCaesar(bool value) {
     state = state.copyWith(pernahCaesar: value, clearError: true);
+  }
+
+  void togglePernahCaesar() {
+    debugPrint('[HealthProfile] Toggling pernahCaesar from ${state.pernahCaesar} to ${!state.pernahCaesar}');
+    state = state.copyWith(pernahCaesar: !state.pernahCaesar, clearError: true);
   }
 
   void updatePernahPerdarahanSaatHamil(String? value) {

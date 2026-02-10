@@ -15,7 +15,9 @@ void main() async {
   await initializeDateFormatting('id_ID', null);
   
   // Initialize Firebase and Notification Service
+  debugPrint('[MAIN] Starting NotificationService initialization...');
   await NotificationService.initialize();
+  debugPrint('[MAIN] NotificationService initialization complete');
   
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -31,6 +33,10 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Setup token refresh callback untuk otomatis kirim ke backend
+    // Ini harus dipanggil sebelum _loadToken agar callback siap saat token refresh
+    _setupTokenRefreshCallback();
+    
     // Load saved token from storage and set to provider
     _loadToken();
   }
@@ -41,11 +47,13 @@ class _MyAppState extends ConsumerState<MyApp> {
       ref.read(authTokenProvider.notifier).state = savedToken;
       print('App: Loaded token from storage, length: ${savedToken.length}');
       
-      // Setup token refresh callback untuk otomatis kirim ke backend
-      _setupTokenRefreshCallback();
-      
       // Update FCM token to backend if user is already logged in
-      _updateFcmTokenToBackend();
+      // Delay sedikit untuk memastikan NotificationService sudah fully initialized
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _updateFcmTokenToBackend();
+        }
+      });
     }
   }
 

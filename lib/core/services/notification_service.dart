@@ -10,14 +10,140 @@ import 'package:wellmom_app/features/chat/presentation/pages/konsul_chat_screen.
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint('[FCM] Background message received: ${message.messageId}');
+  debugPrint('========================================');
+  debugPrint('[FCM] ===== BACKGROUND MESSAGE RECEIVED =====');
+  debugPrint('[FCM] Message ID: ${message.messageId}');
+  debugPrint('[FCM] From: ${message.from}');
+  debugPrint('[FCM] Sent Time: ${message.sentTime}');
   debugPrint('[FCM] Title: ${message.notification?.title}');
   debugPrint('[FCM] Body: ${message.notification?.body}');
   debugPrint('[FCM] Data: ${message.data}');
+  debugPrint('[FCM] Has notification: ${message.notification != null}');
   
-  // Note: Background messages are handled automatically by the system
-  // Local notifications are not needed here as FCM handles it
-  // Navigation will be handled when user taps the notification
+  // Log data payload fields yang dikirim backend
+  if (message.data.isNotEmpty) {
+    debugPrint('[FCM] Background - Data payload fields:');
+    message.data.forEach((key, value) {
+      debugPrint('[FCM]   - $key: $value');
+    });
+    
+    // Check for specific backend fields
+    if (message.data.containsKey('type')) {
+      debugPrint('[FCM] Background - Notification type: ${message.data['type']}');
+    }
+    if (message.data.containsKey('risk_level')) {
+      debugPrint('[FCM] Background - Risk level: ${message.data['risk_level']}');
+    }
+    if (message.data.containsKey('ibu_hamil_id')) {
+      debugPrint('[FCM] Background - Ibu hamil ID: ${message.data['ibu_hamil_id']}');
+    }
+  }
+  debugPrint('========================================');
+  
+  // Initialize local notifications untuk menampilkan notifikasi saat app di background/terminated
+  final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
+  
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const iosSettings = DarwinInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+  );
+  
+  const initSettings = InitializationSettings(
+    android: androidSettings,
+    iOS: iosSettings,
+  );
+  
+  // Initialize dengan callback kosong karena ini background handler
+  await localNotifications.initialize(
+    settings: initSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      debugPrint('[FCM] Background notification tapped: ${response.payload}');
+    },
+  );
+  
+  // Create notification channel untuk Android
+  // IMPORTANT: Channel ID harus match dengan backend: wellmom_notifications
+  const androidChannel = AndroidNotificationChannel(
+    'wellmom_notifications',
+    'WellMom Notifications',
+    description: 'Notifications for WellMom app',
+    importance: Importance.high,
+    playSound: true,
+    enableVibration: true,
+  );
+  
+  await localNotifications
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(androidChannel);
+  
+  // Tampilkan local notification jika ada notification payload atau data payload
+  final notification = message.notification;
+  String? title;
+  String? body;
+  
+  if (notification != null) {
+    title = notification.title;
+    body = notification.body;
+  } else if (message.data.isNotEmpty) {
+    // Fallback: gunakan data payload untuk membuat notifikasi
+    title = message.data['title'] as String? ?? 
+            message.data['notification_title'] as String? ??
+            'WellMom';
+    body = message.data['body'] as String? ?? 
+           message.data['notification_body'] as String? ??
+           message.data['message'] as String? ??
+           'Anda memiliki notifikasi baru';
+    
+    debugPrint('[FCM] Background: Creating notification from data payload: title=$title, body=$body');
+  }
+  
+  if (title != null && body != null) {
+    // IMPORTANT: Channel ID harus match dengan backend: wellmom_notifications
+    const androidDetails = AndroidNotificationDetails(
+      'wellmom_notifications',
+      'WellMom Notifications',
+      channelDescription: 'Notifications for WellMom app',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      playSound: true,
+      enableVibration: true,
+    );
+    
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+    
+    // Store data as JSON string for payload
+    final payload = message.data.isNotEmpty 
+        ? message.data.entries.map((e) => '${e.key}:${e.value}').join('|')
+        : '';
+    
+    try {
+      await localNotifications.show(
+        id: message.hashCode,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
+        payload: payload,
+      );
+      
+      debugPrint('[FCM] Background notification displayed: $title');
+    } catch (e) {
+      debugPrint('[FCM] Error displaying background notification: $e');
+    }
+  } else {
+    debugPrint('[FCM] Background message has no notification or data payload, skipping local notification');
+  }
 }
 
 /// Service untuk menangani Firebase Cloud Messaging (FCM) dan Local Notifications
@@ -32,6 +158,7 @@ class NotificationService {
 
   bool _initialized = false;
   String? _fcmToken;
+  StreamSubscription<RemoteMessage>? _onMessageSubscription;
   
   /// Callback untuk update token ke backend saat token refresh
   Future<void> Function(String token)? _onTokenRefreshCallback;
@@ -71,6 +198,15 @@ class NotificationService {
       // Initialize FirebaseMessaging setelah Firebase siap
       _firebaseMessaging = FirebaseMessaging.instance;
       debugPrint('[NotificationService] FirebaseMessaging initialized');
+      
+      // Set foreground notification presentation options untuk Android
+      // Ini memastikan notifikasi ditampilkan bahkan saat app di foreground
+      await _firebaseMessaging!.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      debugPrint('[NotificationService] Foreground notification presentation options set');
 
       // Initialize Local Notifications
       await _initializeLocalNotifications();
@@ -78,22 +214,68 @@ class NotificationService {
       // Request permission untuk notifications
       await _requestPermission();
 
-      // Setup foreground message handler
-      FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+      // Setup foreground message handler - MUST be registered before getting token
+      // Store subscription to prevent it from being garbage collected
+      debugPrint('[NotificationService] ===== SETTING UP FOREGROUND MESSAGE HANDLER =====');
+      _onMessageSubscription = FirebaseMessaging.onMessage.listen(
+        (RemoteMessage message) {
+          debugPrint('[NotificationService] ===== onMessage listener TRIGGERED =====');
+          debugPrint('[NotificationService] Message received in onMessage stream');
+          debugPrint('[NotificationService] Message ID: ${message.messageId}');
+          debugPrint('[NotificationService] Has notification: ${message.notification != null}');
+          debugPrint('[NotificationService] Has data: ${message.data.isNotEmpty}');
+          _onForegroundMessage(message);
+        },
+        onError: (error) {
+          debugPrint('[NotificationService] ERROR in onMessage stream: $error');
+        },
+        onDone: () {
+          debugPrint('[NotificationService] onMessage stream closed');
+        },
+        cancelOnError: false,
+      );
+      debugPrint('[NotificationService] ✓ Foreground message handler registered and subscription stored');
+      debugPrint('[NotificationService] Subscription object: $_onMessageSubscription');
+      
+      // Verify subscription is active
+      if (_onMessageSubscription != null) {
+        debugPrint('[NotificationService] ✓ onMessage subscription is active: ${!_onMessageSubscription!.isPaused}');
+        debugPrint('[NotificationService] ✓ Subscription hash code: ${_onMessageSubscription.hashCode}');
+      } else {
+        debugPrint('[NotificationService] ✗ WARNING: onMessage subscription is null!');
+      }
+      
+      // Also register a direct listener as a test
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('[NotificationService] ===== DIRECT LISTENER ALSO TRIGGERED =====');
+        debugPrint('[NotificationService] Direct listener - Message ID: ${message.messageId}');
+        _onForegroundMessage(message);
+      });
+      debugPrint('[NotificationService] ✓ Direct listener also registered as backup');
 
       // Setup background message handler
       FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+      debugPrint('[NotificationService] Background message handler registered');
 
       // Setup notification tap handler (ketika user tap notifikasi)
       setupInteractedMessage();
+      debugPrint('[NotificationService] Notification tap handler registered');
 
       // Get FCM token
       await _getFcmToken();
 
       _initialized = true;
-      debugPrint('[NotificationService] Initialization complete');
-    } catch (e) {
-      debugPrint('[NotificationService] Initialization error: $e');
+      debugPrint('========================================');
+      debugPrint('[NotificationService] ✓✓✓ INITIALIZATION COMPLETE ✓✓✓');
+      debugPrint('[NotificationService] All handlers registered and ready');
+      debugPrint('[NotificationService] Channel ID: wellmom_notifications');
+      debugPrint('[NotificationService] FCM Token: ${_fcmToken?.substring(0, _fcmToken!.length > 50 ? 50 : _fcmToken!.length)}...');
+      debugPrint('========================================');
+    } catch (e, stackTrace) {
+      debugPrint('[NotificationService] ✗✗✗ INITIALIZATION ERROR ✗✗✗');
+      debugPrint('[NotificationService] Error: $e');
+      debugPrint('[NotificationService] Stack trace: $stackTrace');
+      // Don't set _initialized to true if there's an error
     }
   }
 
@@ -114,12 +296,22 @@ class NotificationService {
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
-      onDidReceiveBackgroundNotificationResponse: _onNotificationTapped,
+      // Note: onDidReceiveBackgroundNotificationResponse requires a top-level function
+      // We'll handle background notifications through FCM's onBackgroundMessage instead
     );
 
+    // Request permission untuk Android local notifications (Android 13+)
+    final androidPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (androidPlugin != null) {
+      final granted = await androidPlugin.requestNotificationsPermission();
+      debugPrint('[NotificationService] Android notification permission granted: $granted');
+    }
+
     // Create notification channel untuk Android
+    // IMPORTANT: Channel ID harus match dengan backend: wellmom_notifications
     const androidChannel = AndroidNotificationChannel(
-      'wellmom_channel',
+      'wellmom_notifications',
       'WellMom Notifications',
       description: 'Notifications for WellMom app',
       importance: Importance.high,
@@ -127,10 +319,8 @@ class NotificationService {
       enableVibration: true,
     );
 
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+    await androidPlugin?.createNotificationChannel(androidChannel);
+    debugPrint('[NotificationService] Android notification channel created: wellmom_notifications');
 
     debugPrint('[NotificationService] Local notifications initialized');
   }
@@ -160,12 +350,79 @@ class NotificationService {
     }
   }
 
+  /// Request notification permission (public method untuk dipanggil dari UI)
+  Future<bool> requestNotificationPermission() async {
+    try {
+      // Request FCM permission
+      final settings = await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+
+      // Request Android local notification permission (Android 13+)
+      final androidPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        await androidPlugin.requestNotificationsPermission();
+      }
+
+      final isAuthorized = settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+      
+      debugPrint('[NotificationService] Permission request result: $isAuthorized');
+      return isAuthorized;
+    } catch (e) {
+      debugPrint('[NotificationService] Error requesting permission: $e');
+      return false;
+    }
+  }
+
+  /// Check current notification permission status
+  Future<AuthorizationStatus> getNotificationPermissionStatus() async {
+    try {
+      final settings = await _messaging.getNotificationSettings();
+      return settings.authorizationStatus;
+    } catch (e) {
+      debugPrint('[NotificationService] Error getting permission status: $e');
+      return AuthorizationStatus.notDetermined;
+    }
+  }
+
   /// Handle foreground messages (ketika app sedang dibuka)
   void _onForegroundMessage(RemoteMessage message) {
-    debugPrint('[FCM] Foreground message received: ${message.messageId}');
+    debugPrint('========================================');
+    debugPrint('[FCM] ===== FOREGROUND MESSAGE RECEIVED =====');
+    debugPrint('[FCM] Message ID: ${message.messageId}');
+    debugPrint('[FCM] From: ${message.from}');
+    debugPrint('[FCM] Sent Time: ${message.sentTime}');
     debugPrint('[FCM] Title: ${message.notification?.title}');
     debugPrint('[FCM] Body: ${message.notification?.body}');
     debugPrint('[FCM] Data: ${message.data}');
+    debugPrint('[FCM] Has notification payload: ${message.notification != null}');
+    debugPrint('[FCM] Has data payload: ${message.data.isNotEmpty}');
+    debugPrint('[FCM] Notification object: ${message.notification}');
+    
+    // Log data payload fields yang dikirim backend
+    if (message.data.isNotEmpty) {
+      debugPrint('[FCM] Data payload fields:');
+      message.data.forEach((key, value) {
+        debugPrint('[FCM]   - $key: $value');
+      });
+      
+      // Check for specific backend fields
+      if (message.data.containsKey('type')) {
+        debugPrint('[FCM] Notification type: ${message.data['type']}');
+      }
+      if (message.data.containsKey('risk_level')) {
+        debugPrint('[FCM] Risk level: ${message.data['risk_level']}');
+      }
+      if (message.data.containsKey('ibu_hamil_id')) {
+        debugPrint('[FCM] Ibu hamil ID: ${message.data['ibu_hamil_id']}');
+      }
+    }
+    debugPrint('========================================');
 
     // Tampilkan local notification
     _showLocalNotification(message);
@@ -173,11 +430,47 @@ class NotificationService {
 
   /// Show local notification
   Future<void> _showLocalNotification(RemoteMessage message) async {
+    debugPrint('[FCM] _showLocalNotification called');
+    
     final notification = message.notification;
-    if (notification == null) return;
+    debugPrint('[FCM] Notification object: $notification');
+    
+    // Jika tidak ada notification payload, coba buat dari data payload
+    String? title;
+    String? body;
+    
+    if (notification != null) {
+      title = notification.title;
+      body = notification.body;
+      debugPrint('[FCM] Using notification payload - title: $title, body: $body');
+    } else if (message.data.isNotEmpty) {
+      // Fallback: gunakan data payload untuk membuat notifikasi
+      debugPrint('[FCM] No notification payload, checking data payload...');
+      debugPrint('[FCM] Data keys: ${message.data.keys.toList()}');
+      
+      title = message.data['title'] as String? ?? 
+              message.data['notification_title'] as String? ??
+              message.data['title'] as String? ??
+              'WellMom';
+      body = message.data['body'] as String? ?? 
+             message.data['notification_body'] as String? ??
+             message.data['message'] as String? ??
+             message.data['content'] as String? ??
+             'Anda memiliki notifikasi baru';
+      
+      debugPrint('[FCM] Creating notification from data payload: title=$title, body=$body');
+    }
+    
+    // Jika masih tidak ada title/body, skip
+    if (title == null || body == null) {
+      debugPrint('[FCM] ERROR: No notification title/body available, skipping local notification');
+      debugPrint('[FCM] Title: $title, Body: $body');
+      return;
+    }
 
+    // IMPORTANT: Channel ID harus match dengan backend: wellmom_notifications
     const androidDetails = AndroidNotificationDetails(
-      'wellmom_channel',
+      'wellmom_notifications',
       'WellMom Notifications',
       channelDescription: 'Notifications for WellMom app',
       importance: Importance.high,
@@ -185,6 +478,9 @@ class NotificationService {
       showWhen: true,
       playSound: true,
       enableVibration: true,
+      // Icon notification custom dari assets/images/Icon_Notification.png
+      icon: '@mipmap/ic_notification',
+      color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -203,13 +499,36 @@ class NotificationService {
         ? message.data.entries.map((e) => '${e.key}:${e.value}').join('|')
         : '';
     
-    await _localNotifications.show(
-      id: message.hashCode,
-      title: notification.title ?? '',
-      body: notification.body ?? '',
-      notificationDetails: notificationDetails,
-      payload: payload,
-    );
+    debugPrint('[FCM] Attempting to show local notification...');
+    debugPrint('[FCM] Notification ID: ${message.hashCode}');
+    debugPrint('[FCM] Title: $title');
+    debugPrint('[FCM] Body: $body');
+    debugPrint('[FCM] Payload: $payload');
+    
+    try {
+      // Check if local notifications plugin is initialized
+      final androidPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        final permissionGranted = await androidPlugin.areNotificationsEnabled();
+        debugPrint('[FCM] Android notifications enabled: $permissionGranted');
+        if (permissionGranted == false) {
+          debugPrint('[FCM] WARNING: Android notifications are not enabled!');
+        }
+      }
+      
+      await _localNotifications.show(
+        id: message.hashCode,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
+        payload: payload,
+      );
+      debugPrint('[FCM] ✓ Local notification displayed successfully: $title');
+    } catch (e, stackTrace) {
+      debugPrint('[FCM] ✗ ERROR displaying local notification: $e');
+      debugPrint('[FCM] Stack trace: $stackTrace');
+    }
   }
 
   /// Setup handlers for notification interactions (tap/opened)
@@ -403,6 +722,7 @@ class NotificationService {
     try {
       _fcmToken = await _messaging.getToken();
       debugPrint('[NotificationService] FCM Token obtained: ${_fcmToken?.substring(0, _fcmToken!.length > 50 ? 50 : _fcmToken!.length)}...');
+      debugPrint('[NotificationService] Full FCM Token: $_fcmToken');
 
       // Listen untuk token refresh
       _messaging.onTokenRefresh.listen((newToken) async {
@@ -460,6 +780,48 @@ class NotificationService {
       debugPrint('[NotificationService] Unsubscribed from topic: $topic');
     } catch (e) {
       debugPrint('[NotificationService] Error unsubscribing from topic: $e');
+    }
+  }
+
+  /// Test method: Show a test notification to verify local notifications work
+  Future<void> showTestNotification() async {
+    try {
+      debugPrint('[NotificationService] Showing test notification...');
+      
+      const androidDetails = AndroidNotificationDetails(
+        'wellmom_notifications',
+        'WellMom Notifications',
+        channelDescription: 'Notifications for WellMom app',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+        playSound: true,
+        enableVibration: true,
+      );
+      
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+      
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+      
+      await _localNotifications.show(
+        id: 999,
+        title: 'Test Notifikasi',
+        body: 'Ini adalah notifikasi test. Jika Anda melihat ini, berarti notifikasi lokal berfungsi dengan baik.',
+        notificationDetails: notificationDetails,
+        payload: 'test:notification',
+      );
+      
+      debugPrint('[NotificationService] Test notification displayed successfully');
+    } catch (e, stackTrace) {
+      debugPrint('[NotificationService] Error showing test notification: $e');
+      debugPrint('[NotificationService] Stack trace: $stackTrace');
     }
   }
 }

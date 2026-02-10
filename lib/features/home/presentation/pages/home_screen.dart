@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:wellmom_app/core/constants/app_colors.dart';
 import 'package:wellmom_app/core/widgets/bottom_nav_bar.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
@@ -41,6 +42,129 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Sinkronisasi FCM token ke backend saat HomeScreen dimuat
       _syncFcmTokenToBackend();
     });
+  }
+
+  /// Handle notification permission request
+  Future<void> _handleNotificationPermission(BuildContext context) async {
+    try {
+      final notificationService = NotificationService();
+      final currentStatus = await notificationService.getNotificationPermissionStatus();
+      
+      debugPrint('[HomeScreen] Current notification permission status: $currentStatus');
+      
+      if (currentStatus == AuthorizationStatus.authorized ||
+          currentStatus == AuthorizationStatus.provisional) {
+        // Permission sudah diberikan - show test notification
+        if (context.mounted) {
+          // Show test notification to verify it works
+          await notificationService.showTestNotification();
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Izin notifikasi sudah diberikan. Notifikasi test telah dikirim.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Request permission
+      if (context.mounted) {
+        final granted = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Izin Notifikasi'),
+            content: const Text(
+              'WellMom memerlukan izin notifikasi untuk mengirimkan informasi penting tentang kesehatan kehamilan Anda, seperti perubahan status risiko dan pesan dari perawat.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Nanti'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Izinkan'),
+              ),
+            ],
+          ),
+        );
+
+        if (granted == true && context.mounted) {
+          final result = await notificationService.requestNotificationPermission();
+          
+          if (context.mounted) {
+            if (result) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Izin notifikasi berhasil diberikan'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            } else {
+              // Permission ditolak, arahkan ke settings
+              showDialog(
+                context: context,
+                builder: (settingsContext) => AlertDialog(
+                  title: const Text('Izin Diperlukan'),
+                  content: const Text(
+                    'Untuk menerima notifikasi, silakan aktifkan izin notifikasi di Pengaturan perangkat Anda.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(settingsContext).pop(),
+                      child: const Text('Batal'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(settingsContext).pop();
+                        // Buka settings untuk Android
+                        final androidUri = Uri.parse('app-settings:');
+                        if (await canLaunchUrl(androidUri)) {
+                          await launchUrl(androidUri);
+                        } else {
+                          // Fallback untuk iOS atau jika tidak bisa buka settings
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Silakan buka Pengaturan > Aplikasi > WellMom > Notifikasi'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Buka Pengaturan'),
+                    ),
+                  ],
+                ),
+              );
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[HomeScreen] Error handling notification permission: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   /// Sinkronisasi FCM token ke backend
@@ -117,33 +241,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: state.isLoading
+        child: state.isLoading && state.ibuHamil == null
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header Section
-                    _buildHeader(state),
-                    const SizedBox(height: 16),
-                    // Countdown Card
-                    _buildCountdownCard(state),
-                    const SizedBox(height: 16),
-                    // Low Risk Card
-                    _buildRiskCard(state),
-                    const SizedBox(height: 24),
-                    // Metrik Kesehatan
-                    _buildMetrikKesehatan(state),
-                    const SizedBox(height: 24),
-                    // Puskesmas Anda
-                    _buildPuskesmasSection(state),
-                    const SizedBox(height: 24),
-                    // Catatan Perawat
-                    _buildCatatanPerawat(state),
-                    const SizedBox(height: 100), // Bottom padding for nav bar
-                  ],
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await ref.read(homeViewModelProvider.notifier).refreshHome();
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Section
+                      _buildHeader(state),
+                      const SizedBox(height: 16),
+                      // Countdown Card (using ibuHamilMeProvider for fresh data)
+                      _buildCountdownCard(),
+                      const SizedBox(height: 16),
+                      // Low Risk Card
+                      _buildRiskCard(state),
+                      const SizedBox(height: 24),
+                      // Metrik Kesehatan
+                      _buildMetrikKesehatan(state),
+                      const SizedBox(height: 24),
+                      // Puskesmas Anda
+                      _buildPuskesmasSection(state),
+                      const SizedBox(height: 24),
+                      // Catatan Perawat
+                      _buildCatatanPerawat(state),
+                      const SizedBox(height: 100), // Bottom padding for nav bar
+                    ],
+                  ),
                 ),
               ),
       ),
@@ -266,42 +396,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(width: 8),
           // Notification Icon
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                const Center(
-                  child: Icon(
-                    Icons.notifications_outlined,
-                    color: AppColors.textDark,
-                    size: 22,
+          GestureDetector(
+            onTap: () => _handleNotificationPermission(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+                ],
+              ),
+              child: Stack(
+                children: [
+                  const Center(
+                    child: Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.textDark,
+                      size: 22,
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -309,23 +442,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildCountdownCard(HomeState state) {
-    final ibu = state.ibuHamil;
-    final due = ibu?.estimatedDueDate;
-    final week = ibu?.usiaKehamilan;
-    final remainingDays = (due != null)
-        ? due.difference(DateTime.now()).inDays
-        : null;
-    final remainingWeeks = (remainingDays != null)
-        ? (remainingDays / 7).ceil().clamp(0, 40)
-        : null;
-    final progress = (week != null) ? (week / 40).clamp(0.0, 1.0) : 0.0;
+  Widget _buildCountdownCard() {
+    final ibuAsync = ref.watch(ibuHamilMeProvider);
+    
+    return ibuAsync.when(
+      loading: () => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFFFF0F5),
+              const Color(0xFFFFE4EC),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (ibu) {
+        final due = ibu?.estimatedDueDate;
+        final week = ibu?.usiaKehamilan;
+        final remainingDays = (due != null)
+            ? due.difference(DateTime.now()).inDays
+            : null;
+        final remainingWeeks = (remainingDays != null)
+            ? (remainingDays / 7).ceil().clamp(0, 40)
+            : null;
+        final progress = (week != null) ? (week / 40).clamp(0.0, 1.0) : 0.0;
 
-    final title = 'Countdown Persalinan';
-    final valueText = remainingWeeks != null
-        ? '$remainingWeeks Minggu lagi'
-        : 'HPL belum tersedia';
-    return Container(
+        final title = 'Countdown Persalinan';
+        final valueText = remainingWeeks != null
+            ? '$remainingWeeks Minggu lagi'
+            : 'HPL belum tersedia';
+        
+        return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -417,6 +580,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+        );
+      },
     );
   }
 
