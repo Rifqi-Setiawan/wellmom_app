@@ -110,6 +110,11 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
       showWhen: true,
       playSound: true,
       enableVibration: true,
+      // Icon kecil di status bar
+      icon: '@mipmap/ic_notification',
+      // Icon besar saat notifikasi di-expand (menggunakan drawable resource)
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
+      color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
     
     const iosDetails = DarwinNotificationDetails(
@@ -478,8 +483,10 @@ class NotificationService {
       showWhen: true,
       playSound: true,
       enableVibration: true,
-      // Icon notification custom dari assets/images/Icon_Notification.png
+      // Icon kecil di status bar
       icon: '@mipmap/ic_notification',
+      // Icon besar saat notifikasi di-expand (menggunakan drawable resource)
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
 

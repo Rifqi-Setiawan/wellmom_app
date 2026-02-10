@@ -281,7 +281,7 @@ class KerabatProfileScreen extends ConsumerWidget {
               } catch (_) {}
               if (!context.mounted) return;
               Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRouter.loginKerabat,
+                AppRouter.welcome,
                 (route) => false,
               );
             },

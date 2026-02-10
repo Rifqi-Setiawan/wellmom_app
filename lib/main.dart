@@ -110,7 +110,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.lightTheme,
       navigatorKey: AppRouter.navigatorKey,
       onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: AppRouter.welcome,
+      initialRoute: AppRouter.splash,
       debugShowCheckedModeBanner: false,
     );
   }

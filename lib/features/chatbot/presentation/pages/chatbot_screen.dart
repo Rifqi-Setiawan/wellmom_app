@@ -7,6 +7,7 @@ import 'package:wellmom_app/features/chatbot/presentation/viewmodels/chatbot_vie
 import 'package:wellmom_app/features/chatbot/presentation/widgets/chat_bubble.dart';
 import 'package:wellmom_app/features/chatbot/presentation/widgets/chat_input.dart';
 import 'package:wellmom_app/features/chatbot/presentation/widgets/quota_indicator.dart';
+import 'package:wellmom_app/features/chatbot/presentation/widgets/typing_indicator.dart';
 
 /// Main chatbot screen
 class ChatbotScreen extends ConsumerStatefulWidget {
@@ -171,15 +172,17 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(chatbotViewModelProvider);
 
-    // Listen for errors
+    // Listen for errors and state changes
     ref.listen(chatbotViewModelProvider, (ChatbotState? previous, ChatbotState next) {
       if (next.error != null && (previous == null || previous.error != next.error)) {
         ErrorSnackbar.show(context, next.error!);
         ref.read(chatbotViewModelProvider.notifier).clearError();
       }
       
-      // Scroll to bottom when new message arrives
-      if (previous == null || next.messages.length != previous.messages.length) {
+      // Scroll to bottom when new message arrives or typing indicator appears
+      if (previous == null || 
+          next.messages.length != previous.messages.length ||
+          (next.isSending && !previous.isSending)) {
         _scrollToBottom();
       }
     });
@@ -301,9 +304,19 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: state.messages.length,
+                    itemCount: state.messages.length + (state.isSending ? 1 : 0),
                     itemBuilder: (context, index) {
+                      // Show typing indicator as last item when sending
+                      if (state.isSending && index == state.messages.length) {
+                        return const TypingIndicator();
+                      }
+                      
                       final message = state.messages[index];
+                      // Skip loading messages (they're replaced by TypingIndicator)
+                      if (message.isLoading) {
+                        return const SizedBox.shrink();
+                      }
+                      
                       return ChatBubble(message: message);
                     },
                   ),

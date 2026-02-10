@@ -21,6 +21,7 @@ import 'package:wellmom_app/features/kerabat/presentation/pages/undang_kerabat_s
 import 'package:wellmom_app/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/health_profile_screen.dart';
 import 'package:wellmom_app/features/profile/presentation/pages/profile_screen.dart';
+import 'package:wellmom_app/core/widgets/splash_screen.dart';
 
 /// App routing configuration
 class AppRouter {
@@ -29,7 +30,8 @@ class AppRouter {
   /// Global navigator key for navigation from services/outside of widget tree
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  static const String welcome = '/';
+  static const String splash = '/';
+  static const String welcome = '/welcome';
   static const String loginIbuHamil = '/login-ibu-hamil';
   static const String registerIbuHamil = '/register-ibu-hamil';
   static const String medicalData = '/medical-data';
@@ -61,6 +63,11 @@ class AppRouter {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case splash:
+        return MaterialPageRoute(
+          builder: (_) => const SplashScreen(),
+          settings: settings,
+        );
       case welcome:
         return MaterialPageRoute(
           builder: (_) => const WelcomeScreen(),
@@ -193,7 +200,7 @@ class AppRouter {
         );
       default:
         return MaterialPageRoute(
-          builder: (_) => const WelcomeScreen(),
+          builder: (_) => const SplashScreen(),
           settings: settings,
         );
     }
