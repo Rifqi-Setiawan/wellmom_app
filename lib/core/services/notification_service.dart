@@ -43,7 +43,7 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   // Initialize local notifications untuk menampilkan notifikasi saat app di background/terminated
   final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
   
-  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_notification');
   const iosSettings = DarwinInitializationSettings(
     requestAlertPermission: true,
     requestBadgePermission: true,
@@ -110,10 +110,8 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
       showWhen: true,
       playSound: true,
       enableVibration: true,
-      // Icon kecil di status bar
+      // Icon kecil di status bar (logo WellMom)
       icon: '@mipmap/ic_notification',
-      // Icon besar saat notifikasi di-expand (menggunakan drawable resource)
-      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
     
@@ -286,7 +284,7 @@ class NotificationService {
 
   /// Initialize Local Notifications
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_notification');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -483,10 +481,8 @@ class NotificationService {
       showWhen: true,
       playSound: true,
       enableVibration: true,
-      // Icon kecil di status bar
+      // Icon kecil di status bar (logo WellMom)
       icon: '@mipmap/ic_notification',
-      // Icon besar saat notifikasi di-expand (menggunakan drawable resource)
-      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
 
@@ -804,6 +800,9 @@ class NotificationService {
         showWhen: true,
         playSound: true,
         enableVibration: true,
+        // Icon kecil di status bar (logo WellMom)
+        icon: '@mipmap/ic_notification',
+        color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
       );
       
       const iosDetails = DarwinNotificationDetails(

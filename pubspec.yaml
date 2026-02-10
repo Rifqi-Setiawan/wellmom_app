@@ -70,6 +70,9 @@ dev_dependencies:
   build_runner: ^2.4.7
   freezed: ^3.2.5
   json_serializable: ^6.7.1
+  
+  # Native Splash Screen
+  flutter_native_splash: ^2.4.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -110,3 +113,28 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter Native Splash Screen Configuration
+flutter_native_splash:
+  # Background color (putih)
+  color: "#FFFFFF"
+  
+  # Logo/image di tengah
+  # Menggunakan Logo Wellmom.png yang sudah memiliki padding transparan
+  # untuk menghindari logo terpotong di Android 12+ (yang akan di-mask menjadi lingkaran)
+  image: assets/images/Logo Wellmom.png
+  
+  # Platform settings
+  android: true
+  ios: true
+  
+  # Fullscreen mode (menyatu dengan status bar)
+  fullscreen: true
+  
+  # Android 12+ specific (Material You splash screen)
+  # Logo akan otomatis di-center dan di-mask menjadi lingkaran oleh sistem Android 12+
+  # Menggunakan Logo Wellmom.png yang sudah memiliki padding transparan
+  android_12:
+    image: assets/images/Logo Wellmom.png
+    color: "#FFFFFF"
+    fullscreen: true
