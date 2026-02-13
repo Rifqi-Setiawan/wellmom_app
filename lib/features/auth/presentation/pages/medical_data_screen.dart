@@ -42,19 +42,15 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
   @override
   void initState() {
     super.initState();
-    // Sync controllers with ViewModel state when state changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncControllersWithState();
     });
   }
 
-  /// Handle registrasi API lalu navigate ke pilih puskesmas
   Future<void> _handleRegisterAndNext() async {
-    // Ambil semua data dari ViewModel
     final registerState = ref.read(registerViewModelProvider);
     final medicalDataState = ref.read(medicalDataViewModelProvider);
 
-    // Bangun map untuk registerState
     final registerStateMap = {
       'namaLengkap': registerState.namaLengkap,
       'nik': registerState.nik,
@@ -77,7 +73,6 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
       'emergencyContactRelation': registerState.emergencyContactRelation,
     };
 
-    // Bangun map untuk medicalDataState
     final medicalDataStateMap = {
       'hpht': medicalDataState.hpht,
       'hpl': medicalDataState.hpl,
@@ -100,7 +95,6 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
       'whatsappConsent': medicalDataState.whatsappConsent,
     };
 
-    // Panggil registrasi API
     final success = await ref
         .read(confirmRegistrationViewModelProvider.notifier)
         .registerIbuHamil(
@@ -111,14 +105,12 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
     if (!mounted) return;
 
     if (success) {
-      // Registrasi berhasil → navigate ke pilih puskesmas
       ErrorSnackbar.showSuccess(
         context,
         'Registrasi berhasil! Silakan pilih puskesmas terdekat.',
       );
       Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
     } else {
-      // Registrasi gagal → tampilkan error
       final confirmState = ref.read(confirmRegistrationViewModelProvider);
       if (confirmState.error != null) {
         ErrorSnackbar.show(context, confirmState.error!);
@@ -129,22 +121,15 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
   void _syncControllersWithState() {
     final state = ref.read(medicalDataViewModelProvider);
     
-    // Sync HPHT
     if (state.hpht != null && _hphtController.text.isEmpty) {
       _hphtController.text = DateFormatter.formatDate(state.hpht!);
     }
-    
-    // Auto-fill HPL if HPHT is set
     if (state.hpl != null) {
       _hplController.text = DateFormatter.formatDate(state.hpl!);
     }
-    
-    // Auto-fill usia kehamilan if HPHT is set
     if (state.usiaKehamilan != null) {
       _usiaKehamilanController.text = state.usiaKehamilan.toString();
     }
-    
-    // Sync jumlah keguguran
     if (state.jumlahKeguguran != null && _jumlahKeguguranController.text.isEmpty) {
       _jumlahKeguguranController.text = state.jumlahKeguguran.toString();
     }
@@ -412,11 +397,8 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(medicalDataViewModelProvider);
     
-    // Auto-update HPL and usia kehamilan controllers when state changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
-      // Update HPL controller if state has HPL and it's different
       if (state.hpl != null) {
         final hplText = DateFormatter.formatDate(state.hpl!);
         if (_hplController.text != hplText) {
@@ -424,7 +406,6 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
         }
       }
       
-      // Update usia kehamilan controller if state has usia kehamilan and it's different
       if (state.usiaKehamilan != null) {
         final usiaText = state.usiaKehamilan.toString();
         if (_usiaKehamilanController.text != usiaText) {
@@ -456,7 +437,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Progress indicator
+           
             Row(
               children: [
                 Expanded(
@@ -491,7 +472,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ],
             ),
             const SizedBox(height: 24),
-            // Card A: Kehamilan
+           
             _buildCollapsibleCard(
               title: 'Kehamilan',
               letter: 'A',
@@ -525,13 +506,10 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                         },
                       );
                       if (picked != null) {
-                        // Update HPHT which will auto-calculate HPL and usia kehamilan
                         ref
                             .read(medicalDataViewModelProvider.notifier)
                             .updateHpht(picked);
                         _hphtController.text = DateFormatter.formatDate(picked);
-                        
-                        // Auto-fill HPL and usia kehamilan
                         final state = ref.read(medicalDataViewModelProvider);
                         if (state.hpl != null) {
                           _hplController.text = DateFormatter.formatDate(state.hpl!);
@@ -558,7 +536,6 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                     ),
                     suffixIcon: const Icon(Icons.calendar_today, size: 20),
                   ),
-                  // Note: HPL akan otomatis terisi saat HPHT diisi
                   const SizedBox(height: 16),
                   CustomTextField(
                     label: 'Usia kehamilan (minggu)',
@@ -573,7 +550,6 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                           .updateUsiaKehamilan(intValue);
                     },
                   ),
-                  // Note: Usia kehamilan akan otomatis terisi saat HPHT diisi
                   const SizedBox(height: 16),
                   CustomTextField(
                     label: 'Kehamilan ke-berapa',
@@ -627,7 +603,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                 ],
               ),
             ),
-            // Card B: Riwayat Kesehatan Ibu
+           
             _buildCollapsibleCard(
               title: 'Riwayat Kesehatan Ibu',
               letter: 'B',
@@ -710,7 +686,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
                 ],
               ),
             ),
-            // Card C: Riwayat Masa Lalu
+           
             _buildCollapsibleCard(
               title: 'Riwayat Masa Lalu',
               letter: 'C',
@@ -774,7 +750,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ),
             ),
             const SizedBox(height: 32),
-            // Data Sharing Consent Checkbox
+           
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -813,7 +789,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ],
             ),
             const SizedBox(height: 16),
-            // WhatsApp Consent Checkbox
+           
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -852,7 +828,7 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ],
             ),
             const SizedBox(height: 24),
-            // Next button - Registrasi dulu, lalu ke pilih puskesmas
+           
             CustomButton(
               text: 'Daftar & Pilih Puskesmas',
               isLoading: ref.watch(confirmRegistrationViewModelProvider).isSubmitting,

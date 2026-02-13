@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wellmom_app/features/auth/data/models/ibu_hamil_model.dart';
 import 'package:wellmom_app/features/auth/data/models/riwayat_kesehatan_ibu_model.dart';
@@ -93,13 +92,13 @@ class HealthProfileState {
       jarakKehamilanTerakhir: jarakKehamilanTerakhir ?? this.jarakKehamilanTerakhir,
       hpht: hpht ?? this.hpht,
       hpl: hpl ?? this.hpl,
-      darahTinggi: darahTinggi != null ? darahTinggi : this.darahTinggi,
-      diabetes: diabetes != null ? diabetes : this.diabetes,
-      anemia: anemia != null ? anemia : this.anemia,
-      penyakitJantung: penyakitJantung != null ? penyakitJantung : this.penyakitJantung,
-      asma: asma != null ? asma : this.asma,
-      penyakitGinjal: penyakitGinjal != null ? penyakitGinjal : this.penyakitGinjal,
-      tbcMalaria: tbcMalaria != null ? tbcMalaria : this.tbcMalaria,
+      darahTinggi: darahTinggi ?? this.darahTinggi,
+      diabetes: diabetes ?? this.diabetes,
+      anemia: anemia ?? this.anemia,
+      penyakitJantung: penyakitJantung ?? this.penyakitJantung,
+      asma: asma ?? this.asma,
+      penyakitGinjal: penyakitGinjal ?? this.penyakitGinjal,
+      tbcMalaria: tbcMalaria ?? this.tbcMalaria,
       komplikasiKehamilanSebelumnya: komplikasiKehamilanSebelumnya ?? this.komplikasiKehamilanSebelumnya,
       pernahCaesar: pernahCaesar ?? this.pernahCaesar,
       pernahPerdarahanSaatHamil: pernahPerdarahanSaatHamil ?? this.pernahPerdarahanSaatHamil,
@@ -125,15 +124,6 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
       return;
     }
 
-    // Debug: Print loaded data
-    debugPrint('[HealthProfile] Loading data from IbuHamilModel:');
-    debugPrint('  usiaKehamilan: ${ibuHamil.usiaKehamilan}');
-    debugPrint('  kehamilanKe: ${ibuHamil.kehamilanKe}');
-    debugPrint('  jumlahAnak: ${ibuHamil.jumlahAnak}');
-    debugPrint('  darahTinggi: ${ibuHamil.riwayatKesehatanIbu.darahTinggi}');
-    debugPrint('  diabetes: ${ibuHamil.riwayatKesehatanIbu.diabetes}');
-    debugPrint('  anemia: ${ibuHamil.riwayatKesehatanIbu.anemia}');
-
     state = state.copyWith(
       usiaKehamilan: ibuHamil.usiaKehamilan,
       kehamilanKe: ibuHamil.kehamilanKe ?? 1,
@@ -157,12 +147,6 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
           : 'Tidak ada',
       isLoading: false,
     );
-    
-    debugPrint('[HealthProfile] State updated:');
-    debugPrint('  usiaKehamilan: ${state.usiaKehamilan}');
-    debugPrint('  darahTinggi: ${state.darahTinggi}');
-    debugPrint('  diabetes: ${state.diabetes}');
-    debugPrint('  anemia: ${state.anemia}');
   }
 
   // Section A: Kehamilan
@@ -187,7 +171,6 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
   }
 
   void toggleHasRiwayatKeguguran() {
-    debugPrint('[HealthProfile] Toggling hasRiwayatKeguguran from ${state.hasRiwayatKeguguran} to ${!state.hasRiwayatKeguguran}');
     final newValue = !state.hasRiwayatKeguguran;
     state = state.copyWith(
       hasRiwayatKeguguran: newValue,
@@ -237,38 +220,30 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
 
   // Section B: Riwayat Kesehatan Ibu
   void toggleDarahTinggi() {
-    debugPrint('[HealthProfile] Toggling darahTinggi from ${state.darahTinggi} to ${!state.darahTinggi}');
     state = state.copyWith(darahTinggi: !state.darahTinggi, clearError: true);
-    debugPrint('[HealthProfile] darahTinggi updated to: ${state.darahTinggi}');
   }
 
   void toggleDiabetes() {
-    debugPrint('[HealthProfile] Toggling diabetes from ${state.diabetes} to ${!state.diabetes}');
     state = state.copyWith(diabetes: !state.diabetes, clearError: true);
   }
 
   void toggleAnemia() {
-    debugPrint('[HealthProfile] Toggling anemia from ${state.anemia} to ${!state.anemia}');
     state = state.copyWith(anemia: !state.anemia, clearError: true);
   }
 
   void togglePenyakitJantung() {
-    debugPrint('[HealthProfile] Toggling penyakitJantung from ${state.penyakitJantung} to ${!state.penyakitJantung}');
     state = state.copyWith(penyakitJantung: !state.penyakitJantung, clearError: true);
   }
 
   void toggleAsma() {
-    debugPrint('[HealthProfile] Toggling asma from ${state.asma} to ${!state.asma}');
     state = state.copyWith(asma: !state.asma, clearError: true);
   }
 
   void togglePenyakitGinjal() {
-    debugPrint('[HealthProfile] Toggling penyakitGinjal from ${state.penyakitGinjal} to ${!state.penyakitGinjal}');
     state = state.copyWith(penyakitGinjal: !state.penyakitGinjal, clearError: true);
   }
 
   void toggleTbcMalaria() {
-    debugPrint('[HealthProfile] Toggling tbcMalaria from ${state.tbcMalaria} to ${!state.tbcMalaria}');
     state = state.copyWith(tbcMalaria: !state.tbcMalaria, clearError: true);
   }
 
@@ -282,7 +257,6 @@ class HealthProfileViewModel extends StateNotifier<HealthProfileState> {
   }
 
   void togglePernahCaesar() {
-    debugPrint('[HealthProfile] Toggling pernahCaesar from ${state.pernahCaesar} to ${!state.pernahCaesar}');
     state = state.copyWith(pernahCaesar: !state.pernahCaesar, clearError: true);
   }
 

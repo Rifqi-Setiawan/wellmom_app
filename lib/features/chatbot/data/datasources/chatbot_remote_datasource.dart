@@ -6,7 +6,6 @@ import 'package:wellmom_app/features/chatbot/data/models/chatbot_quota_model.dar
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_send_response_model.dart';
 import 'package:wellmom_app/features/chatbot/data/models/chatbot_status_model.dart';
 
-/// Error messages in Indonesian
 const chatbotErrors = {
   'QUOTA_EXCEEDED': 'Batas penggunaan harian habis. Coba lagi besok ya, Bunda!',
   'RATE_LIMITED': 'Terlalu cepat, Bunda. Tunggu sebentar ya...',
@@ -17,7 +16,6 @@ const chatbotErrors = {
   'API_KEY_MISSING': 'Konfigurasi AI belum lengkap. Hubungi administrator.',
 };
 
-/// Abstract remote data source for chatbot
 abstract class ChatbotRemoteDataSource {
   Future<ChatbotSendResponseModel> sendMessage(
       String message, int? conversationId, String token);
@@ -30,13 +28,11 @@ abstract class ChatbotRemoteDataSource {
   Future<ChatbotStatusModel> getStatus(String token);
 }
 
-/// Implementation of ChatbotRemoteDataSource
 class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
   final Dio dio;
 
   ChatbotRemoteDataSourceImpl(this.dio);
 
-  /// Helper to create authorization headers
   Map<String, String> _authHeaders(String token) => {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -152,12 +148,6 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
       return ChatbotStatusModel.fromJson(
           response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      // If status endpoint fails, return unavailable status
-      print('Failed to get chatbot status: ${e.message}');
-      print('Status code: ${e.response?.statusCode}');
-      print('Response: ${e.response?.data}');
-      
-      // If 401, token is invalid
       if (e.response?.statusCode == 401) {
         return const ChatbotStatusModel(
           isAvailable: false,
@@ -180,23 +170,13 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
     }
   }
 
-  /// Handle Dio errors and convert to appropriate Failures
   Failure _handleDioError(DioException e) {
-    // Debug: print error details
-    print('Chatbot API Error: ${e.type}');
-    print('Status code: ${e.response?.statusCode}');
-    print('Response data: ${e.response?.data}');
-    print('Request path: ${e.requestOptions.path}');
-    print('Error message: ${e.message}');
-    
-    // Handle timeout errors
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
       return NetworkFailure('Koneksi timeout. Coba lagi, Bunda.');
     }
-    
-    // Handle connection errors
+
     if (e.type == DioExceptionType.connectionError) {
       return NetworkFailure(chatbotErrors['NETWORK_ERROR']!);
     }
@@ -210,7 +190,6 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
         case 401:
           return ServerFailure(chatbotErrors['UNAUTHORIZED']!);
         case 403:
-          // Check if quota exceeded
           if (detail != null &&
               (detail.toString().contains('quota') ||
                   detail.toString().contains('batas') ||
@@ -223,7 +202,6 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
           return ServerFailure(
               detail?.toString() ?? 'Endpoint tidak ditemukan: ${e.requestOptions.path}');
         case 422:
-          // Validation error
           return ServerFailure(
               detail?.toString() ?? 'Data tidak valid.');
         case 429:
@@ -231,7 +209,6 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
         case 500:
         case 502:
         case 503:
-          // Check for specific AI model errors
           final detailStr = detail?.toString().toLowerCase() ?? '';
           if (detailStr.contains('model') && 
               (detailStr.contains('tidak ditemukan') || 
@@ -244,7 +221,6 @@ class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
               detailStr.contains('gemini')) {
             return ServerFailure(chatbotErrors['API_KEY_MISSING']!);
           }
-          // Return the actual error message from backend if available
           return ServerFailure(
               detail?.toString() ?? chatbotErrors['SERVER_ERROR']!);
         default:

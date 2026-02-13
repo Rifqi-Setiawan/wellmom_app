@@ -39,26 +39,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     Future.microtask(() {
       ref.read(homeViewModelProvider.notifier).fetchHome();
-      // Sinkronisasi FCM token ke backend saat HomeScreen dimuat
       _syncFcmTokenToBackend();
     });
   }
 
-  /// Handle notification permission request
   Future<void> _handleNotificationPermission(BuildContext context) async {
     try {
       final notificationService = NotificationService();
       final currentStatus = await notificationService.getNotificationPermissionStatus();
-      
-      debugPrint('[HomeScreen] Current notification permission status: $currentStatus');
-      
+
       if (currentStatus == AuthorizationStatus.authorized ||
           currentStatus == AuthorizationStatus.provisional) {
-        // Permission sudah diberikan - show test notification
         if (context.mounted) {
-          // Show test notification to verify it works
           await notificationService.showTestNotification();
-          
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Izin notifikasi sudah diberikan. Notifikasi test telah dikirim.'),
@@ -69,7 +62,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
 
-      // Request permission
       if (context.mounted) {
         final granted = await showDialog<bool>(
           context: context,
@@ -97,7 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         if (granted == true && context.mounted) {
           final result = await notificationService.requestNotificationPermission();
-          
+
           if (context.mounted) {
             if (result) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +100,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               );
             } else {
-              // Permission ditolak, arahkan ke settings
               showDialog(
                 context: context,
                 builder: (settingsContext) => AlertDialog(
@@ -124,12 +115,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ElevatedButton(
                       onPressed: () async {
                         Navigator.of(settingsContext).pop();
-                        // Buka settings untuk Android
-                        final androidUri = Uri.parse('app-settings:');
+                          final androidUri = Uri.parse('app-settings:');
                         if (await canLaunchUrl(androidUri)) {
                           await launchUrl(androidUri);
                         } else {
-                          // Fallback untuk iOS atau jika tidak bisa buka settings
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -154,7 +143,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       }
     } catch (e) {
-      debugPrint('[HomeScreen] Error handling notification permission: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -167,30 +155,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  /// Sinkronisasi FCM token ke backend
   Future<void> _syncFcmTokenToBackend() async {
     try {
       final fcmToken = await NotificationService().getCurrentFcmToken();
       if (fcmToken != null && fcmToken.isNotEmpty) {
         final authRepository = ref.read(authRepositoryProvider);
-        final result = await authRepository.updateFcmToken(fcmToken);
-        result.fold(
-          (failure) {
-            debugPrint('[HomeScreen] Failed to update FCM token: ${failure.message}');
-            // Don't show error to user, just log it
-          },
-          (_) {
-            print("DEBUG: FCM Token sent to backend: $fcmToken");
-            debugPrint('[HomeScreen] FCM token updated successfully');
-          },
-        );
-      } else {
-        debugPrint('[HomeScreen] FCM token is null or empty, skipping update');
+        await authRepository.updateFcmToken(fcmToken);
       }
-    } catch (e) {
-      debugPrint('[HomeScreen] Error updating FCM token: $e');
-      // Don't show error to user, just log it
-    }
+    } catch (_) {}
   }
 
   void _onNavTap(int index) {
@@ -220,13 +192,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeViewModelProvider);
-    print('HomeScreen: build() - isLoading: ${state.isLoading}, error: ${state.error}');
-    print('HomeScreen: build() - ibuHamil: ${state.ibuHamil?.namaLengkap ?? "null"}');
-    print('HomeScreen: build() - puskesmas: ${state.puskesmas?.name ?? "null"}');
-    
-    // Show error if any
+
     if (state.error != null) {
-      print('HomeScreen: ERROR in state: ${state.error}');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1597,8 +1564,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _contactPerawat(PerawatModel perawat) {
-    // TODO: Implement contact functionality (WhatsApp, call, etc.)
-    print('Contacting perawat: ${perawat.namaLengkap}, Phone: ${perawat.nomorHp}');
+    Navigator.of(context).pushNamed(
+      AppRouter.konsulChat,
+      arguments: KonsulChatArgs(
+        perawatId: perawat.id,
+        perawatName: perawat.namaLengkap,
+        perawatPhotoUrl: perawat.profilePhotoUrl,
+      ),
+    );
   }
 
   int _getTrimester(int? week) {

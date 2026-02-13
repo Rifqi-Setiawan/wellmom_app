@@ -481,10 +481,8 @@ class RegisterViewModel extends StateNotifier<RegisterState> {
           longitude: locations[0].longitude,
         );
       }
-    } catch (e) {
-      // If geocoding fails, coordinates will remain null
-      // This is acceptable as they can be set later
-      print('Geocoding failed: $e');
+    } catch (_) {
+      // Geocoding failed, coordinates will remain null
     }
   }
 

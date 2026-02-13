@@ -3,13 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'register_ibu_hamil_request_model.freezed.dart';
 part 'register_ibu_hamil_request_model.g.dart';
 
-/// Request model for complete ibu hamil registration
-/// 
-/// Struktur JSON sesuai backend:
-/// {
-///   "user": { "phone": "WAJIB", "password": "WAJIB", "full_name": "WAJIB", "email": "OPSIONAL", "role": "ibu_hamil" },
-///   "ibu_hamil": { ... }
-/// }
 @freezed
 abstract class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
   @JsonSerializable(explicitToJson: true, includeIfNull: false)
@@ -26,16 +19,13 @@ abstract class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel 
 abstract class IbuHamilData with _$IbuHamilData {
   @JsonSerializable(explicitToJson: true, includeIfNull: false)
   const factory IbuHamilData({
-    // === FIELD WAJIB (sesuai backend) ===
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,
     required String nik,
     @JsonKey(name: 'date_of_birth') required String dateOfBirth,
     required String address,
-    required List<double> location, // [longitude, latitude] - WAJIB array 2 elemen
+    required List<double> location,
     @JsonKey(name: 'emergency_contact_name') required String emergencyContactName,
     @JsonKey(name: 'emergency_contact_phone') required String emergencyContactPhone,
-    
-    // === FIELD OPSIONAL (sesuai backend) ===
     @JsonKey(name: 'blood_type') String? bloodType,
     int? age,
     @JsonKey(name: 'emergency_contact_relation') String? emergencyContactRelation,
@@ -84,13 +74,11 @@ abstract class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
 abstract class UserData with _$UserData {
   @JsonSerializable(includeIfNull: false)
   const factory UserData({
-    // === FIELD WAJIB ===
     required String phone,
     required String password,
     @JsonKey(name: 'full_name') required String fullName,
     required String role,
-    // === FIELD OPSIONAL ===
-    String? email, // Backend: OPSIONAL - tidak dikirim jika null/kosong
+    String? email,
   }) = _UserData;
 
   factory UserData.fromJson(Map<String, dynamic> json) =>

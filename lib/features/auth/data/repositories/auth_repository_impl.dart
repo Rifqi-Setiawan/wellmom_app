@@ -13,7 +13,6 @@ import 'package:wellmom_app/features/auth/domain/entities/register_ibu_hamil_res
 import 'package:wellmom_app/features/auth/domain/entities/user_entity.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
 
-/// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final PuskesmasRemoteDataSource puskesmasRemoteDataSource;

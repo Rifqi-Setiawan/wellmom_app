@@ -74,46 +74,22 @@ class _CompleteProfileKerabatScreenState
       (response) async {
         setState(() => _isSubmitting = false);
         
-        // ✅ HANDLE TOKEN BARU - Jika phone diupdate, backend mengembalikan token baru
         final newToken = response.accessToken;
         if (newToken != null && newToken.trim().isNotEmpty) {
           final token = newToken.trim();
-          
-          debugPrint('[COMPLETE_PROFILE] Token baru diterima (panjang: ${token.length})');
-          
-          // 1. Update provider FIRST (untuk Dio interceptor)
+
           ref.read(authTokenProvider.notifier).state = token;
-          debugPrint('[COMPLETE_PROFILE] Token disimpan ke provider');
-          
-          // 2. Simpan token baru ke persistent storage
+
           try {
             await AuthStorageService.saveAccessToken(token);
-            debugPrint('[COMPLETE_PROFILE] Token disimpan ke storage (panjang: ${token.length})');
-          } catch (e) {
-            debugPrint('[COMPLETE_PROFILE] Gagal simpan token ke storage: $e');
+          } catch (_) {
+            // Token persistence failed, will work for current session
           }
-          
-          // 3. Invalidate Dio agar pakai token baru
+
           ref.invalidate(dioProvider);
-          debugPrint('[COMPLETE_PROFILE] Dio provider di-invalidate');
-          
-          // 4. PENTING: Force create new Dio instance sebelum delay
-          final _ = ref.read(dioProvider);
-          debugPrint('[COMPLETE_PROFILE] Dio instance baru dibuat');
-          
-          // 5. Delay lebih lama untuk memastikan token sync (300ms seperti rekomendasi backend)
+          ref.read(dioProvider);
+
           await Future.delayed(const Duration(milliseconds: 300));
-          
-          // 6. Verify token tersimpan dengan benar
-          final verifyToken = await AuthStorageService.getAccessToken();
-          final verifyProviderToken = ref.read(authTokenProvider);
-          debugPrint('[COMPLETE_PROFILE] Verifikasi token - Storage: ${verifyToken?.length ?? 0}, Provider: ${verifyProviderToken?.length ?? 0}');
-          
-          if (verifyToken != token || verifyProviderToken != token) {
-            debugPrint('[COMPLETE_PROFILE] WARNING - Token tidak sync!');
-          }
-        } else {
-          debugPrint('[COMPLETE_PROFILE] Tidak ada token baru (phone tidak diupdate)');
         }
         
         ErrorSnackbar.showSuccess(context, 'Profil berhasil disimpan');

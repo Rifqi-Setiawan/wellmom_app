@@ -47,20 +47,12 @@ class HistoryViewModel extends StateNotifier<HistoryState> {
     try {
       final resolvedId = ibuHamilId ?? await remote.getIbuHamilId();
 
-      // Store for refresh purposes
       _lastFetchDate = checkupDate;
       _lastFetchIbuHamilId = resolvedId;
 
-      print(
-        'HistoryViewModel: Fetching health records for ibuHamilId: $resolvedId, date: $checkupDate',
-      );
       final recordsData = await remote.getHealthRecordsByDate(
         ibuHamilId: resolvedId,
         checkupDate: checkupDate,
-      );
-
-      print(
-        'HistoryViewModel: Fetched ${recordsData.records.length} records',
       );
 
       state = state.copyWith(
@@ -69,11 +61,8 @@ class HistoryViewModel extends StateNotifier<HistoryState> {
         selectedDate: checkupDate,
       );
     } on Failure catch (e) {
-      print('HistoryViewModel: Failure - ${e.message}');
       state = state.copyWith(isLoading: false, error: e.message);
-    } catch (e, stackTrace) {
-      print('HistoryViewModel: Unexpected error - $e');
-      print('HistoryViewModel: Stack trace: $stackTrace');
+    } catch (e, _) {
       state = state.copyWith(
         isLoading: false,
         error: 'Terjadi kesalahan: ${e.toString()}',

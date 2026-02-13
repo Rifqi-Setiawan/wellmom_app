@@ -54,55 +54,36 @@ class HomeViewModel extends StateNotifier<HomeState> {
   HomeViewModel({required this.remote}) : super(const HomeState());
 
   Future<void> fetchHome() async {
-    print('HomeViewModel: fetchHome() called');
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      print('HomeViewModel: Fetching ibu hamil data...');
       final ibu = await remote.getIbuHamilMe();
-      print('HomeViewModel: Ibu hamil data received - nama: ${ibu.namaLengkap}, id: ${ibu.id}');
-      
+
       PuskesmasDetailModel? puskesmas;
       if (ibu.puskesmasId != null) {
-        print('HomeViewModel: Fetching puskesmas data for id: ${ibu.puskesmasId}');
         puskesmas = await remote.getPuskesmasDetail(ibu.puskesmasId!);
-        print('HomeViewModel: Puskesmas data received - name: ${puskesmas.name}');
-      } else {
-        print('HomeViewModel: No puskesmas_id, skipping puskesmas fetch');
       }
-      
-      // Fetch latest health record for metrics
+
       HealthRecordModel? latestHealthRecord;
       try {
-        print('HomeViewModel: Fetching latest health record...');
         latestHealthRecord = await remote.getLatestHealthRecord();
-        if (latestHealthRecord != null) {
-          print('HomeViewModel: Latest health record received - id: ${latestHealthRecord.id}');
-        } else {
-          print('HomeViewModel: No latest health record found');
-        }
-      } catch (e) {
-        print('HomeViewModel: Error fetching health record (non-fatal): $e');
-        // Silently fail - health records are optional
+      } catch (_) {
         latestHealthRecord = null;
       }
 
-      // Fetch latest perawat notes for homepage
       LatestPerawatNotesModel? latestPerawatNotes;
       try {
         latestPerawatNotes = await remote.getLatestPerawatNotes();
-      } catch (e) {
+      } catch (_) {
         latestPerawatNotes = null;
       }
 
-      // Fetch perawat info
       IbuHamilPerawatModel? ibuHamilPerawat;
       try {
         ibuHamilPerawat = await remote.getIbuHamilPerawat();
-      } catch (e) {
+      } catch (_) {
         ibuHamilPerawat = null;
       }
 
-      print('HomeViewModel: Updating state with all data...');
       state = state.copyWith(
         isLoading: false,
         ibuHamil: ibu,
@@ -111,13 +92,9 @@ class HomeViewModel extends StateNotifier<HomeState> {
         latestPerawatNotes: latestPerawatNotes,
         ibuHamilPerawat: ibuHamilPerawat,
       );
-      print('HomeViewModel: State updated - ibuHamil: ${state.ibuHamil?.namaLengkap}, puskesmas: ${state.puskesmas?.name}');
     } on Failure catch (e) {
-      print('HomeViewModel: Failure caught - ${e.message}');
       state = state.copyWith(isLoading: false, error: e.message);
-    } catch (e, stackTrace) {
-      print('HomeViewModel: Unexpected error - $e');
-      print('HomeViewModel: Stack trace: $stackTrace');
+    } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Terjadi kesalahan: ${e.toString()}',
@@ -125,7 +102,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
     }
   }
 
-  /// Refresh home data (same as fetchHome but for pull-to-refresh)
   Future<void> refreshHome() async {
     await fetchHome();
   }

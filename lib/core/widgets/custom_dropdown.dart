@@ -75,7 +75,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
                   : [],
             ),
             child: DropdownButtonFormField<T>(
-              value: widget.items.contains(widget.value) ? widget.value : null,
+              initialValue: widget.items.contains(widget.value) ? widget.value : null,
               isExpanded: true,
               elevation: 4,
               borderRadius: BorderRadius.circular(12),

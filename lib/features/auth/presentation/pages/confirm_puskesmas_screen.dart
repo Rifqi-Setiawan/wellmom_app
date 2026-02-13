@@ -27,7 +27,6 @@ class _ConfirmPuskesmasScreenState
       return;
     }
 
-    // Assign ibu hamil ke puskesmas (registrasi sudah dilakukan di step sebelumnya)
     final success = await ref
         .read(confirmRegistrationViewModelProvider.notifier)
         .assignToPuskesmas(puskesmasId: selectedPuskesmas.puskesmas.id);
@@ -40,8 +39,8 @@ class _ConfirmPuskesmasScreenState
       ref.read(authTokenProvider.notifier).state = null;
       try {
         await AuthStorageService.clearAccessToken();
-      } catch (e) {
-        debugPrint('Gagal clear token: $e');
+      } catch (_) {
+        // Token clearing failed, will be handled on next login
       }
       
       // Show success message

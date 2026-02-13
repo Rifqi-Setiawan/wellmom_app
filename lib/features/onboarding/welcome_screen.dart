@@ -70,18 +70,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             Navigator.of(context).pushReplacementNamed(AppRouter.kerabatHome);
             return;
           }
-        } catch (e2) {
-          // Not kerabat either, token might be invalid
-          // Clear token and stay on welcome screen
-          debugPrint('[WelcomeScreen] Token invalid, clearing: $e2');
+        } catch (_) {
           await AuthStorageService.clearAccessToken();
           if (mounted) {
             ref.read(authTokenProvider.notifier).state = null;
           }
         }
       }
-    } catch (e) {
-      debugPrint('[WelcomeScreen] Error checking auth: $e');
+    } catch (_) {
       // On error, stay on welcome screen
     }
   }

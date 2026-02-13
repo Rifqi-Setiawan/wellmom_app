@@ -147,13 +147,8 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
     fetchQuota();
   }
 
-  /// Check chatbot availability status
   Future<void> checkStatus() async {
-    // Skip if no token
-    if (token.isEmpty) {
-      print('Chatbot: No token available, skipping status check');
-      return;
-    }
+    if (token.isEmpty) return;
     
     state = state.copyWith(isCheckingStatus: true);
     try {
@@ -162,8 +157,7 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
         status: status,
         isCheckingStatus: false,
       );
-      
-      // If chatbot is not available, show error message
+
       if (!status.isAvailable) {
         final errorMsg = ChatMessage(
           id: 'status_error',
@@ -175,13 +169,10 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
           messages: [...state.messages, errorMsg],
         );
       }
-    } catch (e) {
-      print('Chatbot: Error checking status: $e');
+    } catch (_) {
       state = state.copyWith(isCheckingStatus: false);
     }
   }
-
-  /// Fetch user's quota
   Future<void> fetchQuota() async {
     try {
       final quota = await remoteDataSource.getQuota(token);
@@ -191,19 +182,12 @@ class ChatbotViewModel extends StateNotifier<ChatbotState> {
     }
   }
 
-  /// Send a message to the chatbot
   Future<void> sendMessage(String message) async {
     if (message.trim().isEmpty || state.isSending) return;
-    
-    // Debug: log token status
-    print('Chatbot: Sending message...');
-    print('Chatbot: Token length: ${token.length}');
-    print('Chatbot: Token preview: ${token.isNotEmpty ? "${token.substring(0, token.length > 20 ? 20 : token.length)}..." : "EMPTY"}');
 
-    // Clear any previous error
     state = state.copyWith(clearError: true);
 
-    // Add user message
+
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       role: 'user',

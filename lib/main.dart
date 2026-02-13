@@ -10,15 +10,8 @@ import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_prov
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize date formatting
   await initializeDateFormatting('id_ID', null);
-  
-  // Initialize Firebase and Notification Service
-  debugPrint('[MAIN] Starting NotificationService initialization...');
   await NotificationService.initialize();
-  debugPrint('[MAIN] NotificationService initialization complete');
-  
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -33,11 +26,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Setup token refresh callback untuk otomatis kirim ke backend
-    // Ini harus dipanggil sebelum _loadToken agar callback siap saat token refresh
     _setupTokenRefreshCallback();
-    
-    // Load saved token from storage and set to provider
     _loadToken();
   }
 
@@ -45,62 +34,35 @@ class _MyAppState extends ConsumerState<MyApp> {
     final savedToken = await AuthStorageService.getAccessToken();
     if (savedToken != null && mounted) {
       ref.read(authTokenProvider.notifier).state = savedToken;
-      print('App: Loaded token from storage, length: ${savedToken.length}');
-      
-      // Update FCM token to backend if user is already logged in
-      // Delay sedikit untuk memastikan NotificationService sudah fully initialized
       Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          _updateFcmTokenToBackend();
-        }
+        if (mounted) _updateFcmTokenToBackend();
       });
     }
   }
 
-  /// Setup callback untuk otomatis kirim token ke backend saat token refresh
   void _setupTokenRefreshCallback() {
     NotificationService().setTokenRefreshCallback((String newToken) async {
       try {
         final authRepository = ref.read(authRepositoryProvider);
         final result = await authRepository.updateFcmToken(newToken);
         result.fold(
-          (failure) {
-            debugPrint('[App] Failed to update refreshed FCM token: ${failure.message}');
-          },
-          (_) {
-            print("DEBUG: Refreshed FCM Token sent to backend: $newToken");
-            debugPrint('[App] Refreshed FCM token updated successfully');
-          },
+          (failure) => debugPrint('Failed to update refreshed FCM token: ${failure.message}'),
+          (_) {},
         );
       } catch (e) {
-        debugPrint('[App] Error updating refreshed FCM token: $e');
+        debugPrint('Error updating refreshed FCM token: $e');
       }
     });
   }
 
-  /// Update FCM token to backend when app opens (if user is logged in)
   Future<void> _updateFcmTokenToBackend() async {
     try {
       final fcmToken = await NotificationService().getCurrentFcmToken();
       if (fcmToken != null && fcmToken.isNotEmpty) {
         final authRepository = ref.read(authRepositoryProvider);
-        final result = await authRepository.updateFcmToken(fcmToken);
-        result.fold(
-          (failure) {
-            debugPrint('[App] Failed to update FCM token: ${failure.message}');
-            // Don't show error to user, just log it
-          },
-          (_) {
-            debugPrint('[App] FCM token updated successfully on app start');
-          },
-        );
-      } else {
-        debugPrint('[App] FCM token is null or empty, skipping update');
+        await authRepository.updateFcmToken(fcmToken);
       }
-    } catch (e) {
-      debugPrint('[App] Error updating FCM token: $e');
-      // Don't show error to user, just log it
-    }
+    } catch (_) {}
   }
 
   @override
@@ -115,4 +77,3 @@ class _MyAppState extends ConsumerState<MyApp> {
     );
   }
 }
-

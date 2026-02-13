@@ -2,15 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-/// Splash Screen widget untuk transisi mulus dari native splash ke Flutter app
-/// 
-/// Native splash screen akan otomatis ditampilkan saat app launch.
-/// Widget ini menampilkan tampilan yang identik dengan native splash untuk 
-/// transisi yang seamless, kemudian langsung navigate ke welcome screen 
-/// tanpa delay buatan.
-/// 
-/// Widget ini tetap ada untuk logika pengecekan auth (jika diperlukan di masa depan),
-/// namun tampilannya dibuat identik dengan native splash agar transisinya mulus.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -22,17 +13,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    
-    // Remove native splash screen setelah Flutter app siap
-    // Widget ini sudah identik dengan native splash, jadi transisi akan seamless
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        // Remove native splash segera setelah frame pertama render
-        // Tidak perlu delay karena widget ini sudah identik dengan native splash
         FlutterNativeSplash.remove();
-        
-        // Navigate ke welcome screen setelah native splash di-remove
-        // Welcome screen akan menangani logika pengecekan auth
         Navigator.of(context).pushReplacementNamed(AppRouter.welcome);
       }
     });
@@ -40,27 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Tampilkan splash screen yang identik dengan native splash
-    // untuk transisi yang seamless tanpa jeda putih
-    // Background putih (#FFFFFF) dan logo di tengah sesuai konfigurasi native splash
-    
-    // Ambil ukuran layar untuk membuat logo responsif
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Gunakan 35% dari dimensi terkecil layar untuk memastikan logo tidak terpotong
-    // Terutama penting untuk Android 12+ yang akan di-mask menjadi lingkaran
-    // Batasi maksimum 250px untuk memberikan lebih banyak ruang padding
     final minDimension = screenWidth < screenHeight ? screenWidth : screenHeight;
     final calculatedSize = minDimension * 0.35;
     final logoSize = calculatedSize > 250 ? 250.0 : calculatedSize;
-    
-    // Tambahkan padding tambahan di sekitar logo untuk memastikan tidak terpotong
-    // Padding ini akan memberikan ruang ekstra di luar logo
-    final paddingSize = logoSize * 0.15; // 15% padding tambahan
-    
+    final paddingSize = logoSize * 0.15;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF), // #FFFFFF
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(paddingSize),
@@ -69,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
             height: logoSize,
             child: Image.asset(
               'assets/images/Logo Wellmom.png',
-              fit: BoxFit.contain, // Pastikan logo tidak terpotong, proporsional
+              fit: BoxFit.contain,
             ),
           ),
         ),

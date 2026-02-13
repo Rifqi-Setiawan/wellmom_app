@@ -31,7 +31,6 @@ abstract class ForumRemoteDataSource {
   );
 }
 
-/// Implementation of ForumRemoteDataSource
 class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
   final Dio dio;
 

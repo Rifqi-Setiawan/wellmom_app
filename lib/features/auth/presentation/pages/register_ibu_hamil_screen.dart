@@ -597,9 +597,8 @@ class _RegisterIbuHamilScreenState
                                 matchedProvinsi = state.provinces.firstWhere(
                                   (p) => isRegionMatch(p.name, updatedState.provinsi),
                                 );
-                              } catch (e) {
+                              } catch (_) {
                                 // No match found, keep current selection
-                                debugPrint('Provinsi tidak ditemukan: ${updatedState.provinsi}');
                               }
                               
                               if (matchedProvinsi != null) {
@@ -671,16 +670,12 @@ class _RegisterIbuHamilScreenState
                                             .read(registerViewModelProvider.notifier)
                                             .updateKecamatan(
                                                 matchedKecamatan.name, matchedKecamatan.id);
-                                      } catch (e) {
+                                      } catch (_) {
                                         // Kecamatan not matched
-                                        debugPrint('Kecamatan tidak ditemukan: ${updatedState.kecamatan}');
-                                        debugPrint('Kecamatan yang tersedia: ${stateAfterDistricts.districts.map((d) => d.name).join(", ")}');
                                       }
                                     }
-                                  } catch (e) {
+                                  } catch (_) {
                                     // Kota not matched
-                                    debugPrint('Kota/Kabupaten tidak ditemukan: ${updatedState.kota}');
-                                    debugPrint('Kota/Kabupaten yang tersedia: ${stateAfterRegencies.regencies.map((k) => k.name).join(", ")}');
                                   }
                                 }
                               }

@@ -392,10 +392,7 @@ class _MessageList extends ConsumerWidget {
                   // Backend menggunakan field "sender_role" dengan nilai "ibu_hamil" atau "perawat"
                   // isFromIbuHamil getter sudah melakukan case-insensitive comparison
                   final isMe = msg.isFromIbuHamil;
-                  
-                  // Debug: Uncomment to check senderRole values
-                  // debugPrint('Message: ${msg.messageText}, senderRole: ${msg.senderRole}, isMe: $isMe');
-                  
+
                   return ChatBubble(
                     message: msg, 
                     isMe: isMe,

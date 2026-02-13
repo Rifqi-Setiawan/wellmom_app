@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:geocoding/geocoding.dart';
@@ -203,45 +202,31 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
     final normalized1 = _normalizeRegionName(name1);
     final normalized2 = _normalizeRegionName(name2);
     
-    // Exact match after normalization
-    if (normalized1 == normalized2) {
-      debugPrint('[EditProfile] Exact match: "$normalized1" == "$normalized2"');
-      return true;
-    }
-    
-    // Contains match (handles "Air Hangat" vs "Air Hangat Timur", etc.)
+    if (normalized1 == normalized2) return true;
+
     if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
-      debugPrint('[EditProfile] Contains match: "$normalized1" contains "$normalized2" or vice versa');
       return true;
     }
-    
-    // Match without spaces (handles "Air Hangat" vs "AirHangat")
+
     final noSpace1 = normalized1.replaceAll(' ', '');
     final noSpace2 = normalized2.replaceAll(' ', '');
     if (noSpace1.contains(noSpace2) || noSpace2.contains(noSpace1)) {
-      debugPrint('[EditProfile] No-space match: "$noSpace1" contains "$noSpace2" or vice versa');
       return true;
     }
-    
-    // Match with common variations (e.g., "Kerinci" vs "Kerinci Regency")
+
     final clean1 = normalized1.replaceAll(RegExp(r'[^\w]'), '');
     final clean2 = normalized2.replaceAll(RegExp(r'[^\w]'), '');
     if (clean1.contains(clean2) || clean2.contains(clean1)) {
-      debugPrint('[EditProfile] Clean match: "$clean1" contains "$clean2" or vice versa');
       return true;
     }
-    
-    // Additional: Check if one is a substring of the other (for partial matches)
-    // This helps with cases where geocoding returns partial names
+
     if (normalized1.length >= 3 && normalized2.length >= 3) {
       if (normalized1.substring(0, normalized1.length > 5 ? 5 : normalized1.length) == 
           normalized2.substring(0, normalized2.length > 5 ? 5 : normalized2.length)) {
-        debugPrint('[EditProfile] Prefix match: "$normalized1" and "$normalized2" share prefix');
         return true;
       }
     }
-    
-    debugPrint('[EditProfile] No match: "$normalized1" vs "$normalized2"');
+
     return false;
   }
 
@@ -279,9 +264,7 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
       );
       await loadRegencies(id);
       _buildAddressString();
-    } catch (e) {
-      debugPrint('[EditProfile] Provinsi not found in list: $id');
-      // Don't set selectedProvinsi if not found
+    } catch (_) {
       state = state.copyWith(
         provinsiName: name,
         provinsiId: id,
@@ -347,9 +330,7 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
       );
       await loadDistricts(id);
       _buildAddressString();
-    } catch (e) {
-      debugPrint('[EditProfile] Kota not found in list: $id');
-      // Don't set selectedKota if not found
+    } catch (_) {
       state = state.copyWith(
         kotaName: name,
         kotaId: id,
@@ -406,10 +387,7 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
         wilayahError: null,
       );
       _buildAddressString();
-    } catch (e) {
-      debugPrint('[EditProfile] Kecamatan not found in list: $id');
-      debugPrint('[EditProfile] Available districts: ${state.districts.map((d) => d.name).join(", ")}');
-      // Don't set selectedKecamatan if not found
+    } catch (_) {
       state = state.copyWith(
         kecamatanName: name,
         kecamatanId: id,
@@ -466,33 +444,15 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
     }
   }
 
-  /// Parse Placemark to address fields
-  /// Note: For rural areas, geocoding data might be incomplete or in different fields
   void _parsePlacemarkToAddress(Placemark placemark) {
-    // Debug: Print placemark data to help troubleshoot
-    debugPrint('[EditProfile] Placemark data:');
-    debugPrint('  street: ${placemark.street}');
-    debugPrint('  subLocality: ${placemark.subLocality}');
-    debugPrint('  locality: ${placemark.locality}');
-    debugPrint('  subAdministrativeArea: ${placemark.subAdministrativeArea}');
-    debugPrint('  administrativeArea: ${placemark.administrativeArea}');
-    debugPrint('  thoroughfare: ${placemark.thoroughfare}');
-    debugPrint('  subThoroughfare: ${placemark.subThoroughfare}');
-    
-    // For rural areas, try multiple fields for kecamatan
-    // Sometimes kecamatan is in locality, sometimes in subLocality
     String kecamatan = placemark.locality ?? '';
     if (kecamatan.isEmpty && placemark.subLocality != null) {
-      // Try subLocality if locality is empty
       kecamatan = placemark.subLocality!;
     }
-    
-    // For kota/kabupaten, try subAdministrativeArea first
+
     String kota = placemark.subAdministrativeArea ?? '';
-    
-    // For provinsi, use administrativeArea
     String provinsi = placemark.administrativeArea ?? '';
-    
+
     state = state.copyWith(
       jalan: placemark.street ?? placemark.thoroughfare ?? '',
       kelurahan: placemark.subLocality ?? '',
@@ -501,13 +461,6 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
       provinsiName: provinsi,
       address: AddressBuilder.buildAddressString(placemark),
     );
-    
-    debugPrint('[EditProfile] Parsed address:');
-    debugPrint('  jalan: ${state.jalan}');
-    debugPrint('  kelurahan: ${state.kelurahan}');
-    debugPrint('  kecamatan: ${state.kecamatanName}');
-    debugPrint('  kota: ${state.kotaName}');
-    debugPrint('  provinsi: ${state.provinsiName}');
   }
 
   /// Update form fields
@@ -605,8 +558,6 @@ class EditProfileViewModel extends StateNotifier<EditProfileState> {
         if (longitude >= -180 && longitude <= 180 && 
             latitude >= -90 && latitude <= 90) {
           validLocation = state.location;
-        } else {
-          debugPrint('[EditProfile] Invalid location coordinates: [$longitude, $latitude]');
         }
       }
 

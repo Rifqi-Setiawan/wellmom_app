@@ -33,13 +33,11 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      // Update ViewModel with current form values
       ref.read(loginViewModelProvider.notifier)
           .updateEmail(_emailController.text.trim());
       ref.read(loginViewModelProvider.notifier)
           .updatePassword(_passwordController.text);
 
-      // Submit login
       final success = await ref.read(loginViewModelProvider.notifier).login();
 
       if (!mounted) return;
@@ -47,38 +45,26 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       if (success) {
         final state = ref.read(loginViewModelProvider);
         if (state.loginResponse != null) {
-          // Save token to provider first (this always works)
           final token = state.loginResponse!.accessToken;
           ref.read(authTokenProvider.notifier).state = token;
             ref.read(ibuHamilIdProvider.notifier).state =
               state.loginResponse!.ibuHamilId;
           
-          // Try to save token to storage (may fail if plugin not initialized)
           try {
             await AuthStorageService.saveAccessToken(token);
-            print('Login: Token saved to storage and provider, length: ${token.length}');
-          } catch (e) {
-            print('Login: Warning - Failed to save token to storage: $e');
-            print('Login: Token saved to provider only. Please restart app after rebuild.');
-            // Continue anyway - token is in provider and will work for current session
-          }
+          } catch (_) {}
           
-          print('Login: Token preview: ${token.substring(0, token.length > 30 ? 30 : token.length)}...');
-          
-          // Update FCM token to backend
           _updateFcmTokenToBackend(ref);
-          
-          // Show success message
+          _updateFcmTokenToBackend(ref);
+
           ErrorSnackbar.showSuccess(
             context,
             'Login berhasil! Selamat datang, ${state.loginResponse!.namaLengkap}',
           );
           
-          // Navigate to home screen and clear all previous routes
-          // This ensures user cannot go back to login screen
           Navigator.of(context).pushNamedAndRemoveUntil(
             AppRouter.home,
-            (route) => false, // Remove all previous routes
+            (route) => false,
           );
         }
       } else {
@@ -104,29 +90,14 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
     }
   }
 
-  /// Update FCM token to backend after successful login
   Future<void> _updateFcmTokenToBackend(WidgetRef ref) async {
     try {
       final fcmToken = await NotificationService().getCurrentFcmToken();
       if (fcmToken != null && fcmToken.isNotEmpty) {
         final authRepository = ref.read(authRepositoryProvider);
-        final result = await authRepository.updateFcmToken(fcmToken);
-        result.fold(
-          (failure) {
-            debugPrint('[Login] Failed to update FCM token: ${failure.message}');
-            // Don't show error to user, just log it
-          },
-          (_) {
-            debugPrint('[Login] FCM token updated successfully');
-          },
-        );
-      } else {
-        debugPrint('[Login] FCM token is null or empty, skipping update');
+        await authRepository.updateFcmToken(fcmToken);
       }
-    } catch (e) {
-      debugPrint('[Login] Error updating FCM token: $e');
-      // Don't show error to user, just log it
-    }
+    } catch (_) {}
   }
 
   @override
@@ -137,23 +108,20 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background image with blue overlay
           Positioned.fill(
             child: Stack(
               children: [
-                // Background image - positioned at top, smaller size, fit to top
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: MediaQuery.of(context).size.height * 0.5, // ~50% of screen height
+                  height: MediaQuery.of(context).size.height * 0.5,
                   child: Image.asset(
                     'assets/images/onboarding_pregnant_bg.png',
-                    fit: BoxFit.fitWidth, // Fit width, maintain aspect ratio
+                    fit: BoxFit.fitWidth,
                     alignment: Alignment.topCenter,
                   ),
                 ),
-                // Blue transparent overlay with Figma gradient - full screen
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -175,7 +143,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
               ],
             ),
           ),
-          // White card with curved top
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -201,7 +168,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title - centered
                       const Center(
                         child: Text(
                           'Masuk ke Akun Wellmom',
@@ -214,7 +180,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Subtitle - centered
                       Center(
                         child: Text(
                           'Mulai perjalanan kehamilan yang sehat dan bahagia bersama Wellmom.',
@@ -226,7 +191,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      // Error message display
                       if (state.error != null) ...[
                         Container(
                           width: double.infinity,
@@ -259,7 +223,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                           ),
                         ),
                       ],
-                      // Nama Pengguna / Email field
                       CustomTextField(
                         label: 'Nama Pengguna',
                         hintText: 'Masukkan nama pengguna atau email',
@@ -273,7 +236,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Nama pengguna atau email harus diisi';
                           }
-                          // Allow both email and username
                           if (value.contains('@')) {
                             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                 .hasMatch(value)) {
@@ -284,7 +246,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      // Password field
                       CustomTextField(
                         label: AppStrings.kataSandi,
                         hintText: '••••••••',
@@ -324,14 +285,12 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                             ),
                       ),
                       const SizedBox(height: 24),
-                      // Login button
                       CustomButton(
                         text: 'Masuk',
                         onPressed: state.isLoading ? null : _handleLogin,
                         isLoading: state.isLoading,
                       ),
                       const SizedBox(height: 14),
-                      // Google login button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -363,7 +322,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Register link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

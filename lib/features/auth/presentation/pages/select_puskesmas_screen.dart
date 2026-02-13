@@ -20,7 +20,6 @@ class _SelectPuskesmasScreenState
   @override
   void initState() {
     super.initState();
-    // Fetch nearest puskesmas when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchNearestPuskesmas();
     });
@@ -28,21 +27,10 @@ class _SelectPuskesmasScreenState
 
   Future<void> _fetchNearestPuskesmas() async {
     final registerState = ref.read(registerViewModelProvider);
-    
-    // Log location information for debugging
-    print('═══════════════════════════════════════════════════════════');
-    print('📍 Fetching Nearest Puskesmas');
-    print('   currentPosition: ${registerState.currentPosition}');
-    print('   latitude: ${registerState.latitude}');
-    print('   longitude: ${registerState.longitude}');
-    print('   currentPosition?.latitude: ${registerState.currentPosition?.latitude}');
-    print('   currentPosition?.longitude: ${registerState.currentPosition?.longitude}');
-    print('═══════════════════════════════════════════════════════════');
-    
-    // Determine which location to use
+
     double? finalLatitude;
     double? finalLongitude;
-    
+
     if (registerState.currentPosition != null) {
       finalLatitude = registerState.currentPosition!.latitude;
       finalLongitude = registerState.currentPosition!.longitude;
@@ -50,15 +38,13 @@ class _SelectPuskesmasScreenState
       finalLatitude = registerState.latitude;
       finalLongitude = registerState.longitude;
     }
-    
+
     if (finalLatitude != null && finalLongitude != null) {
-      print('✅ Using location: lat=$finalLatitude, lng=$finalLongitude');
       await ref.read(puskesmasViewModelProvider.notifier).fetchNearestPuskesmas(
             finalLatitude,
             finalLongitude,
           );
     } else {
-      print('❌ No valid location found');
       if (mounted) {
         ErrorSnackbar.show(
           context,
@@ -70,7 +56,6 @@ class _SelectPuskesmasScreenState
 
   void _selectPuskesmas(NearestPuskesmasModel puskesmas) {
     ref.read(puskesmasViewModelProvider.notifier).selectPuskesmas(puskesmas);
-    // Navigate to confirmation screen
     Navigator.of(context).pushNamed(AppRouter.confirmPuskesmas);
   }
 

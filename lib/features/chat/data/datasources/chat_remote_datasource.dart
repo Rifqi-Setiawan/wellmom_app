@@ -112,13 +112,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     required String messageText,
   }) async {
     try {
-      // Backend: Untuk ibu hamil, hanya perlu message_text
-      // Backend otomatis mengirim ke perawat yang di-assign
-      // Tidak perlu conversation_id atau perawat_id
       final body = <String, dynamic>{
         'message_text': messageText,
-        // Note: Backend tidak memerlukan conversation_id atau perawat_id untuk ibu hamil
-        // Backend otomatis menentukan conversation berdasarkan perawat yang di-assign
       };
       final response = await dio.post('/chat/messages', data: body);
       if (response.data is! Map) {

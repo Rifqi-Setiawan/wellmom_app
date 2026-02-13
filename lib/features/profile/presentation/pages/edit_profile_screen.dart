@@ -92,9 +92,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       } else {
         _selectedKecamatan = null;
       }
-    } catch (e) {
-      // Silently fail jika state belum siap
-      debugPrint('Failed to sync controllers: $e');
+    } catch (_) {
+      // State not ready yet
     }
   }
 
@@ -144,53 +143,37 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         .replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  /// Check if two region names match (handles exact, contains, and fuzzy matching)
-  /// Enhanced for rural areas like "Air Hangat", "Kerinci", etc.
   bool _isRegionMatch(String name1, String name2) {
     if (name1.isEmpty || name2.isEmpty) return false;
-    
+
     final normalized1 = _normalizeRegionName(name1);
     final normalized2 = _normalizeRegionName(name2);
-    
-    // Exact match after normalization
-    if (normalized1 == normalized2) {
-      debugPrint('[EditProfile] Exact match: "$normalized1" == "$normalized2"');
-      return true;
-    }
-    
-    // Contains match (handles "Air Hangat" vs "Air Hangat Timur", etc.)
+
+    if (normalized1 == normalized2) return true;
+
     if (normalized1.contains(normalized2) || normalized2.contains(normalized1)) {
-      debugPrint('[EditProfile] Contains match: "$normalized1" contains "$normalized2" or vice versa');
       return true;
     }
-    
-    // Match without spaces (handles "Air Hangat" vs "AirHangat")
+
     final noSpace1 = normalized1.replaceAll(' ', '');
     final noSpace2 = normalized2.replaceAll(' ', '');
     if (noSpace1.contains(noSpace2) || noSpace2.contains(noSpace1)) {
-      debugPrint('[EditProfile] No-space match: "$noSpace1" contains "$noSpace2" or vice versa');
       return true;
     }
-    
-    // Match with common variations (e.g., "Kerinci" vs "Kerinci Regency")
+
     final clean1 = normalized1.replaceAll(RegExp(r'[^\w]'), '');
     final clean2 = normalized2.replaceAll(RegExp(r'[^\w]'), '');
     if (clean1.contains(clean2) || clean2.contains(clean1)) {
-      debugPrint('[EditProfile] Clean match: "$clean1" contains "$clean2" or vice versa');
       return true;
     }
-    
-    // Additional: Check if one is a substring of the other (for partial matches)
-    // This helps with cases where geocoding returns partial names
+
     if (normalized1.length >= 3 && normalized2.length >= 3) {
       if (normalized1.substring(0, normalized1.length > 5 ? 5 : normalized1.length) == 
           normalized2.substring(0, normalized2.length > 5 ? 5 : normalized2.length)) {
-        debugPrint('[EditProfile] Prefix match: "$normalized1" and "$normalized2" share prefix');
         return true;
       }
     }
-    
-    debugPrint('[EditProfile] No match: "$normalized1" vs "$normalized2"');
+
     return false;
   }
 
@@ -219,8 +202,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         matchedProvinsi = state.provinces.firstWhere(
           (p) => _isRegionMatch(p.name, state.provinsiName),
         );
-      } catch (e) {
-        debugPrint('Provinsi tidak ditemukan: ${state.provinsiName}');
+      } catch (_) {
+        // Province not found in list
       }
 
       if (matchedProvinsi != null) {
@@ -278,12 +261,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 });
                 viewModel.updateKecamatan(
                     matchedKecamatan.name, matchedKecamatan.id);
-              } catch (e) {
-                debugPrint('Kecamatan tidak ditemukan: ${stateAfterDistricts.kecamatanName}');
+              } catch (_) {
+                // District not found in list
               }
             }
-          } catch (e) {
-            debugPrint('Kota/Kabupaten tidak ditemukan: ${stateAfterRegencies.kotaName}');
+          } catch (_) {
+            // City not found in list
           }
         }
       }
