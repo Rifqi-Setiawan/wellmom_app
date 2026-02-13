@@ -174,28 +174,49 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         final responseData = e.response?.data;
 
         if (statusCode == 422) {
-          // Validation error
+          // Validation error - log SEMUA detail untuk debugging
           final detail = responseData?['detail'];
+          print('═══════════════════════════════════════════════════════════');
+          print('❌ 422 VALIDATION ERROR - FULL RESPONSE:');
+          print('═══════════════════════════════════════════════════════════');
+          print('Response data: $responseData');
+          print('Detail type: ${detail.runtimeType}');
+          print('Detail value: $detail');
+          
           String errorMessage = 'Data yang dimasukkan tidak valid';
+          final allErrors = <String>[];
 
           if (detail is List && detail.isNotEmpty) {
-            final firstError = detail[0];
-            if (firstError is Map) {
-              final msg = firstError['msg'] as String?;
-              final loc = firstError['loc'] as List?;
-              if (msg != null) {
-                errorMessage = msg;
-                if (loc != null && loc.length >= 2) {
-                  final field = loc[1] as String?;
-                  if (field != null) {
-                    errorMessage = '${_formatFieldName(field)}: $msg';
-                  }
-                }
+            print('Total errors: ${detail.length}');
+            for (int i = 0; i < detail.length; i++) {
+              final error = detail[i];
+              print('--- Error [$i]: $error');
+              if (error is Map) {
+                final msg = error['msg'] as String? ?? 'Unknown error';
+                final loc = error['loc'] as List? ?? [];
+                final type = error['type'] as String? ?? '';
+                final input = error['input'];
+                print('  msg: $msg');
+                print('  loc: $loc');
+                print('  type: $type');
+                print('  input: $input');
+                
+                // Build readable error path
+                final fieldPath = loc.where((l) => l != 'body').join('.');
+                allErrors.add('$fieldPath: $msg');
               }
             }
+            errorMessage = allErrors.join('\n');
           } else if (detail is String) {
             errorMessage = detail;
+          } else if (detail is Map) {
+            print('Detail as Map: $detail');
+            errorMessage = detail.toString();
           }
+          
+          print('═══════════════════════════════════════════════════════════');
+          print('📋 ALL ERRORS: $allErrors');
+          print('═══════════════════════════════════════════════════════════');
 
           throw ValidationFailure(errorMessage);
         } else {

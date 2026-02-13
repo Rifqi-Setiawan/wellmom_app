@@ -4,9 +4,15 @@ part 'register_ibu_hamil_request_model.freezed.dart';
 part 'register_ibu_hamil_request_model.g.dart';
 
 /// Request model for complete ibu hamil registration
+/// 
+/// Struktur JSON sesuai backend:
+/// {
+///   "user": { "phone": "WAJIB", "password": "WAJIB", "full_name": "WAJIB", "email": "OPSIONAL", "role": "ibu_hamil" },
+///   "ibu_hamil": { ... }
+/// }
 @freezed
 abstract class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel {
-  @JsonSerializable(explicitToJson: true)
+  @JsonSerializable(explicitToJson: true, includeIfNull: false)
   const factory RegisterIbuHamilRequestModel({
     @JsonKey(name: 'ibu_hamil') required IbuHamilData ibuHamil,
     required UserData user,
@@ -18,36 +24,39 @@ abstract class RegisterIbuHamilRequestModel with _$RegisterIbuHamilRequestModel 
 
 @freezed
 abstract class IbuHamilData with _$IbuHamilData {
-  @JsonSerializable(explicitToJson: true)
+  @JsonSerializable(explicitToJson: true, includeIfNull: false)
   const factory IbuHamilData({
-    required String address,
-    int? age,
-    @JsonKey(name: 'blood_type') String? bloodType,
-    @JsonKey(name: 'data_sharing_consent') @Default(false) bool dataSharingConsent,
-    @JsonKey(name: 'date_of_birth') required String dateOfBirth,
-    @JsonKey(name: 'emergency_contact_name') required String emergencyContactName,
-    @JsonKey(name: 'emergency_contact_phone') required String emergencyContactPhone,
-    @JsonKey(name: 'emergency_contact_relation') String? emergencyContactRelation,
-    @JsonKey(name: 'estimated_due_date') String? estimatedDueDate,
-    @JsonKey(name: 'healthcare_preference') String? healthcarePreference,
-    @JsonKey(name: 'jarak_kehamilan_terakhir') String? jarakKehamilanTerakhir,
-    @JsonKey(name: 'jumlah_anak') int? jumlahAnak,
-    required String kecamatan,
-    @JsonKey(name: 'kehamilan_ke') int? kehamilanKe,
-    String? kelurahan,
-    @JsonKey(name: 'kota_kabupaten') required String kotaKabupaten,
-    @JsonKey(name: 'last_menstrual_period') String? lastMenstrualPeriod,
-    required List<double> location, // [longitude, latitude]
-    @JsonKey(name: 'miscarriage_number') @Default(0) int miscarriageNumber,
+    // === FIELD WAJIB (sesuai backend) ===
     @JsonKey(name: 'nama_lengkap') required String namaLengkap,
     required String nik,
+    @JsonKey(name: 'date_of_birth') required String dateOfBirth,
+    required String address,
+    required List<double> location, // [longitude, latitude] - WAJIB array 2 elemen
+    @JsonKey(name: 'emergency_contact_name') required String emergencyContactName,
+    @JsonKey(name: 'emergency_contact_phone') required String emergencyContactPhone,
+    
+    // === FIELD OPSIONAL (sesuai backend) ===
+    @JsonKey(name: 'blood_type') String? bloodType,
+    int? age,
+    @JsonKey(name: 'emergency_contact_relation') String? emergencyContactRelation,
+    String? provinsi,
+    @JsonKey(name: 'kota_kabupaten') String? kotaKabupaten,
+    String? kecamatan,
+    String? kelurahan,
+    @JsonKey(name: 'last_menstrual_period') String? lastMenstrualPeriod,
+    @JsonKey(name: 'estimated_due_date') String? estimatedDueDate,
+    @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
+    @JsonKey(name: 'kehamilan_ke') int? kehamilanKe,
+    @JsonKey(name: 'jumlah_anak') int? jumlahAnak,
+    @JsonKey(name: 'jarak_kehamilan_terakhir') String? jarakKehamilanTerakhir,
+    @JsonKey(name: 'miscarriage_number') int? miscarriageNumber,
+    @JsonKey(name: 'previous_pregnancy_complications') String? previousPregnancyComplications,
     @JsonKey(name: 'pernah_caesar') @Default(false) bool pernahCaesar,
     @JsonKey(name: 'pernah_perdarahan_saat_hamil') @Default(false) bool pernahPerdarahanSaatHamil,
-    @JsonKey(name: 'previous_pregnancy_complications') String? previousPregnancyComplications,
-    required String provinsi,
-    @JsonKey(name: 'riwayat_kesehatan_ibu') required RiwayatKesehatanIbuData riwayatKesehatanIbu,
-    @JsonKey(name: 'usia_kehamilan') int? usiaKehamilan,
-    @JsonKey(name: 'whatsapp_consent') @Default(false) bool whatsappConsent,
+    @JsonKey(name: 'riwayat_kesehatan_ibu') RiwayatKesehatanIbuData? riwayatKesehatanIbu,
+    @JsonKey(name: 'healthcare_preference') String? healthcarePreference,
+    @JsonKey(name: 'whatsapp_consent') @Default(true) bool whatsappConsent,
+    @JsonKey(name: 'data_sharing_consent') @Default(false) bool dataSharingConsent,
   }) = _IbuHamilData;
 
   factory IbuHamilData.fromJson(Map<String, dynamic> json) =>
@@ -56,13 +65,14 @@ abstract class IbuHamilData with _$IbuHamilData {
 
 @freezed
 abstract class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
+  @JsonSerializable(includeIfNull: false)
   const factory RiwayatKesehatanIbuData({
-    @Default(false) bool anemia,
-    @Default(false) bool asma,
     @JsonKey(name: 'darah_tinggi') @Default(false) bool darahTinggi,
     @Default(false) bool diabetes,
-    @JsonKey(name: 'penyakit_ginjal') @Default(false) bool penyakitGinjal,
+    @Default(false) bool anemia,
     @JsonKey(name: 'penyakit_jantung') @Default(false) bool penyakitJantung,
+    @Default(false) bool asma,
+    @JsonKey(name: 'penyakit_ginjal') @Default(false) bool penyakitGinjal,
     @JsonKey(name: 'tbc_malaria') @Default(false) bool tbcMalaria,
   }) = _RiwayatKesehatanIbuData;
 
@@ -72,12 +82,15 @@ abstract class RiwayatKesehatanIbuData with _$RiwayatKesehatanIbuData {
 
 @freezed
 abstract class UserData with _$UserData {
+  @JsonSerializable(includeIfNull: false)
   const factory UserData({
-    required String email, // Required: email must be provided
-    @JsonKey(name: 'full_name') required String fullName,
-    required String password,
+    // === FIELD WAJIB ===
     required String phone,
+    required String password,
+    @JsonKey(name: 'full_name') required String fullName,
     required String role,
+    // === FIELD OPSIONAL ===
+    String? email, // Backend: OPSIONAL - tidak dikirim jika null/kosong
   }) = _UserData;
 
   factory UserData.fromJson(Map<String, dynamic> json) =>

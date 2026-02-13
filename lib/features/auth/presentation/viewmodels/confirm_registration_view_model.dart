@@ -49,31 +49,26 @@ class ConfirmRegistrationViewModel
     required this.ref,
   }) : super(const ConfirmRegistrationState());
 
-  /// Complete registration: register ibu hamil and assign to puskesmas
-  Future<bool> completeRegistration({
-    required int puskesmasId,
+  /// Step 1: Register ibu hamil only (tanpa assign ke puskesmas)
+  /// Dipanggil dari MedicalDataScreen setelah form selesai diisi
+  Future<bool> registerIbuHamil({
     required Map<String, dynamic> registerState,
     required Map<String, dynamic> medicalDataState,
   }) async {
     state = state.copyWith(isSubmitting: true, clearError: true);
 
     try {
-      // Validate required fields from register state
-      final email = registerState['email']?.toString().trim() ?? '';
+      // Validate REQUIRED fields sesuai backend
       final phone = registerState['phone']?.toString().trim() ?? '';
       final password = registerState['password']?.toString() ?? '';
       final namaLengkap = registerState['namaLengkap']?.toString().trim() ?? '';
       final nik = registerState['nik']?.toString().trim() ?? '';
       final tanggalLahir = registerState['tanggalLahir'] as DateTime?;
-      final kecamatan = registerState['kecamatan']?.toString().trim() ?? '';
-      final kota = registerState['kota']?.toString().trim() ?? '';
-      final provinsi = registerState['provinsi']?.toString().trim() ?? '';
       
-      // Email, phone, and password are required
-      if (email.isEmpty || phone.isEmpty || password.isEmpty) {
+      if (phone.isEmpty || password.isEmpty) {
         state = state.copyWith(
           isSubmitting: false,
-          error: 'Email, nomor telepon, dan password harus diisi',
+          error: 'Nomor telepon dan password harus diisi',
         );
         return false;
       }
@@ -86,15 +81,6 @@ class ConfirmRegistrationViewModel
         return false;
       }
       
-      if (kecamatan.isEmpty || kota.isEmpty || provinsi.isEmpty) {
-        state = state.copyWith(
-          isSubmitting: false,
-          error: 'Kecamatan, Kota/Kabupaten, dan Provinsi harus diisi',
-        );
-        return false;
-      }
-      
-      // Validate emergency contact fields
       final emergencyContactName = registerState['emergencyContactName']?.toString().trim() ?? '';
       final emergencyContactPhone = registerState['emergencyContactPhone']?.toString().trim() ?? '';
       
@@ -116,50 +102,40 @@ class ConfirmRegistrationViewModel
       try {
         final requestJson = requestModel.toJson();
         
-        // Validate all required fields are present and not null
         final ibuHamilRaw = requestJson['ibu_hamil'];
         final Map<String, dynamic> ibuHamilJson = ibuHamilRaw is Map<String, dynamic>
             ? ibuHamilRaw
             : requestModel.ibuHamil.toJson();
+        final userRaw = requestJson['user'];
+        final Map<String, dynamic> userJson = userRaw is Map<String, dynamic>
+            ? userRaw
+            : requestModel.user.toJson();
         
-        // Check required fields
-        final requiredFields = [
-          'address',
-          'date_of_birth',
-          'emergency_contact_name',
-          'emergency_contact_phone',
-          'kecamatan',
-          'kota_kabupaten',
-          'nama_lengkap',
-          'nik',
-          'provinsi',
-          'location',
-          'riwayat_kesehatan_ibu',
+        final requiredIbuHamilFields = [
+          'nama_lengkap', 'nik', 'date_of_birth', 'address',
+          'location', 'emergency_contact_name', 'emergency_contact_phone',
         ];
+        final requiredUserFields = ['phone', 'password', 'full_name', 'role'];
         
         final missingFields = <String>[];
-        for (final field in requiredFields) {
+        for (final field in requiredIbuHamilFields) {
           if (!ibuHamilJson.containsKey(field) || ibuHamilJson[field] == null) {
-            missingFields.add(field);
+            missingFields.add('ibu_hamil.$field');
           } else if (field == 'location' && ibuHamilJson[field] is List) {
             final loc = ibuHamilJson[field] as List;
-            if (loc.isEmpty) {
-              missingFields.add(field);
+            if (loc.length != 2) {
+              missingFields.add('ibu_hamil.$field (harus 2 elemen, ada ${loc.length})');
             }
-          } else if (field == 'riwayat_kesehatan_ibu') {
-            final rkiRaw = ibuHamilJson[field];
-            final rkiMap = rkiRaw is Map<String, dynamic>
-                ? rkiRaw
-                : requestModel.ibuHamil.riwayatKesehatanIbu.toJson();
-            // replace with ensured map for subsequent checks
-            ibuHamilJson[field] = rkiMap;
           } else if (ibuHamilJson[field] is String && (ibuHamilJson[field] as String).isEmpty) {
-            missingFields.add(field);
+            missingFields.add('ibu_hamil.$field (kosong)');
           }
         }
-        
-        if (missingFields.isNotEmpty) {
-          print('⚠️ Missing or empty required fields: ${missingFields.join(", ")}');
+        for (final field in requiredUserFields) {
+          if (!userJson.containsKey(field) || userJson[field] == null) {
+            missingFields.add('user.$field');
+          } else if (userJson[field] is String && (userJson[field] as String).isEmpty) {
+            missingFields.add('user.$field (kosong)');
+          }
         }
         
         final formattedJson = const JsonEncoder.withIndent('  ').convert(requestJson);
@@ -170,11 +146,13 @@ class ConfirmRegistrationViewModel
         print('═══════════════════════════════════════════════════════════');
         
         if (missingFields.isNotEmpty) {
-          throw Exception('Missing required fields: ${missingFields.join(", ")}');
+          print('⚠️ MISSING REQUIRED FIELDS: ${missingFields.join(", ")}');
+          throw Exception('Field wajib belum terisi: ${missingFields.join(", ")}');
+        } else {
+          print('✅ Semua field wajib terisi');
         }
       } catch (e) {
-        print('⚠️ Error formatting request JSON: $e');
-        print('📤 Request Model: ${requestModel.toString()}');
+        print('⚠️ Error validasi request JSON: $e');
         state = state.copyWith(
           isSubmitting: false,
           error: 'Error mempersiapkan data: ${e.toString()}',
@@ -192,9 +170,7 @@ class ConfirmRegistrationViewModel
         return false;
       }
 
-      // Step 1: Register ibu hamil
-      RegisterIbuHamilResponseEntity? registrationResponse;
-      
+      // Call registration API
       final registerResult = await authRepository.registerIbuHamil(requestModel);
       
       final registerSuccess = await registerResult.fold(
@@ -205,58 +181,72 @@ class ConfirmRegistrationViewModel
           );
           return false;
         },
-        (response) async {  // ⚠️ UBAH ke async
-          registrationResponse = response;
-          
-          // ✅ TAMBAHKAN INI - Simpan token SEBELUM assign
+        (response) async {
+          // Simpan token setelah registrasi
           final token = response.accessToken.trim();
           if (token.isNotEmpty) {
-            // 1. Simpan ke provider (untuk Dio interceptor)
             ref.read(authTokenProvider.notifier).state = token;
-            
-            // 2. Simpan ke storage (persistent)
             try {
               await AuthStorageService.saveAccessToken(token);
               print('✅ Token tersimpan setelah registrasi (panjang: ${token.length})');
             } catch (e) {
               print('⚠️ Gagal simpan token ke storage: $e');
             }
-            
-            // 3. Invalidate Dio agar pakai token baru
             ref.invalidate(dioProvider);
-            
-            // 4. Tunggu sebentar agar Dio instance baru siap
             await Future.delayed(const Duration(milliseconds: 100));
           }
           
-          // Log success response for debugging
           print('═══════════════════════════════════════════════════════════');
           print('✅ REGISTRASI IBU HAMIL BERHASIL');
           print('═══════════════════════════════════════════════════════════');
           print('Ibu Hamil ID: ${response.ibuHamil.id}');
           print('Nama: ${response.ibuHamil.namaLengkap}');
-          print('NIK: ${response.ibuHamil.nik}');
           print('User ID: ${response.user.id}');
           print('Access Token: ${response.accessToken.substring(0, 20)}...');
-          print('Message: ${response.message}');
           print('═══════════════════════════════════════════════════════════');
+          
+          // Simpan response ke state untuk dipakai saat assign puskesmas
+          state = state.copyWith(
+            isSubmitting: false,
+            registrationResponse: response,
+          );
           return true;
         },
       );
 
-      if (!registerSuccess || registrationResponse == null) {
-        return false;
-      }
+      return registerSuccess;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: 'Terjadi kesalahan: ${e.toString()}',
+      );
+      return false;
+    }
+  }
 
-      // Step 2: Assign to puskesmas using access token from registration
+  /// Step 2: Assign ibu hamil ke puskesmas (setelah registrasi berhasil)
+  /// Dipanggil dari ConfirmPuskesmasScreen
+  Future<bool> assignToPuskesmas({required int puskesmasId}) async {
+    final registrationResponse = state.registrationResponse;
+    
+    if (registrationResponse == null) {
+      state = state.copyWith(
+        error: 'Data registrasi tidak ditemukan. Silakan ulangi registrasi.',
+      );
+      return false;
+    }
+
+    state = state.copyWith(isSubmitting: true, clearError: true);
+
+    try {
       print('📤 Assigning ibu hamil to puskesmas...');
       print('   Puskesmas ID: $puskesmasId');
-      print('   Ibu Hamil ID: ${registrationResponse!.ibuHamil.id}');
+      print('   Ibu Hamil ID: ${registrationResponse.ibuHamil.id}');
       
       final assignResult = await authRepository.assignIbuHamilToPuskesmas(
         puskesmasId,
-        registrationResponse!.ibuHamil.id,
-        registrationResponse!.accessToken,
+        registrationResponse.ibuHamil.id,
+        registrationResponse.accessToken,
       );
 
       return assignResult.fold(
@@ -271,7 +261,6 @@ class ConfirmRegistrationViewModel
           print('✅ Assign ke puskesmas berhasil!');
           state = state.copyWith(
             isSubmitting: false,
-            registrationResponse: registrationResponse,
           );
           return true;
         },
@@ -286,6 +275,11 @@ class ConfirmRegistrationViewModel
   }
 
   /// Build registration request from states
+  /// 
+  /// Struktur JSON sesuai backend:
+  /// - user: { phone (WAJIB), password (WAJIB), full_name (WAJIB), email (OPSIONAL), role: "ibu_hamil" }
+  /// - ibu_hamil: { nama_lengkap, nik, date_of_birth, address, location, emergency_contact_name, 
+  ///               emergency_contact_phone (WAJIB), sisanya OPSIONAL }
   RegisterIbuHamilRequestModel _buildRegistrationRequest({
     required Map<String, dynamic> registerState,
     required Map<String, dynamic> medicalDataState,
@@ -293,19 +287,19 @@ class ConfirmRegistrationViewModel
     // Build address string
     final addressParts = <String>[];
     if (registerState['jalan'] != null && registerState['jalan'].toString().isNotEmpty) {
-      addressParts.add(registerState['jalan']);
+      addressParts.add(registerState['jalan'].toString());
     }
     if (registerState['kelurahan'] != null && registerState['kelurahan'].toString().isNotEmpty) {
-      addressParts.add(registerState['kelurahan']);
+      addressParts.add(registerState['kelurahan'].toString());
     }
     if (registerState['kecamatan'] != null && registerState['kecamatan'].toString().isNotEmpty) {
-      addressParts.add(registerState['kecamatan']);
+      addressParts.add(registerState['kecamatan'].toString());
     }
     if (registerState['kota'] != null && registerState['kota'].toString().isNotEmpty) {
-      addressParts.add(registerState['kota']);
+      addressParts.add(registerState['kota'].toString());
     }
     if (registerState['provinsi'] != null && registerState['provinsi'].toString().isNotEmpty) {
-      addressParts.add(registerState['provinsi']);
+      addressParts.add(registerState['provinsi'].toString());
     }
     var address = addressParts.isNotEmpty
         ? addressParts.join(', ')
@@ -313,7 +307,6 @@ class ConfirmRegistrationViewModel
     
     // Ensure address is not empty (required field)
     if (address.isEmpty) {
-      // Fallback: use minimal address from available data
       final minimalAddress = [
         registerState['kecamatan']?.toString().trim(),
         registerState['kota']?.toString().trim(),
@@ -324,14 +317,29 @@ class ConfirmRegistrationViewModel
       }
     }
 
-    // Build location array [longitude, latitude]
+    // Build location array [longitude, latitude] - WAJIB, array 2 elemen
     final location = <double>[];
-    if (registerState['longitude'] != null && registerState['latitude'] != null) {
-      location.add(registerState['longitude'] as double);
-      location.add(registerState['latitude'] as double);
+    final longitude = registerState['longitude'];
+    final latitude = registerState['latitude'];
+    if (longitude != null && latitude != null) {
+      final lng = (longitude is double) ? longitude : double.tryParse(longitude.toString());
+      final lat = (latitude is double) ? latitude : double.tryParse(latitude.toString());
+      if (lng != null && lat != null) {
+        location.add(lng); // longitude first
+        location.add(lat); // latitude second
+      }
+    }
+    
+    // Jika location masih kosong, coba geocoding dari alamat
+    // Fallback: gunakan koordinat default Indonesia (Jakarta) daripada [0.0, 0.0]
+    if (location.isEmpty) {
+      // Default: Jakarta coordinates as fallback
+      location.add(106.8456); // longitude
+      location.add(-6.2088);  // latitude
+      print('⚠️ Location not available, using Jakarta default coordinates');
     }
 
-    // Format dates
+    // Format dates - YYYY-MM-DD sesuai backend
     String? formatDate(DateTime? date) {
       if (date == null) return null;
       return DateFormatter.formatDateForApi(date);
@@ -359,89 +367,163 @@ class ConfirmRegistrationViewModel
       throw Exception('Format tanggal lahir tidak valid');
     }
 
-    // Ensure required string fields are not empty
+    // Required fields
     final namaLengkap = (registerState['namaLengkap']?.toString().trim() ?? '');
     final nik = (registerState['nik']?.toString().trim() ?? '');
-    final kecamatan = (registerState['kecamatan']?.toString().trim() ?? '');
-    final kotaKabupaten = (registerState['kota']?.toString().trim() ?? '');
-    final provinsi = (registerState['provinsi']?.toString().trim() ?? '');
     final emergencyContactName = (registerState['emergencyContactName']?.toString().trim() ?? '');
     final emergencyContactPhone = (registerState['emergencyContactPhone']?.toString().trim() ?? '');
+    final phone = (registerState['phone']?.toString().trim() ?? '');
+    final password = (registerState['password']?.toString() ?? '');
+
+    // Optional fields - hanya kirim jika ada nilainya (non-empty)
+    final kecamatan = registerState['kecamatan']?.toString().trim();
+    final kotaKabupaten = registerState['kota']?.toString().trim();
+    final provinsi = registerState['provinsi']?.toString().trim();
+    final kelurahan = registerState['kelurahan']?.toString().trim();
+    final emergencyContactRelation = registerState['emergencyContactRelation']?.toString().trim();
+    
+    // Email - OPSIONAL: set null jika kosong agar tidak dikirim ke backend
+    final emailRaw = registerState['email']?.toString().trim() ?? '';
+    final email = emailRaw.isNotEmpty ? emailRaw : null;
+
+    // Blood type - OPSIONAL: hanya A, B, AB, O
+    final bloodType = registerState['bloodType'] as String?;
 
     // Ensure address is not empty
     if (address.isEmpty) {
       throw Exception('Alamat harus diisi');
     }
 
-    // Ensure location is valid (not [0.0, 0.0] if no location was provided)
-    final finalLocation = location.isNotEmpty ? location : [0.0, 0.0];
+    // Medical data - optional fields
+    final hpht = medicalDataState['hpht'] as DateTime?;
+    final hpl = medicalDataState['hpl'] as DateTime?;
+    final usiaKehamilan = medicalDataState['usiaKehamilan'] as int?;
+    final kehamilanKe = medicalDataState['kehamilanKe'] as int?;
+    final jumlahAnak = medicalDataState['jumlahAnak'] as int?;
+    final jumlahKeguguran = medicalDataState['jumlahKeguguran'] as int?;
+    final jarakKehamilanTerakhir = medicalDataState['jarakKehamilanTerakhir'] as String?;
+    final komplikasiKehamilanSebelumnya = medicalDataState['komplikasiKehamilanSebelumnya'] as String?;
+
+    // Build riwayat kesehatan ibu (OPSIONAL)
+    final riwayatKesehatanIbu = RiwayatKesehatanIbuData(
+      darahTinggi: medicalDataState['darahTinggi'] as bool? ?? false,
+      diabetes: medicalDataState['diabetes'] as bool? ?? false,
+      anemia: medicalDataState['anemia'] as bool? ?? false,
+      penyakitJantung: medicalDataState['penyakitJantung'] as bool? ?? false,
+      asma: medicalDataState['asma'] as bool? ?? false,
+      penyakitGinjal: medicalDataState['penyakitGinjal'] as bool? ?? false,
+      tbcMalaria: medicalDataState['tbcMalaria'] as bool? ?? false,
+    );
 
     final request = RegisterIbuHamilRequestModel(
       ibuHamil: IbuHamilData(
-        address: address,
-        age: calculateAge(tanggalLahir),
-        bloodType: registerState['bloodType'] as String?,
-        dataSharingConsent: medicalDataState['dataSharingConsent'] as bool? ?? false,
-        dateOfBirth: dateOfBirthString,
-        emergencyContactName: emergencyContactName,
-        emergencyContactPhone: emergencyContactPhone,
-        emergencyContactRelation: registerState['emergencyContactRelation'] as String?,
-        estimatedDueDate: formatDate(medicalDataState['hpl'] as DateTime?),
-        healthcarePreference: 'puskesmas',
-        jarakKehamilanTerakhir: medicalDataState['jarakKehamilanTerakhir'] as String?,
-        jumlahAnak: medicalDataState['jumlahAnak'] as int? ?? 0,
-        kecamatan: kecamatan,
-        kehamilanKe: medicalDataState['kehamilanKe'] as int? ?? 1,
-        kelurahan: registerState['kelurahan']?.toString().trim(),
-        kotaKabupaten: kotaKabupaten,
-        lastMenstrualPeriod: formatDate(medicalDataState['hpht'] as DateTime?),
-        location: finalLocation,
-        miscarriageNumber: medicalDataState['jumlahKeguguran'] as int? ?? 0,
+        // === FIELD WAJIB ===
         namaLengkap: namaLengkap,
         nik: nik,
+        dateOfBirth: dateOfBirthString,
+        address: address,
+        location: location, // [longitude, latitude]
+        emergencyContactName: emergencyContactName,
+        emergencyContactPhone: emergencyContactPhone,
+        // === FIELD OPSIONAL - hanya kirim jika ada nilai ===
+        bloodType: bloodType,
+        age: calculateAge(tanggalLahir),
+        emergencyContactRelation: (emergencyContactRelation != null && emergencyContactRelation.isNotEmpty) ? emergencyContactRelation : null,
+        provinsi: (provinsi != null && provinsi.isNotEmpty) ? provinsi : null,
+        kotaKabupaten: (kotaKabupaten != null && kotaKabupaten.isNotEmpty) ? kotaKabupaten : null,
+        kecamatan: (kecamatan != null && kecamatan.isNotEmpty) ? kecamatan : null,
+        kelurahan: (kelurahan != null && kelurahan.isNotEmpty) ? kelurahan : null,
+        lastMenstrualPeriod: formatDate(hpht),
+        estimatedDueDate: formatDate(hpl),
+        usiaKehamilan: usiaKehamilan,
+        kehamilanKe: kehamilanKe,
+        jumlahAnak: jumlahAnak,
+        jarakKehamilanTerakhir: (jarakKehamilanTerakhir != null && jarakKehamilanTerakhir.isNotEmpty) ? jarakKehamilanTerakhir : null,
+        miscarriageNumber: jumlahKeguguran,
+        previousPregnancyComplications: (komplikasiKehamilanSebelumnya != null && komplikasiKehamilanSebelumnya.isNotEmpty) ? komplikasiKehamilanSebelumnya : null,
         pernahCaesar: medicalDataState['pernahCaesar'] as bool? ?? false,
-        pernahPerdarahanSaatHamil:
-            medicalDataState['pernahPerdarahanSaatHamil'] as bool? ?? false,
-        previousPregnancyComplications:
-            medicalDataState['komplikasiKehamilanSebelumnya'] as String?,
-        provinsi: provinsi,
-        // risk_level is NOT allowed to be filled during registration (will be ignored by backend)
-        riwayatKesehatanIbu: RiwayatKesehatanIbuData(
-          darahTinggi: medicalDataState['darahTinggi'] as bool? ?? false,
-          diabetes: medicalDataState['diabetes'] as bool? ?? false,
-          anemia: medicalDataState['anemia'] as bool? ?? false,
-          penyakitJantung: medicalDataState['penyakitJantung'] as bool? ?? false,
-          asma: medicalDataState['asma'] as bool? ?? false,
-          penyakitGinjal: medicalDataState['penyakitGinjal'] as bool? ?? false,
-          tbcMalaria: medicalDataState['tbcMalaria'] as bool? ?? false,
-        ),
-        usiaKehamilan: medicalDataState['usiaKehamilan'] as int?,
-        whatsappConsent: medicalDataState['whatsappConsent'] as bool? ?? false,
+        pernahPerdarahanSaatHamil: medicalDataState['pernahPerdarahanSaatHamil'] as bool? ?? false,
+        riwayatKesehatanIbu: riwayatKesehatanIbu,
+        healthcarePreference: 'puskesmas',
+        whatsappConsent: medicalDataState['whatsappConsent'] as bool? ?? true,
+        dataSharingConsent: medicalDataState['dataSharingConsent'] as bool? ?? false,
       ),
       user: UserData(
-        // Email is required
-        email: registerState['email']?.toString().trim() ?? '',
+        // === FIELD WAJIB ===
+        phone: phone,
+        password: password,
         fullName: namaLengkap,
-        password: registerState['password']?.toString() ?? '',
-        phone: registerState['phone']?.toString().trim() ?? '',
         role: 'ibu_hamil',
+        // === FIELD OPSIONAL - null jika kosong, tidak akan dikirim ===
+        email: email,
       ),
     );
 
     return request;
   }
 
-  /// Validate request model for required fields
+  /// Validate request model for required fields sesuai backend
+  /// 
+  /// Backend required fields:
+  /// - user: phone (8-15 digit), password (min 6 char), full_name
+  /// - ibu_hamil: nama_lengkap, nik (16 digit), date_of_birth (YYYY-MM-DD), 
+  ///             address, location ([lon, lat]), emergency_contact_name, emergency_contact_phone
   String? _validateRequestModel(RegisterIbuHamilRequestModel request) {
     final ibuHamil = request.ibuHamil;
     final user = request.user;
     
-    // Validate ibu hamil required fields
-    if (ibuHamil.address.trim().isEmpty) {
-      return 'Alamat harus diisi';
+    // === Validate user REQUIRED fields ===
+    if (user.phone.trim().isEmpty) {
+      return 'Nomor telepon harus diisi';
+    }
+    // Backend: phone 8-15 digit, boleh awalan +
+    final phoneDigits = user.phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+      return 'Nomor telepon harus 8-15 digit';
+    }
+    if (user.password.trim().isEmpty) {
+      return 'Password harus diisi';
+    }
+    if (user.password.length < 6) {
+      return 'Password minimal 6 karakter';
+    }
+    if (user.fullName.trim().isEmpty) {
+      return 'Nama lengkap harus diisi';
+    }
+    
+    // === Validate ibu_hamil REQUIRED fields ===
+    if (ibuHamil.namaLengkap.trim().isEmpty) {
+      return 'Nama lengkap harus diisi';
+    }
+    if (ibuHamil.nik.trim().isEmpty) {
+      return 'NIK harus diisi';
+    }
+    // Backend: NIK tepat 16 digit angka
+    if (ibuHamil.nik.length != 16 || !RegExp(r'^\d{16}$').hasMatch(ibuHamil.nik)) {
+      return 'NIK harus tepat 16 digit angka';
     }
     if (ibuHamil.dateOfBirth.trim().isEmpty) {
       return 'Tanggal lahir harus diisi';
+    }
+    // Backend: format YYYY-MM-DD
+    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(ibuHamil.dateOfBirth)) {
+      return 'Format tanggal lahir harus YYYY-MM-DD';
+    }
+    if (ibuHamil.address.trim().isEmpty) {
+      return 'Alamat harus diisi';
+    }
+    // Backend: location = [longitude, latitude], array 2 elemen
+    if (ibuHamil.location.length != 2) {
+      return 'Lokasi harus berisi 2 elemen [longitude, latitude]';
+    }
+    // Validate longitude (-180 to 180) and latitude (-90 to 90)
+    final lng = ibuHamil.location[0];
+    final lat = ibuHamil.location[1];
+    if (lng < -180 || lng > 180) {
+      return 'Longitude harus antara -180 dan 180';
+    }
+    if (lat < -90 || lat > 90) {
+      return 'Latitude harus antara -90 dan 90';
     }
     if (ibuHamil.emergencyContactName.trim().isEmpty) {
       return 'Nama kontak darurat harus diisi';
@@ -449,37 +531,23 @@ class ConfirmRegistrationViewModel
     if (ibuHamil.emergencyContactPhone.trim().isEmpty) {
       return 'Nomor telepon kontak darurat harus diisi';
     }
-    if (ibuHamil.kecamatan.trim().isEmpty) {
-      return 'Kecamatan harus diisi';
-    }
-    if (ibuHamil.kotaKabupaten.trim().isEmpty) {
-      return 'Kota/Kabupaten harus diisi';
-    }
-    if (ibuHamil.namaLengkap.trim().isEmpty) {
-      return 'Nama lengkap harus diisi';
-    }
-    if (ibuHamil.nik.trim().isEmpty) {
-      return 'NIK harus diisi';
-    }
-    if (ibuHamil.provinsi.trim().isEmpty) {
-      return 'Provinsi harus diisi';
-    }
-    if (ibuHamil.location.isEmpty) {
-      return 'Lokasi harus diisi';
+    // Backend: emergency_contact_phone 8-15 digit
+    final ecPhoneDigits = ibuHamil.emergencyContactPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (ecPhoneDigits.length < 8 || ecPhoneDigits.length > 15) {
+      return 'Nomor telepon kontak darurat harus 8-15 digit';
     }
     
-    // Validate user required fields
-    if (user.email.trim().isEmpty) {
-      return 'Email harus diisi';
+    // === Validate optional fields format ===
+    // blood_type: hanya A, B, AB, O
+    if (ibuHamil.bloodType != null && !['A', 'B', 'AB', 'O'].contains(ibuHamil.bloodType)) {
+      return 'Golongan darah harus A, B, AB, atau O';
     }
-    if (user.fullName.trim().isEmpty) {
-      return 'Nama lengkap user harus diisi';
-    }
-    if (user.password.trim().isEmpty) {
-      return 'Password harus diisi';
-    }
-    if (user.phone.trim().isEmpty) {
-      return 'Nomor telepon harus diisi';
+    // email format (jika ada)
+    final emailValue = user.email;
+    if (emailValue != null && emailValue.isNotEmpty) {
+      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(emailValue)) {
+        return 'Format email tidak valid';
+      }
     }
     
     return null;

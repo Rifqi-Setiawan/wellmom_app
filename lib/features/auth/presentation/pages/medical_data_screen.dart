@@ -5,6 +5,7 @@ import 'package:wellmom_app/core/routing/app_router.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/core/widgets/custom_button.dart';
 import 'package:wellmom_app/core/widgets/custom_text_field.dart';
+import 'package:wellmom_app/core/widgets/error_snackbar.dart';
 import 'package:wellmom_app/features/auth/presentation/providers/auth_providers.dart';
 
 class MedicalDataScreen extends ConsumerStatefulWidget {
@@ -45,6 +46,84 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncControllersWithState();
     });
+  }
+
+  /// Handle registrasi API lalu navigate ke pilih puskesmas
+  Future<void> _handleRegisterAndNext() async {
+    // Ambil semua data dari ViewModel
+    final registerState = ref.read(registerViewModelProvider);
+    final medicalDataState = ref.read(medicalDataViewModelProvider);
+
+    // Bangun map untuk registerState
+    final registerStateMap = {
+      'namaLengkap': registerState.namaLengkap,
+      'nik': registerState.nik,
+      'tanggalLahir': registerState.tanggalLahir,
+      'alamat': registerState.alamat,
+      'jalan': registerState.jalan,
+      'kelurahan': registerState.kelurahan,
+      'kecamatan': registerState.kecamatan,
+      'kota': registerState.kota,
+      'provinsi': registerState.provinsi,
+      'kodePos': registerState.kodePos,
+      'latitude': registerState.latitude ?? registerState.currentPosition?.latitude,
+      'longitude': registerState.longitude ?? registerState.currentPosition?.longitude,
+      'email': registerState.email,
+      'phone': registerState.phone,
+      'password': registerState.password,
+      'bloodType': registerState.bloodType,
+      'emergencyContactName': registerState.emergencyContactName,
+      'emergencyContactPhone': registerState.emergencyContactPhone,
+      'emergencyContactRelation': registerState.emergencyContactRelation,
+    };
+
+    // Bangun map untuk medicalDataState
+    final medicalDataStateMap = {
+      'hpht': medicalDataState.hpht,
+      'hpl': medicalDataState.hpl,
+      'usiaKehamilan': medicalDataState.usiaKehamilan,
+      'kehamilanKe': medicalDataState.kehamilanKe,
+      'jumlahAnak': medicalDataState.jumlahAnak,
+      'jumlahKeguguran': medicalDataState.jumlahKeguguran,
+      'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
+      'darahTinggi': medicalDataState.darahTinggi,
+      'diabetes': medicalDataState.diabetes,
+      'anemia': medicalDataState.anemia,
+      'penyakitJantung': medicalDataState.penyakitJantung,
+      'asma': medicalDataState.asma,
+      'penyakitGinjal': medicalDataState.penyakitGinjal,
+      'tbcMalaria': medicalDataState.tbcMalaria,
+      'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
+      'pernahCaesar': medicalDataState.pernahCaesar,
+      'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
+      'dataSharingConsent': medicalDataState.dataSharingConsent,
+      'whatsappConsent': medicalDataState.whatsappConsent,
+    };
+
+    // Panggil registrasi API
+    final success = await ref
+        .read(confirmRegistrationViewModelProvider.notifier)
+        .registerIbuHamil(
+          registerState: registerStateMap,
+          medicalDataState: medicalDataStateMap,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
+      // Registrasi berhasil → navigate ke pilih puskesmas
+      ErrorSnackbar.showSuccess(
+        context,
+        'Registrasi berhasil! Silakan pilih puskesmas terdekat.',
+      );
+      Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
+    } else {
+      // Registrasi gagal → tampilkan error
+      final confirmState = ref.read(confirmRegistrationViewModelProvider);
+      if (confirmState.error != null) {
+        ErrorSnackbar.show(context, confirmState.error!);
+      }
+    }
   }
 
   void _syncControllersWithState() {
@@ -773,13 +852,13 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
               ],
             ),
             const SizedBox(height: 24),
-            // Next button
+            // Next button - Registrasi dulu, lalu ke pilih puskesmas
             CustomButton(
-              text: 'Next',
-              onPressed: state.whatsappConsent
-                  ? () {
-                      Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
-                    }
+              text: 'Daftar & Pilih Puskesmas',
+              isLoading: ref.watch(confirmRegistrationViewModelProvider).isSubmitting,
+              onPressed: state.whatsappConsent &&
+                      !ref.watch(confirmRegistrationViewModelProvider).isSubmitting
+                  ? () => _handleRegisterAndNext()
                   : null,
             ),
           ],

@@ -112,6 +112,8 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
       enableVibration: true,
       // Icon kecil di status bar (logo WellMom)
       icon: '@mipmap/ic_notification',
+      // Icon besar di panel notifikasi (logo WellMom berwarna)
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
     
@@ -483,6 +485,8 @@ class NotificationService {
       enableVibration: true,
       // Icon kecil di status bar (logo WellMom)
       icon: '@mipmap/ic_notification',
+      // Icon besar di panel notifikasi (logo WellMom berwarna)
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
     );
 
@@ -802,6 +806,8 @@ class NotificationService {
         enableVibration: true,
         // Icon kecil di status bar (logo WellMom)
         icon: '@mipmap/ic_notification',
+        // Icon besar di panel notifikasi (logo WellMom berwarna)
+        largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
         color: const Color(0xFFFF6B9D), // Match dengan backend color #FF6B9D
       );
       

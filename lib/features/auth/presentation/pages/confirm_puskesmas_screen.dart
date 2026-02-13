@@ -18,7 +18,7 @@ class ConfirmPuskesmasScreen extends ConsumerStatefulWidget {
 
 class _ConfirmPuskesmasScreenState
     extends ConsumerState<ConfirmPuskesmasScreen> {
-  Future<void> _handleCompleteRegistration() async {
+  Future<void> _handleAssignPuskesmas() async {
     final puskesmasState = ref.read(puskesmasViewModelProvider);
     final selectedPuskesmas = puskesmasState.selectedPuskesmas;
 
@@ -27,69 +27,16 @@ class _ConfirmPuskesmasScreenState
       return;
     }
 
-    // Get data from all ViewModels
-    final registerState = ref.read(registerViewModelProvider);
-    final medicalDataState = ref.read(medicalDataViewModelProvider);
-
-    // Convert states to maps for the ViewModel
-    final registerStateMap = {
-      'namaLengkap': registerState.namaLengkap,
-      'nik': registerState.nik,
-      'tanggalLahir': registerState.tanggalLahir,
-      'alamat': registerState.alamat,
-      'jalan': registerState.jalan,
-      'kelurahan': registerState.kelurahan,
-      'kecamatan': registerState.kecamatan,
-      'kota': registerState.kota,
-      'provinsi': registerState.provinsi,
-      'kodePos': registerState.kodePos,
-      'latitude': registerState.latitude ?? registerState.currentPosition?.latitude,
-      'longitude': registerState.longitude ?? registerState.currentPosition?.longitude,
-      'email': registerState.email,
-      'phone': registerState.phone,
-      'password': registerState.password,
-      'bloodType': registerState.bloodType,
-      'emergencyContactName': registerState.emergencyContactName,
-      'emergencyContactPhone': registerState.emergencyContactPhone,
-      'emergencyContactRelation': registerState.emergencyContactRelation,
-    };
-
-    final medicalDataStateMap = {
-      'hpht': medicalDataState.hpht,
-      'hpl': medicalDataState.hpl,
-      'usiaKehamilan': medicalDataState.usiaKehamilan,
-      'kehamilanKe': medicalDataState.kehamilanKe,
-      'jumlahAnak': medicalDataState.jumlahAnak,
-      'jumlahKeguguran': medicalDataState.jumlahKeguguran,
-      'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
-      'darahTinggi': medicalDataState.darahTinggi,
-      'diabetes': medicalDataState.diabetes,
-      'anemia': medicalDataState.anemia,
-      'penyakitJantung': medicalDataState.penyakitJantung,
-      'asma': medicalDataState.asma,
-      'penyakitGinjal': medicalDataState.penyakitGinjal,
-      'tbcMalaria': medicalDataState.tbcMalaria,
-      'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
-      'pernahCaesar': medicalDataState.pernahCaesar,
-      'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
-      'dataSharingConsent': medicalDataState.dataSharingConsent,
-      'whatsappConsent': medicalDataState.whatsappConsent,
-    };
-
-    // Execute complete registration
+    // Assign ibu hamil ke puskesmas (registrasi sudah dilakukan di step sebelumnya)
     final success = await ref
         .read(confirmRegistrationViewModelProvider.notifier)
-        .completeRegistration(
-          puskesmasId: selectedPuskesmas.puskesmas.id,
-          registerState: registerStateMap,
-          medicalDataState: medicalDataStateMap,
-        );
+        .assignToPuskesmas(puskesmasId: selectedPuskesmas.puskesmas.id);
 
     if (!mounted) return;
 
     if (success) {
       // Clear token yang disimpan saat registrasi
-      // User perlu login dengan email/password yang sudah didaftarkan
+      // User perlu login dengan phone/password yang sudah didaftarkan
       ref.read(authTokenProvider.notifier).state = null;
       try {
         await AuthStorageService.clearAccessToken();
@@ -100,17 +47,16 @@ class _ConfirmPuskesmasScreenState
       // Show success message
       ErrorSnackbar.showSuccess(
         context,
-        'Registrasi berhasil! Silakan login dengan email dan password Anda.',
+        'Registrasi berhasil! Silakan login dengan nomor telepon dan password Anda.',
       );
       
       // Navigate to login screen and clear all previous routes
-      // This ensures user cannot go back to registration screens
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRouter.loginIbuHamil,
-        (route) => false, // Remove all previous routes
+        (route) => false,
       );
     } else {
-      // Show error message if registration or assign failed
+      // Show error message if assign failed
       final confirmState = ref.read(confirmRegistrationViewModelProvider);
       if (confirmState.error != null) {
         ErrorSnackbar.show(context, confirmState.error!);
@@ -408,10 +354,10 @@ class _ConfirmPuskesmasScreenState
             child: Column(
               children: [
                 CustomButton(
-                  text: 'Selesai Registrasi →',
+                  text: 'Konfirmasi Puskesmas →',
                   onPressed: confirmState.isSubmitting
                       ? null
-                      : _handleCompleteRegistration,
+                      : _handleAssignPuskesmas,
                   isLoading: confirmState.isSubmitting,
                 ),
                 const SizedBox(height: 12),

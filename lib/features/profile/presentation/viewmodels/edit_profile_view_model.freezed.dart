@@ -12,7 +12,7 @@ part of 'edit_profile_view_model.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$EditProfileState {
+mixin _$EditProfileState implements DiagnosticableTreeMixin {
 
 // Form fields
  String get namaLengkap; String get nik; DateTime? get dateOfBirth; String get address; String get jalan;// Location
@@ -28,6 +28,12 @@ mixin _$EditProfileState {
 $EditProfileStateCopyWith<EditProfileState> get copyWith => _$EditProfileStateCopyWithImpl<EditProfileState>(this as EditProfileState, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'EditProfileState'))
+    ..add(DiagnosticsProperty('namaLengkap', namaLengkap))..add(DiagnosticsProperty('nik', nik))..add(DiagnosticsProperty('dateOfBirth', dateOfBirth))..add(DiagnosticsProperty('address', address))..add(DiagnosticsProperty('jalan', jalan))..add(DiagnosticsProperty('currentPosition', currentPosition))..add(DiagnosticsProperty('location', location))..add(DiagnosticsProperty('provinces', provinces))..add(DiagnosticsProperty('regencies', regencies))..add(DiagnosticsProperty('districts', districts))..add(DiagnosticsProperty('selectedProvinsi', selectedProvinsi))..add(DiagnosticsProperty('selectedKota', selectedKota))..add(DiagnosticsProperty('selectedKecamatan', selectedKecamatan))..add(DiagnosticsProperty('provinsiId', provinsiId))..add(DiagnosticsProperty('kotaId', kotaId))..add(DiagnosticsProperty('kecamatanId', kecamatanId))..add(DiagnosticsProperty('provinsiName', provinsiName))..add(DiagnosticsProperty('kotaName', kotaName))..add(DiagnosticsProperty('kecamatanName', kecamatanName))..add(DiagnosticsProperty('kelurahan', kelurahan))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isLoadingLocation', isLoadingLocation))..add(DiagnosticsProperty('isLoadingProvinces', isLoadingProvinces))..add(DiagnosticsProperty('isLoadingRegencies', isLoadingRegencies))..add(DiagnosticsProperty('isLoadingDistricts', isLoadingDistricts))..add(DiagnosticsProperty('error', error))..add(DiagnosticsProperty('locationError', locationError))..add(DiagnosticsProperty('wilayahError', wilayahError));
+}
 
 @override
 bool operator ==(Object other) {
@@ -39,7 +45,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hashAll([runtimeType,namaLengkap,nik,dateOfBirth,address,jalan,currentPosition,const DeepCollectionEquality().hash(location),const DeepCollectionEquality().hash(provinces),const DeepCollectionEquality().hash(regencies),const DeepCollectionEquality().hash(districts),selectedProvinsi,selectedKota,selectedKecamatan,provinsiId,kotaId,kecamatanId,provinsiName,kotaName,kecamatanName,kelurahan,isLoading,isLoadingLocation,isLoadingProvinces,isLoadingRegencies,isLoadingDistricts,error,locationError,wilayahError]);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'EditProfileState(namaLengkap: $namaLengkap, nik: $nik, dateOfBirth: $dateOfBirth, address: $address, jalan: $jalan, currentPosition: $currentPosition, location: $location, provinces: $provinces, regencies: $regencies, districts: $districts, selectedProvinsi: $selectedProvinsi, selectedKota: $selectedKota, selectedKecamatan: $selectedKecamatan, provinsiId: $provinsiId, kotaId: $kotaId, kecamatanId: $kecamatanId, provinsiName: $provinsiName, kotaName: $kotaName, kecamatanName: $kecamatanName, kelurahan: $kelurahan, isLoading: $isLoading, isLoadingLocation: $isLoadingLocation, isLoadingProvinces: $isLoadingProvinces, isLoadingRegencies: $isLoadingRegencies, isLoadingDistricts: $isLoadingDistricts, error: $error, locationError: $locationError, wilayahError: $wilayahError)';
 }
 
@@ -238,7 +244,7 @@ return $default(_that.namaLengkap,_that.nik,_that.dateOfBirth,_that.address,_tha
 /// @nodoc
 
 
-class _EditProfileState implements EditProfileState {
+class _EditProfileState with DiagnosticableTreeMixin implements EditProfileState {
   const _EditProfileState({this.namaLengkap = '', this.nik = '', this.dateOfBirth, this.address = '', this.jalan = '', this.currentPosition, final  List<double> location = const [0.0, 0.0], final  List<Provinsi> provinces = const [], final  List<KotaKabupaten> regencies = const [], final  List<Kecamatan> districts = const [], this.selectedProvinsi, this.selectedKota, this.selectedKecamatan, this.provinsiId = '', this.kotaId = '', this.kecamatanId = '', this.provinsiName = '', this.kotaName = '', this.kecamatanName = '', this.kelurahan = '', this.isLoading = false, this.isLoadingLocation = false, this.isLoadingProvinces = false, this.isLoadingRegencies = false, this.isLoadingDistricts = false, this.error, this.locationError, this.wilayahError}): _location = location,_provinces = provinces,_regencies = regencies,_districts = districts;
   
 
@@ -310,6 +316,12 @@ class _EditProfileState implements EditProfileState {
 _$EditProfileStateCopyWith<_EditProfileState> get copyWith => __$EditProfileStateCopyWithImpl<_EditProfileState>(this, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'EditProfileState'))
+    ..add(DiagnosticsProperty('namaLengkap', namaLengkap))..add(DiagnosticsProperty('nik', nik))..add(DiagnosticsProperty('dateOfBirth', dateOfBirth))..add(DiagnosticsProperty('address', address))..add(DiagnosticsProperty('jalan', jalan))..add(DiagnosticsProperty('currentPosition', currentPosition))..add(DiagnosticsProperty('location', location))..add(DiagnosticsProperty('provinces', provinces))..add(DiagnosticsProperty('regencies', regencies))..add(DiagnosticsProperty('districts', districts))..add(DiagnosticsProperty('selectedProvinsi', selectedProvinsi))..add(DiagnosticsProperty('selectedKota', selectedKota))..add(DiagnosticsProperty('selectedKecamatan', selectedKecamatan))..add(DiagnosticsProperty('provinsiId', provinsiId))..add(DiagnosticsProperty('kotaId', kotaId))..add(DiagnosticsProperty('kecamatanId', kecamatanId))..add(DiagnosticsProperty('provinsiName', provinsiName))..add(DiagnosticsProperty('kotaName', kotaName))..add(DiagnosticsProperty('kecamatanName', kecamatanName))..add(DiagnosticsProperty('kelurahan', kelurahan))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isLoadingLocation', isLoadingLocation))..add(DiagnosticsProperty('isLoadingProvinces', isLoadingProvinces))..add(DiagnosticsProperty('isLoadingRegencies', isLoadingRegencies))..add(DiagnosticsProperty('isLoadingDistricts', isLoadingDistricts))..add(DiagnosticsProperty('error', error))..add(DiagnosticsProperty('locationError', locationError))..add(DiagnosticsProperty('wilayahError', wilayahError));
+}
 
 @override
 bool operator ==(Object other) {
@@ -321,7 +333,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hashAll([runtimeType,namaLengkap,nik,dateOfBirth,address,jalan,currentPosition,const DeepCollectionEquality().hash(_location),const DeepCollectionEquality().hash(_provinces),const DeepCollectionEquality().hash(_regencies),const DeepCollectionEquality().hash(_districts),selectedProvinsi,selectedKota,selectedKecamatan,provinsiId,kotaId,kecamatanId,provinsiName,kotaName,kecamatanName,kelurahan,isLoading,isLoadingLocation,isLoadingProvinces,isLoadingRegencies,isLoadingDistricts,error,locationError,wilayahError]);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'EditProfileState(namaLengkap: $namaLengkap, nik: $nik, dateOfBirth: $dateOfBirth, address: $address, jalan: $jalan, currentPosition: $currentPosition, location: $location, provinces: $provinces, regencies: $regencies, districts: $districts, selectedProvinsi: $selectedProvinsi, selectedKota: $selectedKota, selectedKecamatan: $selectedKecamatan, provinsiId: $provinsiId, kotaId: $kotaId, kecamatanId: $kecamatanId, provinsiName: $provinsiName, kotaName: $kotaName, kecamatanName: $kecamatanName, kelurahan: $kelurahan, isLoading: $isLoading, isLoadingLocation: $isLoadingLocation, isLoadingProvinces: $isLoadingProvinces, isLoadingRegencies: $isLoadingRegencies, isLoadingDistricts: $isLoadingDistricts, error: $error, locationError: $locationError, wilayahError: $wilayahError)';
 }
 
