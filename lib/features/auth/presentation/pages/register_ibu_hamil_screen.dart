@@ -423,7 +423,7 @@ class _RegisterIbuHamilScreenState
                 label: 'Golongan Darah',
                 hintText: 'Pilih Golongan Darah',
                 value: _selectedBloodType,
-                items: const ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+                items: const ['A', 'B', 'AB', 'O'],
                 getLabel: (type) => type,
                 onChanged: (value) {
                   setState(() {

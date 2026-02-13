@@ -46,18 +46,31 @@ class _SplashScreenState extends State<SplashScreen> {
     
     // Ambil ukuran layar untuk membuat logo responsif
     final screenWidth = MediaQuery.of(context).size.width;
-    // Gunakan 55% dari lebar layar untuk ukuran logo (antara 50-60% sesuai permintaan)
-    final logoSize = screenWidth * 0.55;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Gunakan 35% dari dimensi terkecil layar untuk memastikan logo tidak terpotong
+    // Terutama penting untuk Android 12+ yang akan di-mask menjadi lingkaran
+    // Batasi maksimum 250px untuk memberikan lebih banyak ruang padding
+    final minDimension = screenWidth < screenHeight ? screenWidth : screenHeight;
+    final calculatedSize = minDimension * 0.35;
+    final logoSize = calculatedSize > 250 ? 250.0 : calculatedSize;
+    
+    // Tambahkan padding tambahan di sekitar logo untuk memastikan tidak terpotong
+    // Padding ini akan memberikan ruang ekstra di luar logo
+    final paddingSize = logoSize * 0.15; // 15% padding tambahan
     
     return Scaffold(
       backgroundColor: const Color(0xFFFFFFFF), // #FFFFFF
       body: Center(
-        child: SizedBox(
-          width: logoSize,
-          height: logoSize,
-          child: Image.asset(
-            'assets/images/Logo Wellmom.png',
-            fit: BoxFit.contain, // Pastikan logo tidak terpotong, proporsional
+        child: Padding(
+          padding: EdgeInsets.all(paddingSize),
+          child: SizedBox(
+            width: logoSize,
+            height: logoSize,
+            child: Image.asset(
+              'assets/images/Logo Wellmom.png',
+              fit: BoxFit.contain, // Pastikan logo tidak terpotong, proporsional
+            ),
           ),
         ),
       ),

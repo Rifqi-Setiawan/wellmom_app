@@ -120,8 +120,11 @@ flutter_native_splash:
   color: "#FFFFFF"
   
   # Logo/image di tengah
-  # Menggunakan Logo Wellmom.png yang sudah memiliki padding transparan
-  # untuk menghindari logo terpotong di Android 12+ (yang akan di-mask menjadi lingkaran)
+  # PERINGATAN: Untuk Android 12+, logo akan di-mask menjadi lingkaran.
+  # Pastikan gambar memiliki padding transparan minimal 25-30% dari total ukuran
+  # (bukan hanya 20%) agar logo tidak terpotong saat di-mask menjadi lingkaran.
+  # Contoh: Jika logo 1024x1024, konten tengah maksimal 600x600 (padding ~212px = 20.7%)
+  # Idealnya konten tengah maksimal 500x500 (padding ~262px = 25.6%) untuk Android 12+
   image: assets/images/Logo Wellmom.png
   
   # Platform settings
@@ -133,7 +136,8 @@ flutter_native_splash:
   
   # Android 12+ specific (Material You splash screen)
   # Logo akan otomatis di-center dan di-mask menjadi lingkaran oleh sistem Android 12+
-  # Menggunakan Logo Wellmom.png yang sudah memiliki padding transparan
+  # PENTING: Padding minimal 25-30% diperlukan untuk menghindari logo terpotong
+  # Jika logo masih terpotong, edit gambar dan tambahkan lebih banyak padding transparan
   android_12:
     image: assets/images/Logo Wellmom.png
     color: "#FFFFFF"
