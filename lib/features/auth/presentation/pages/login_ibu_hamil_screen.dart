@@ -55,7 +55,6 @@ class _LoginIbuHamilScreenState extends ConsumerState<LoginIbuHamilScreen> {
           } catch (_) {}
           
           _updateFcmTokenToBackend(ref);
-          _updateFcmTokenToBackend(ref);
 
           ErrorSnackbar.showSuccess(
             context,

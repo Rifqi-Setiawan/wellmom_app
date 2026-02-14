@@ -18,7 +18,7 @@ class ConfirmPuskesmasScreen extends ConsumerStatefulWidget {
 
 class _ConfirmPuskesmasScreenState
     extends ConsumerState<ConfirmPuskesmasScreen> {
-  Future<void> _handleAssignPuskesmas() async {
+  Future<void> _handleRegisterAndAssign() async {
     final puskesmasState = ref.read(puskesmasViewModelProvider);
     final selectedPuskesmas = puskesmasState.selectedPuskesmas;
 
@@ -27,35 +27,94 @@ class _ConfirmPuskesmasScreenState
       return;
     }
 
-    final success = await ref
+    final registerState = ref.read(registerViewModelProvider);
+    final medicalDataState = ref.read(medicalDataViewModelProvider);
+
+    final registerStateMap = {
+      'namaLengkap': registerState.namaLengkap,
+      'nik': registerState.nik,
+      'tanggalLahir': registerState.tanggalLahir,
+      'alamat': registerState.alamat,
+      'jalan': registerState.jalan,
+      'kelurahan': registerState.kelurahan,
+      'kecamatan': registerState.kecamatan,
+      'kota': registerState.kota,
+      'provinsi': registerState.provinsi,
+      'kodePos': registerState.kodePos,
+      'latitude': registerState.latitude ?? registerState.currentPosition?.latitude,
+      'longitude': registerState.longitude ?? registerState.currentPosition?.longitude,
+      'email': registerState.email,
+      'phone': registerState.phone,
+      'password': registerState.password,
+      'bloodType': registerState.bloodType,
+      'emergencyContactName': registerState.emergencyContactName,
+      'emergencyContactPhone': registerState.emergencyContactPhone,
+      'emergencyContactRelation': registerState.emergencyContactRelation,
+    };
+
+    final medicalDataStateMap = {
+      'hpht': medicalDataState.hpht,
+      'hpl': medicalDataState.hpl,
+      'usiaKehamilan': medicalDataState.usiaKehamilan,
+      'kehamilanKe': medicalDataState.kehamilanKe,
+      'jumlahAnak': medicalDataState.jumlahAnak,
+      'jumlahKeguguran': medicalDataState.jumlahKeguguran,
+      'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
+      'darahTinggi': medicalDataState.darahTinggi,
+      'diabetes': medicalDataState.diabetes,
+      'anemia': medicalDataState.anemia,
+      'penyakitJantung': medicalDataState.penyakitJantung,
+      'asma': medicalDataState.asma,
+      'penyakitGinjal': medicalDataState.penyakitGinjal,
+      'tbcMalaria': medicalDataState.tbcMalaria,
+      'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
+      'pernahCaesar': medicalDataState.pernahCaesar,
+      'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
+      'dataSharingConsent': medicalDataState.dataSharingConsent,
+      'whatsappConsent': medicalDataState.whatsappConsent,
+    };
+
+    // Step 1: Register ibu hamil
+    final registerSuccess = await ref
+        .read(confirmRegistrationViewModelProvider.notifier)
+        .registerIbuHamil(
+          registerState: registerStateMap,
+          medicalDataState: medicalDataStateMap,
+        );
+
+    if (!mounted) return;
+
+    if (!registerSuccess) {
+      final confirmState = ref.read(confirmRegistrationViewModelProvider);
+      if (confirmState.error != null) {
+        ErrorSnackbar.show(context, confirmState.error!);
+      }
+      return;
+    }
+
+    // Step 2: Assign to puskesmas
+    final assignSuccess = await ref
         .read(confirmRegistrationViewModelProvider.notifier)
         .assignToPuskesmas(puskesmasId: selectedPuskesmas.puskesmas.id);
 
     if (!mounted) return;
 
-    if (success) {
-      // Clear token yang disimpan saat registrasi
-      // User perlu login dengan phone/password yang sudah didaftarkan
+    if (assignSuccess) {
       ref.read(authTokenProvider.notifier).state = null;
       try {
         await AuthStorageService.clearAccessToken();
-      } catch (_) {
-        // Token clearing failed, will be handled on next login
-      }
-      
-      // Show success message
+      } catch (_) {}
+
       ErrorSnackbar.showSuccess(
         context,
         'Registrasi berhasil! Silakan login dengan nomor telepon dan password Anda.',
       );
-      
-      // Navigate to login screen and clear all previous routes
+
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRouter.loginIbuHamil,
         (route) => false,
       );
     } else {
-      // Show error message if assign failed
       final confirmState = ref.read(confirmRegistrationViewModelProvider);
       if (confirmState.error != null) {
         ErrorSnackbar.show(context, confirmState.error!);
@@ -353,10 +412,10 @@ class _ConfirmPuskesmasScreenState
             child: Column(
               children: [
                 CustomButton(
-                  text: 'Konfirmasi Puskesmas →',
+                  text: 'Daftar & Konfirmasi Puskesmas →',
                   onPressed: confirmState.isSubmitting
                       ? null
-                      : _handleAssignPuskesmas,
+                      : _handleRegisterAndAssign,
                   isLoading: confirmState.isSubmitting,
                 ),
                 const SizedBox(height: 12),

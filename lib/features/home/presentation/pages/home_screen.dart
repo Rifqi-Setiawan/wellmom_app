@@ -655,12 +655,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildMetrikKesehatan(HomeState state) {
     final healthRecord = state.latestHealthRecord;
-    final hasNoData = healthRecord == null;
+    
+    // Get values from health record
+    final systolic = healthRecord?.bloodPressureSystolic;
+    final diastolic = healthRecord?.bloodPressureDiastolic;
+    final weight = healthRecord?.weight;
+    final bodyTemp = healthRecord?.bodyTemperature;
+    final heartRate = healthRecord?.heartRate;
+    
+    // Check if there's any actual health data (not just a record with all null values)
+    final hasActualData = systolic != null || diastolic != null || 
+                         weight != null || bodyTemp != null || heartRate != null;
+    final hasNoData = healthRecord == null || !hasActualData;
     
     // Format last update time from created_at (waktu record disimpan) agar sesuai data backend
     String lastUpdateText = 'Belum ada data';
     String lastUpdateDetail = '';
-    if (healthRecord?.createdAt != null) {
+    if (healthRecord?.createdAt != null && hasActualData) {
       final recordTime = healthRecord!.createdAt.toLocal();
       final now = DateTime.now();
       final difference = now.difference(recordTime);
@@ -685,24 +696,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     }
     
-    // Get values from health record
-    final systolic = healthRecord?.bloodPressureSystolic;
-    final diastolic = healthRecord?.bloodPressureDiastolic;
     final bloodPressureText = (systolic != null && diastolic != null)
         ? '$systolic/$diastolic'
         : '-';
     
-    final weight = healthRecord?.weight;
     final weightText = weight != null
       ? weight.toStringAsFixed(1)
       : '-';
     
-    final bodyTemp = healthRecord?.bodyTemperature;
     final bodyTempText = bodyTemp != null
         ? bodyTemp.toStringAsFixed(1)
         : '-';
     
-    final heartRate = healthRecord?.heartRate;
     final heartRateText = heartRate != null
         ? heartRate.toString()
         : '-';

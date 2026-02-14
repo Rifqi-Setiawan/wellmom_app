@@ -47,75 +47,15 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
     });
   }
 
-  Future<void> _handleRegisterAndNext() async {
-    final registerState = ref.read(registerViewModelProvider);
+  void _handleNext() {
     final medicalDataState = ref.read(medicalDataViewModelProvider);
 
-    final registerStateMap = {
-      'namaLengkap': registerState.namaLengkap,
-      'nik': registerState.nik,
-      'tanggalLahir': registerState.tanggalLahir,
-      'alamat': registerState.alamat,
-      'jalan': registerState.jalan,
-      'kelurahan': registerState.kelurahan,
-      'kecamatan': registerState.kecamatan,
-      'kota': registerState.kota,
-      'provinsi': registerState.provinsi,
-      'kodePos': registerState.kodePos,
-      'latitude': registerState.latitude ?? registerState.currentPosition?.latitude,
-      'longitude': registerState.longitude ?? registerState.currentPosition?.longitude,
-      'email': registerState.email,
-      'phone': registerState.phone,
-      'password': registerState.password,
-      'bloodType': registerState.bloodType,
-      'emergencyContactName': registerState.emergencyContactName,
-      'emergencyContactPhone': registerState.emergencyContactPhone,
-      'emergencyContactRelation': registerState.emergencyContactRelation,
-    };
-
-    final medicalDataStateMap = {
-      'hpht': medicalDataState.hpht,
-      'hpl': medicalDataState.hpl,
-      'usiaKehamilan': medicalDataState.usiaKehamilan,
-      'kehamilanKe': medicalDataState.kehamilanKe,
-      'jumlahAnak': medicalDataState.jumlahAnak,
-      'jumlahKeguguran': medicalDataState.jumlahKeguguran,
-      'jarakKehamilanTerakhir': medicalDataState.jarakKehamilanTerakhir,
-      'darahTinggi': medicalDataState.darahTinggi,
-      'diabetes': medicalDataState.diabetes,
-      'anemia': medicalDataState.anemia,
-      'penyakitJantung': medicalDataState.penyakitJantung,
-      'asma': medicalDataState.asma,
-      'penyakitGinjal': medicalDataState.penyakitGinjal,
-      'tbcMalaria': medicalDataState.tbcMalaria,
-      'komplikasiKehamilanSebelumnya': medicalDataState.komplikasiKehamilanSebelumnya,
-      'pernahCaesar': medicalDataState.pernahCaesar,
-      'pernahPerdarahanSaatHamil': medicalDataState.pernahPerdarahanSaatHamil,
-      'dataSharingConsent': medicalDataState.dataSharingConsent,
-      'whatsappConsent': medicalDataState.whatsappConsent,
-    };
-
-    final success = await ref
-        .read(confirmRegistrationViewModelProvider.notifier)
-        .registerIbuHamil(
-          registerState: registerStateMap,
-          medicalDataState: medicalDataStateMap,
-        );
-
-    if (!mounted) return;
-
-    if (success) {
-      ErrorSnackbar.showSuccess(
-        context,
-        'Registrasi berhasil! Silakan pilih puskesmas terdekat.',
-      );
-      Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
-    } else {
-      final confirmState = ref.read(confirmRegistrationViewModelProvider);
-      if (confirmState.error != null) {
-        ErrorSnackbar.show(context, confirmState.error!);
-      }
+    if (!medicalDataState.whatsappConsent) {
+      ErrorSnackbar.show(context, 'Anda harus menyetujui persetujuan WhatsApp untuk melanjutkan.');
+      return;
     }
+
+    Navigator.of(context).pushNamed(AppRouter.selectPuskesmas);
   }
 
   void _syncControllersWithState() {
@@ -830,11 +770,9 @@ class _MedicalDataScreenState extends ConsumerState<MedicalDataScreen>
             const SizedBox(height: 24),
            
             CustomButton(
-              text: 'Daftar & Pilih Puskesmas',
-              isLoading: ref.watch(confirmRegistrationViewModelProvider).isSubmitting,
-              onPressed: state.whatsappConsent &&
-                      !ref.watch(confirmRegistrationViewModelProvider).isSubmitting
-                  ? () => _handleRegisterAndNext()
+              text: 'Pilih Puskesmas',
+              onPressed: state.whatsappConsent
+                  ? () => _handleNext()
                   : null,
             ),
           ],

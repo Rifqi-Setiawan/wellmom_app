@@ -86,6 +86,5 @@ final confirmRegistrationViewModelProvider =
   final authRepository = ref.watch(authRepositoryProvider);
   return ConfirmRegistrationViewModel(
     authRepository: authRepository,
-    ref: ref,
   );
 });

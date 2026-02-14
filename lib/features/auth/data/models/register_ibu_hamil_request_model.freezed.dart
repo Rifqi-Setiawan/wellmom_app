@@ -317,10 +317,7 @@ $UserDataCopyWith<$Res> get user {
 /// @nodoc
 mixin _$IbuHamilData {
 
-// === FIELD WAJIB (sesuai backend) ===
-@JsonKey(name: 'nama_lengkap') String get namaLengkap; String get nik;@JsonKey(name: 'date_of_birth') String get dateOfBirth; String get address; List<double> get location;// [longitude, latitude] - WAJIB array 2 elemen
-@JsonKey(name: 'emergency_contact_name') String get emergencyContactName;@JsonKey(name: 'emergency_contact_phone') String get emergencyContactPhone;// === FIELD OPSIONAL (sesuai backend) ===
-@JsonKey(name: 'blood_type') String? get bloodType; int? get age;@JsonKey(name: 'emergency_contact_relation') String? get emergencyContactRelation; String? get provinsi;@JsonKey(name: 'kota_kabupaten') String? get kotaKabupaten; String? get kecamatan; String? get kelurahan;@JsonKey(name: 'last_menstrual_period') String? get lastMenstrualPeriod;@JsonKey(name: 'estimated_due_date') String? get estimatedDueDate;@JsonKey(name: 'usia_kehamilan') int? get usiaKehamilan;@JsonKey(name: 'kehamilan_ke') int? get kehamilanKe;@JsonKey(name: 'jumlah_anak') int? get jumlahAnak;@JsonKey(name: 'jarak_kehamilan_terakhir') String? get jarakKehamilanTerakhir;@JsonKey(name: 'miscarriage_number') int? get miscarriageNumber;@JsonKey(name: 'previous_pregnancy_complications') String? get previousPregnancyComplications;@JsonKey(name: 'pernah_caesar') bool get pernahCaesar;@JsonKey(name: 'pernah_perdarahan_saat_hamil') bool get pernahPerdarahanSaatHamil;@JsonKey(name: 'riwayat_kesehatan_ibu') RiwayatKesehatanIbuData? get riwayatKesehatanIbu;@JsonKey(name: 'healthcare_preference') String? get healthcarePreference;@JsonKey(name: 'whatsapp_consent') bool get whatsappConsent;@JsonKey(name: 'data_sharing_consent') bool get dataSharingConsent;
+@JsonKey(name: 'nama_lengkap') String get namaLengkap; String get nik;@JsonKey(name: 'date_of_birth') String get dateOfBirth; String get address; List<double> get location;@JsonKey(name: 'emergency_contact_name') String get emergencyContactName;@JsonKey(name: 'emergency_contact_phone') String get emergencyContactPhone;@JsonKey(name: 'blood_type') String? get bloodType; int? get age;@JsonKey(name: 'emergency_contact_relation') String? get emergencyContactRelation; String? get provinsi;@JsonKey(name: 'kota_kabupaten') String? get kotaKabupaten; String? get kecamatan; String? get kelurahan;@JsonKey(name: 'last_menstrual_period') String? get lastMenstrualPeriod;@JsonKey(name: 'estimated_due_date') String? get estimatedDueDate;@JsonKey(name: 'usia_kehamilan') int? get usiaKehamilan;@JsonKey(name: 'kehamilan_ke') int? get kehamilanKe;@JsonKey(name: 'jumlah_anak') int? get jumlahAnak;@JsonKey(name: 'jarak_kehamilan_terakhir') String? get jarakKehamilanTerakhir;@JsonKey(name: 'miscarriage_number') int? get miscarriageNumber;@JsonKey(name: 'previous_pregnancy_complications') String? get previousPregnancyComplications;@JsonKey(name: 'pernah_caesar') bool get pernahCaesar;@JsonKey(name: 'pernah_perdarahan_saat_hamil') bool get pernahPerdarahanSaatHamil;@JsonKey(name: 'riwayat_kesehatan_ibu') RiwayatKesehatanIbuData? get riwayatKesehatanIbu;@JsonKey(name: 'healthcare_preference') String? get healthcarePreference;@JsonKey(name: 'whatsapp_consent') bool get whatsappConsent;@JsonKey(name: 'data_sharing_consent') bool get dataSharingConsent;
 /// Create a copy of IbuHamilData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -556,7 +553,6 @@ class _IbuHamilData implements IbuHamilData {
   const _IbuHamilData({@JsonKey(name: 'nama_lengkap') required this.namaLengkap, required this.nik, @JsonKey(name: 'date_of_birth') required this.dateOfBirth, required this.address, required final  List<double> location, @JsonKey(name: 'emergency_contact_name') required this.emergencyContactName, @JsonKey(name: 'emergency_contact_phone') required this.emergencyContactPhone, @JsonKey(name: 'blood_type') this.bloodType, this.age, @JsonKey(name: 'emergency_contact_relation') this.emergencyContactRelation, this.provinsi, @JsonKey(name: 'kota_kabupaten') this.kotaKabupaten, this.kecamatan, this.kelurahan, @JsonKey(name: 'last_menstrual_period') this.lastMenstrualPeriod, @JsonKey(name: 'estimated_due_date') this.estimatedDueDate, @JsonKey(name: 'usia_kehamilan') this.usiaKehamilan, @JsonKey(name: 'kehamilan_ke') this.kehamilanKe, @JsonKey(name: 'jumlah_anak') this.jumlahAnak, @JsonKey(name: 'jarak_kehamilan_terakhir') this.jarakKehamilanTerakhir, @JsonKey(name: 'miscarriage_number') this.miscarriageNumber, @JsonKey(name: 'previous_pregnancy_complications') this.previousPregnancyComplications, @JsonKey(name: 'pernah_caesar') this.pernahCaesar = false, @JsonKey(name: 'pernah_perdarahan_saat_hamil') this.pernahPerdarahanSaatHamil = false, @JsonKey(name: 'riwayat_kesehatan_ibu') this.riwayatKesehatanIbu, @JsonKey(name: 'healthcare_preference') this.healthcarePreference, @JsonKey(name: 'whatsapp_consent') this.whatsappConsent = true, @JsonKey(name: 'data_sharing_consent') this.dataSharingConsent = false}): _location = location;
   factory _IbuHamilData.fromJson(Map<String, dynamic> json) => _$IbuHamilDataFromJson(json);
 
-// === FIELD WAJIB (sesuai backend) ===
 @override@JsonKey(name: 'nama_lengkap') final  String namaLengkap;
 @override final  String nik;
 @override@JsonKey(name: 'date_of_birth') final  String dateOfBirth;
@@ -568,10 +564,8 @@ class _IbuHamilData implements IbuHamilData {
   return EqualUnmodifiableListView(_location);
 }
 
-// [longitude, latitude] - WAJIB array 2 elemen
 @override@JsonKey(name: 'emergency_contact_name') final  String emergencyContactName;
 @override@JsonKey(name: 'emergency_contact_phone') final  String emergencyContactPhone;
-// === FIELD OPSIONAL (sesuai backend) ===
 @override@JsonKey(name: 'blood_type') final  String? bloodType;
 @override final  int? age;
 @override@JsonKey(name: 'emergency_contact_relation') final  String? emergencyContactRelation;
@@ -978,9 +972,7 @@ as bool,
 /// @nodoc
 mixin _$UserData {
 
-// === FIELD WAJIB ===
- String get phone; String get password;@JsonKey(name: 'full_name') String get fullName; String get role;// === FIELD OPSIONAL ===
- String? get email;
+ String get phone; String get password;@JsonKey(name: 'full_name') String get fullName; String get role; String? get email;
 /// Create a copy of UserData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1181,12 +1173,10 @@ class _UserData implements UserData {
   const _UserData({required this.phone, required this.password, @JsonKey(name: 'full_name') required this.fullName, required this.role, this.email});
   factory _UserData.fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);
 
-// === FIELD WAJIB ===
 @override final  String phone;
 @override final  String password;
 @override@JsonKey(name: 'full_name') final  String fullName;
 @override final  String role;
-// === FIELD OPSIONAL ===
 @override final  String? email;
 
 /// Create a copy of UserData

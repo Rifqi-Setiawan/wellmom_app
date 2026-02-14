@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wellmom_app/core/network/api_client.dart';
-import 'package:wellmom_app/core/storage/auth_storage_service.dart';
 import 'package:wellmom_app/core/utils/date_formatter.dart';
 import 'package:wellmom_app/features/auth/data/models/register_ibu_hamil_request_model.dart';
 import 'package:wellmom_app/features/auth/domain/entities/register_ibu_hamil_response_entity.dart';
 import 'package:wellmom_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:wellmom_app/features/chatbot/presentation/providers/chatbot_providers.dart';
 
 class ConfirmRegistrationState {
   final bool isSubmitting;
@@ -38,11 +35,9 @@ class ConfirmRegistrationState {
 class ConfirmRegistrationViewModel
     extends StateNotifier<ConfirmRegistrationState> {
   final AuthRepository authRepository;
-  final Ref ref;
 
   ConfirmRegistrationViewModel({
     required this.authRepository,
-    required this.ref,
   }) : super(const ConfirmRegistrationState());
 
   Future<bool> registerIbuHamil({
@@ -106,16 +101,6 @@ class ConfirmRegistrationViewModel
           return false;
         },
         (response) async {
-          final token = response.accessToken.trim();
-          if (token.isNotEmpty) {
-            ref.read(authTokenProvider.notifier).state = token;
-            try {
-              await AuthStorageService.saveAccessToken(token);
-            } catch (_) {}
-            ref.invalidate(dioProvider);
-            await Future.delayed(const Duration(milliseconds: 100));
-          }
-
           state = state.copyWith(
             isSubmitting: false,
             registrationResponse: response,
