@@ -46,3 +46,9 @@ app.*.map.json
 
 **/android/**/build/
 **/ios/**/build/
+
+# Android keystore files - DO NOT COMMIT
+**/android/**/*.jks
+**/android/**/*.keystore
+**/android/key.properties
+**/android/local.properties
